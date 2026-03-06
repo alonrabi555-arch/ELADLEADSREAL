@@ -641,7 +641,7 @@ function render(){
       <td style="color:var(--sub);font-size:13px">${l.meeting_type||'—'}</td>
       <td>${statusEl(l.status)}</td>
       <td>${saleStatusSelect(l)}</td>
-      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${fmtDate(l.created_at)}</td>
+      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${l.call_ended_at ? fmtDate(l.call_ended_at) : '—'}</td>
       <td><button onclick="removeLead(${l.id},event)" title="הסר ליד" style="background:var(--hot-bg);border:1px solid rgba(232,64,64,.25);color:var(--hot);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">✕</button></td>
     </tr>`;
   }).join('');
