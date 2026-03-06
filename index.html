@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אלעד רבי | לוח לידים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080809;--s1:#0f0f12;--s2:#141418;--s3:#1a1a20;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.12);
+  --text:#ececf4;--sub:#888898;
+  --gold:#c9a84c;--gold-bg:rgba(201,168,76,0.12);
+  --hot:#e84040;--hot-bg:rgba(232,64,64,0.12);
+  --warm:#e87d20;--warm-bg:rgba(232,125,32,0.12);
+  --cold:#3a9de8;--cold-bg:rgba(58,157,232,0.12);
+  --green:#2ecc8e;--green-bg:rgba(46,204,142,0.1);
+  --mono:'DM Mono',monospace;--body:'Heebo',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+.amb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.a1{width:500px;height:500px;top:-150px;left:40%;background:radial-gradient(circle,rgba(201,168,76,0.06),transparent 70%)}
+.a2{width:400px;height:400px;bottom:0;right:-100px;background:radial-gradient(circle,rgba(232,64,64,0.05),transparent 70%)}
+.shell{position:relative;z-index:1;max-width:1480px;margin:0 auto;padding:0 28px 80px}
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 24px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:14px}
+.bmark{width:44px;height:44px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.btxt h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.btxt p{font-size:13px;color:var(--sub);margin-top:2px}
+.hright{display:flex;align-items:center;gap:12px}
+.pill{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:6px}
+.pill-live{background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,142,.25)}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.btn-ref{background:var(--s2);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .2s}
+.btn-ref:hover{border-color:var(--border2);color:var(--text)}
+.btn-ref.spin{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:24px 0}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px 22px;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi-lbl{font-size:12px;color:var(--sub);margin-bottom:8px;font-weight:500}
+.kpi-val{font-size:32px;font-weight:900;font-family:var(--mono);letter-spacing:-1px}
+.kpi-sub{font-size:11px;color:var(--sub);margin-top:4px}
+.kt .kpi-val{color:var(--gold)}
+.kh .kpi-val{color:var(--hot)}
+.kw .kpi-val{color:var(--warm)}
+.kc .kpi-val{color:var(--cold)}
+.ka .kpi-val{color:var(--green)}
+.alert{display:none;background:var(--hot-bg);border:1px solid rgba(232,64,64,.25);border-radius:14px;padding:14px 18px;margin-bottom:20px;align-items:center;gap:14px;animation:fU .4s ease}
+.alert.show{display:flex}
+@keyframes fU{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.a-ico{font-size:22px}
+.a-body strong{font-size:14px;font-weight:700;color:var(--hot)}
+.a-body p{font-size:12px;color:var(--sub);margin-top:2px}
+.a-chips{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
+.chip{background:rgba(232,64,64,.15);border:1px solid rgba(232,64,64,.3);color:var(--hot);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.ctrl{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:var(--s2);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab:hover{border-color:var(--border2);color:var(--text)}
+.tab.on{background:var(--gold-bg);border-color:rgba(201,168,76,.4);color:var(--gold)}
+.tab.fh.on{background:var(--hot-bg);border-color:rgba(232,64,64,.4);color:var(--hot)}
+.tab.fw.on{background:var(--warm-bg);border-color:rgba(232,125,32,.4);color:var(--warm)}
+.tab.fc.on{background:var(--cold-bg);border-color:rgba(58,157,232,.4);color:var(--cold)}
+.tab.fa.on{background:var(--green-bg);border-color:rgba(46,204,142,.4);color:var(--green)}
+.tcnt{background:rgba(255,255,255,.08);border-radius:8px;padding:1px 6px;font-size:11px;font-family:var(--mono)}
+.spacer{flex:1}
+.srt-sel{background:var(--s2);border:1px solid var(--border);color:var(--sub);padding:7px 12px;border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;outline:none}
+.srch{position:relative;display:flex;align-items:center}
+.srch-i{position:absolute;right:10px;font-size:14px;pointer-events:none}
+#srchIn{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 32px 7px 12px;border-radius:10px;font-family:var(--body);font-size:13px;width:200px;outline:none;transition:border-color .2s}
+#srchIn:focus{border-color:var(--border2)}
+.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--s2);border-bottom:1px solid var(--border)}
+th{padding:12px 14px;text-align:right;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+.name-btn{display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .15s}
+.name-btn:hover{opacity:.85}
+.name-btn:hover .name-arrow{opacity:1}
+.name-txt{font-weight:600;font-size:14px}
+.name-phone{color:var(--sub);font-size:12px;font-family:var(--mono)}
+.name-arrow{font-size:11px;color:var(--gold);opacity:0;transition:opacity .15s;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid transparent}
+.badge.h{background:var(--hot-bg);color:var(--hot);border-color:rgba(232,64,64,.25)}
+.badge.w{background:var(--warm-bg);color:var(--warm);border-color:rgba(232,125,32,.25)}
+.badge.c{background:var(--cold-bg);color:var(--cold);border-color:rgba(58,157,232,.25)}
+.badge.d{background:rgba(100,100,120,.1);color:#666;border-color:rgba(100,100,120,.2)}
+.badge.p{background:var(--gold-bg);color:var(--gold);border-color:rgba(201,168,76,.25)}
+.sc-cell{display:flex;align-items:center;gap:8px}
+.sc-n{font-family:var(--mono);font-size:13px;font-weight:700;min-width:24px}
+.sc-bg{width:60px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.sc-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.sdot{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.sdot.done{background:var(--green-bg);color:var(--green)}
+.sdot.prog{background:var(--gold-bg);color:var(--gold)}
+.sdot.disq{background:rgba(100,100,120,.1);color:#666}
+.tbl-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--sub)}
+.pages{display:flex;gap:4px}
+.pg{background:var(--s2);border:1px solid var(--border);color:var(--sub);width:30px;height:30px;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pg:hover{border-color:var(--border2);color:var(--text)}
+.pg.on{background:var(--gold-bg);border-color:rgba(201,168,76,.4);color:var(--gold)}
+.empty{padding:48px;text-align:center}
+.empty-i{font-size:32px;margin-bottom:12px}
+.empty p{color:var(--sub);font-size:14px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px 24px}
+.cc-title{font-size:14px;font-weight:700;margin-bottom:18px;color:var(--sub)}
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut-leg{display:flex;flex-direction:column;gap:10px}
+.leg-item{display:flex;align-items:center;justify-content:space-between;gap:24px;min-width:160px}
+.leg-lbl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+.leg-val{font-family:var(--mono);font-size:14px;font-weight:700}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar-r{display:flex;align-items:center;gap:10px}
+.bar-lbl{font-size:13px;color:var(--sub);min-width:100px;text-align:right}
+.bar-track{flex:1;height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
+.bar-seg{height:100%;border-radius:4px;transition:width .8s ease}
+.bar-val{font-family:var(--mono);font-size:13px;font-weight:700;min-width:24px;text-align:left}
+/* Drawer */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:520px;background:var(--s1);border-right:1px solid var(--border);z-index:101;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.drawer.open{transform:none}
+.drw-hero{padding:28px;background:var(--s2);border-bottom:1px solid var(--border)}
+.drw-hero.hot{background:linear-gradient(135deg,rgba(232,64,64,.1),var(--s2))}
+.drw-hero.warm{background:linear-gradient(135deg,rgba(232,125,32,.1),var(--s2))}
+.drw-hero.cold{background:linear-gradient(135deg,rgba(58,157,232,.1),var(--s2))}
+.drw-top{display:flex;align-items:center;gap:14px}
+.drw-av{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+.drw-info{flex:1}
+.drw-info h2{font-size:18px;font-weight:800}
+.drw-info p{font-size:13px;color:var(--sub);font-family:var(--mono);margin-top:2px}
+.drw-close{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--sub);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.drw-close:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.drw-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.score-pill{background:rgba(255,255,255,.04);border:1px solid;border-radius:20px;padding:4px 12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+.of{font-size:11px;color:var(--sub);font-weight:400}
+.drw-sec{padding:20px 24px;border-bottom:1px solid var(--border)}
+.drw-sec:last-child{border-bottom:none}
+.drw-sec-title{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ifield label{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+.ifield .v{font-size:13px;font-weight:500}
+.ifield .mn{font-family:var(--mono);font-size:12px}
+.ifield .gold{color:var(--gold);font-family:var(--mono);font-weight:700;font-size:15px}
+.q-block{margin-bottom:16px}
+.q-label{font-size:13px;font-weight:600;margin-bottom:10px;line-height:1.5}
+.q-opts{display:flex;flex-direction:column;gap:6px}
+.q-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);font-size:12px;transition:all .2s}
+.q-opt.chosen.pos{background:var(--green-bg);border-color:rgba(46,204,142,.3)}
+.q-opt.chosen.mid{background:var(--gold-bg);border-color:rgba(201,168,76,.3)}
+.q-opt.chosen.neg{background:var(--hot-bg);border-color:rgba(232,64,64,.3)}
+.q-opt.chosen.neu{background:var(--cold-bg);border-color:rgba(58,157,232,.3)}
+.q-check{width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700}
+.q-opt.chosen .q-check{background:var(--green);border-color:var(--green);color:#000}
+.q-opt.chosen.neg .q-check{background:var(--hot);border-color:var(--hot);color:#000}
+.q-opt.chosen.mid .q-check{background:var(--gold);border-color:var(--gold);color:#000}
+.q-opt.chosen.neu .q-check{background:var(--cold);border-color:var(--cold);color:#000}
+.q-pts{margin-right:auto;font-family:var(--mono);font-size:11px;color:var(--sub)}
+.q-opt.chosen.pos .q-pts{color:var(--green)}
+.q-opt.chosen.neg .q-pts{color:var(--hot)}
+.q-opt.chosen.mid .q-pts{color:var(--gold)}
+/* Sale status */
+.sale-sel{appearance:none;padding:5px 10px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none;border-radius:8px;min-width:100px}
+@keyframes fU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="amb a1"></div><div class="amb a2"></div>
+
+<!-- Profile Drawer -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drw-hero" id="drwHero">
+    <div class="drw-top">
+      <div class="drw-av" id="drwAv"></div>
+      <div class="drw-info">
+        <h2 id="drwName"></h2>
+        <p id="drwPhone"></p>
+      </div>
+      <button class="drw-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drw-badges" id="drwBadges"></div>
+  </div>
+
+  <!-- Section: Contact -->
+  <div class="drw-sec">
+    <div class="drw-sec-title">פרטי קשר</div>
+    <div class="info-grid">
+      <div class="ifield"><label>שם מלא</label><div class="v" id="di-name"></div></div>
+      <div class="ifield"><label>גיל</label><div class="v" id="di-age"></div></div>
+      <div class="ifield"><label>טלפון</label><div class="v mn" id="di-phone"></div></div>
+      <div class="ifield"><label>אימייל</label><div class="v mn" id="di-email"></div></div>
+      <div class="ifield"><label>זמינות לשיחה</label><div class="v" id="di-avail"></div></div>
+      <div class="ifield"><label>אופן שיחה</label><div class="v" id="di-meeting"></div></div>
+      <div class="ifield"><label>נרשם</label><div class="v mn" id="di-date"></div></div>
+      <div class="ifield"><label>ניקוד סופי</label><div class="v gold" id="di-score"></div></div>
+    </div>
+  </div>
+
+  <!-- Section: Answers -->
+  <div class="drw-sec">
+    <div class="drw-sec-title">תשובות מהשיחה</div>
+    <div id="drwAnswers"></div>
+  </div>
+
+  <!-- Section: Notes -->
+  <div class="drw-sec">
+    <div class="drw-sec-title">📝 הערות מהשיחה</div>
+    <textarea id="drwNotes" placeholder="כתוב כאן את המידע שאספת מהשיחה..." style="width:100%;min-height:120px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-family:var(--body);font-size:14px;resize:vertical;outline:none;line-height:1.6;direction:rtl" oninput="this.style.borderColor='rgba(201,168,76,0.5)'"></textarea>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <button onclick="saveNotes()" style="padding:10px 24px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">💾 שמור הערות</button>
+      <span id="notesSaved" style="color:var(--green);font-size:13px;opacity:0;transition:opacity .3s"></span>
+    </div>
+    <p style="margin-top:10px;font-size:12px;color:var(--sub)">💡 סיכום שיחה יתווסף כאן אוטומטית לאחר שיחה של 4 דקות ויותר</p>
+  </div>
+</div>
+
+<div class="shell">
+<header>
+  <div class="brand">
+    <div class="bmark">✂️</div>
+    <div class="btxt"><h1>אקדמיית אלעד רבי</h1><p>מרכז ניהול לידים</p></div>
+  </div>
+  <div class="hright">
+    <div class="pill pill-live" id="statusPill"><div class="pulse"></div> מחובר</div>
+    <button class="btn-ref" id="btnRef" onclick="doRefresh()">↻ רענן</button>
+  </div>
+</header>
+
+<!-- KPI -->
+<div class="kpi-row">
+  <div class="kpi kt"><div class="kpi-lbl">סה"כ לידים</div><div class="kpi-val" id="kT">—</div><div class="kpi-sub">כל הסטטוסים</div></div>
+  <div class="kpi kh"><div class="kpi-lbl">🔥 חמים</div><div class="kpi-val" id="kH">—</div><div class="kpi-sub">16+ נקודות</div></div>
+  <div class="kpi kw"><div class="kpi-lbl">🌤️ ממוצעים</div><div class="kpi-val" id="kW">—</div><div class="kpi-sub">10–16 נקודות</div></div>
+  <div class="kpi kc"><div class="kpi-lbl">❄️ קרים</div><div class="kpi-val" id="kC">—</div><div class="kpi-sub">מתחת ל-10</div></div>
+  <div class="kpi ka"><div class="kpi-lbl">⏳ בתהליך</div><div class="kpi-val" id="kA">—</div><div class="kpi-sub">שיחה פתוחה</div></div>
+</div>
+
+<!-- Alert -->
+<div class="alert" id="alertEl">
+  <div class="a-ico">🔥</div>
+  <div class="a-body"><strong>לידים חמים ממתינים לשיחת התאמה!</strong><p>צור קשר בהקדם</p></div>
+  <div class="a-chips" id="alertChips"></div>
+</div>
+
+<!-- Controls -->
+<div class="ctrl">
+  <button class="tab on"  data-f="all"  onclick="setFilter(this)">הכל <span class="tcnt" id="tc-all">0</span></button>
+  <button class="tab fh"  data-f="hot"  onclick="setFilter(this)">🔥 חם <span class="tcnt" id="tc-hot">0</span></button>
+  <button class="tab fw"  data-f="warm" onclick="setFilter(this)">🌤️ ממוצע <span class="tcnt" id="tc-warm">0</span></button>
+  <button class="tab fc"  data-f="cold" onclick="setFilter(this)">❄️ קר <span class="tcnt" id="tc-cold">0</span></button>
+  <button class="tab fa"  data-f="prog" onclick="setFilter(this)">⏳ בתהליך <span class="tcnt" id="tc-prog">0</span></button>
+  <button class="tab"     data-f="disq" onclick="setFilter(this)">🚫 נפסלו <span class="tcnt" id="tc-disq">0</span></button>
+  <div class="spacer"></div>
+  <select class="srt-sel" id="srtSel" onchange="render()">
+    <option value="date">תאריך — חדש ראשון</option>
+    <option value="sd">ניקוד — גבוה ראשון</option>
+    <option value="sa">ניקוד — נמוך ראשון</option>
+    <option value="name">שם — א׳ ב׳</option>
+  </select>
+  <div class="srch">
+    <span class="srch-i">🔍</span>
+    <input id="srchIn" type="text" placeholder="חיפוש שם / טלפון..." oninput="render()">
+  </div>
+</div>
+
+<!-- Table -->
+<div class="tbl-wrap">
+  <table>
+    <thead><tr>
+      <th>שם</th><th>סיווג</th><th>ניקוד</th>
+      <th>גיל</th><th>ניסיון</th><th>זמינות</th>
+      <th>שיחה</th><th>סטטוס</th><th>סטטוס מכירה</th><th>ממתין לשיחה</th><th>הסר</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="emptyEl" style="display:none"><div class="empty-i">🔍</div><p>אין לידים התואמים את הסינון</p></div>
+  <div class="tbl-foot">
+    <span id="footCnt">0 תוצאות</span>
+    <div class="pages" id="pages"></div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="chart-row">
+  <div class="cc">
+    <div class="cc-title">התפלגות לידים</div>
+    <div class="donut-wrap">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="40" fill="none" stroke="#1a1a20" stroke-width="16"/>
+        <circle id="dH" cx="55" cy="55" r="40" fill="none" stroke="#e84040" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease"/>
+        <circle id="dW" cx="55" cy="55" r="40" fill="none" stroke="#e87d20" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease;transition-delay:.15s"/>
+        <circle id="dC" cx="55" cy="55" r="40" fill="none" stroke="#3a9de8" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease;transition-delay:.3s"/>
+        <text x="55" y="51" text-anchor="middle" fill="#ececf4" font-size="16" font-weight="700" font-family="DM Mono,monospace" id="dCtr">0</text>
+        <text x="55" y="66" text-anchor="middle" fill="#888898" font-size="9" font-family="Heebo,sans-serif">לידים</text>
+      </svg>
+      <div class="donut-leg">
+        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#e84040"></span>חמים 🔥</span><span class="leg-val" id="lH">0</span></div>
+        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#e87d20"></span>ממוצעים 🌤️</span><span class="leg-val" id="lW">0</span></div>
+        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#3a9de8"></span>קרים ❄️</span><span class="leg-val" id="lC">0</span></div>
+        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#555"></span>נפסלו</span><span class="leg-val" id="lD">0</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="cc">
+    <div class="cc-title">זמינות לשיחות</div>
+    <div class="bars" id="avBars"></div>
+  </div>
+</div>
+
+<!-- After-Sale Table -->
+<div style="margin-top:36px;animation:fU .5s .25s ease both">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <h2 style="font-size:18px;font-weight:800;color:var(--gold)">📋 מעקב אחרי שיחה</h2>
+    <div class="ctrl" style="margin-bottom:0;gap:6px">
+      <button class="tab sale-tab on" data-sf="all" onclick="setSaleFilter(this)">הכל <span class="tcnt" id="sAll">0</span></button>
+      <button class="tab sale-tab" data-sf="thinking" onclick="setSaleFilter(this)">עדיין חושב 🤔 <span class="tcnt" id="sThink">0</span></button>
+      <button class="tab sale-tab" data-sf="purchased" onclick="setSaleFilter(this)">קנה ✅ <span class="tcnt" id="sPurch">0</span></button>
+      <button class="tab sale-tab" data-sf="no_answer" onclick="setSaleFilter(this)">לא ענה 📵 <span class="tcnt" id="sNoAns">0</span></button>
+      <button class="tab sale-tab" data-sf="not_relevant" onclick="setSaleFilter(this)">לא מעוניין ❌ <span class="tcnt" id="sNotRel">0</span></button>
+      <button class="tab sale-tab" data-sf="support_ended" onclick="setSaleFilter(this)">ליווי אישי הסתיים 🎓 <span class="tcnt" id="sSupEnd">0</span></button>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>שם</th><th>טלפון</th><th>סיווג</th><th>ניקוד</th>
+        <th>גיל</th><th>שיחה</th><th>סטטוס מכירה</th><th>עדכון אחרון</th>
+      </tr></thead>
+      <tbody id="saleTbody"></tbody>
+    </table>
+    <div class="empty" id="saleEmptyEl" style="display:none"><div class="empty-i">📋</div><p>אין לידים בקטגוריה זו</p></div>
+    <div class="tbl-foot"><span id="saleFootCnt">0 תוצאות</span></div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+const N8N_URL='https://alon09.app.n8n.cloud/webhook/leads-data';
+const DEMO=false;
+const REFRESH=30000;
+
+// ── Demo data ────────────────────────────────────────────────
+function ago(n,u){const m={m:60000,h:3600000,d:86400000};return new Date(Date.now()-n*m[u]).toISOString()}
+
+const DEMO_LEADS=[
+  {id:1,name:'יונתן כהן',   phone:'972501234567',email:'yoni@gmail.com',  lead_type:'hot', score:19,age:16,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'completed',
+   answers:{familiarity:3,experience:1,understanding:3,hours:4,budget:4,parents:4}},
+  {id:2,name:'דניאל לוי',   phone:'972521111111',email:'daniel@gmail.com',lead_type:'hot', score:17,age:15,has_experience:true, availability:'בוקר (9-12)',   meeting_type:'זום',   status:'completed',
+   answers:{familiarity:4,experience:3,understanding:3,hours:3,budget:3,parents:3},created_at:ago(5,'h')},
+  {id:3,name:'אורי שמש',    phone:'972532222222',email:'uri@gmail.com',   lead_type:'hot', score:16,age:17,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'completed',
+   answers:{familiarity:3,experience:2,understanding:3,hours:4,budget:3,parents:4},created_at:ago(1,'d')},
+  {id:4,name:'אביב שפירא',  phone:'972543333333',email:'aviv@gmail.com',  lead_type:'warm',score:13,age:17,has_experience:false,availability:'צהריים (12-16)',meeting_type:'טלפון', status:'completed',
+   answers:{familiarity:2,experience:1,understanding:3,hours:3,budget:2,parents:3},created_at:ago(1,'d')},
+  {id:5,name:'עומר בן דוד', phone:'972554444444',email:'omer@gmail.com',  lead_type:'warm',score:11,age:14,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'in_progress',
+   answers:{familiarity:2,experience:1},created_at:ago(30,'m')},
+  {id:6,name:'שי כהן',      phone:'972565555555',email:'shai@gmail.com',  lead_type:'warm',score:10,age:16,has_experience:true, availability:'בוקר (9-12)',   meeting_type:'טלפון', status:'completed',
+   answers:{familiarity:3,experience:3,understanding:2,hours:2,budget:2},created_at:ago(2,'d')},
+  {id:7,name:'נועם פרידמן', phone:'972576666666',email:'noam@gmail.com',  lead_type:'cold',score:4, age:13,has_experience:false,availability:'בוקר (9-12)',   meeting_type:'טלפון', status:'completed',
+   answers:{familiarity:1,experience:1,understanding:1,hours:1,budget:1,parents:2},created_at:ago(3,'d')},
+  {id:8,name:'תמר גולן',    phone:'972587777777',email:'tamar@gmail.com', lead_type:'cold',score:2, age:13,has_experience:false,availability:'צהריים (12-16)',meeting_type:'טלפון', status:'completed',
+   answers:{familiarity:1,experience:1,understanding:1,hours:1,budget:1,parents:1},created_at:ago(4,'d')},
+  {id:9,name:'ליאל מזרחי',  phone:'972598888888',email:'liel@gmail.com',  lead_type:'disqualified',score:0,age:10,has_experience:false,availability:'—',meeting_type:'—',status:'disqualified',
+   answers:{},created_at:ago(2,'d')},
+  {id:10,name:'תום גולדברג', phone:'972509999999',email:'tom@gmail.com',  lead_type:'pending',score:0,age:null,has_experience:false,availability:'—',meeting_type:'—',status:'in_progress',
+   answers:{},created_at:ago(5,'m')},
+];
+DEMO_LEADS.forEach(l=>{if(!l.created_at)l.created_at=ago(2,'h')});
+
+// ── Question definitions ─────────────────────────────────────
+const QUESTIONS=[
+  {key:'familiarity', label:'מה רמת ההיכרות שלך עם אלעד רבי?',
+   opts:['שמעתי עליו השבוע','שמעתי עליו מזמן וצפיתי בכמה סרטונים','צופה בתוכן שלו כבר תקופה ועוקב','הסתפרתי אצלו בעבר ועוקב כבר הרבה זמן'],
+   pts:[0,1,2,4], tone:['neg','mid','pos','pos']},
+  {key:'experience', label:'מה הכי מתאר את הניסיון שלך בתחום הספרות?', infoOnly:true,
+   opts:['אין לי שום ידע בכלל / רק צפיתי בתכנים','סיפרתי כמה חברים בקטנה','סיפרתי מעל 15 אנשים, יודע את הבסיס ויש לי ציוד','עברתי קורס שלם ויש לי ניסיון'],
+   pts:[null,null,null,null], tone:['neu','neu','neu','neu']},
+  {key:'understanding', label:'האם צפית בסרטון ההסברה במלואו והבנת את אופי המסלול?',
+   opts:['לא היה לי כוח לראות ואין לי מושג','ראיתי קצת ולא ממש הבנתי','ראיתי הכל ואני חושב שהבנתי בגדול'],
+   pts:[0,0.5,2], tone:['neg','mid','pos']},
+  {key:'hours', label:'כמה שעות בשבוע אתה מוכן להשקיע במסלול?',
+   opts:['3-4 שעות','6-7 שעות','8-10 שעות','כמה שצריך - אני בא לתת בראש! 💥'],
+   pts:[0,1,2,4], tone:['neg','mid','pos','pos']},
+  {key:'budget', label:'כמה כסף אתה מוכן להשקיע במסלול שמבטיח 100% תוצאות?',
+   opts:['1,500-2,000₪','4,500₪','7,000₪','10,000₪'],
+   pts:[-2,1,2,2], tone:['neg','mid','pos','pos']},
+  {key:'parents', label:'האם ההורים שלך מודעים שאתה רוצה להירשם לאקדמיה?', ageGated:true,
+   opts:['לא סיפרתי להם','זרקתי להם משהו על זה פה ושם','כן הם יודעים אבל צריכים שכנוע','הם יודעים ותומכים בי 💪'],
+   pts:[0,0,1,3], tone:['neg','neg','mid','pos']},
+];
+
+// ── State ────────────────────────────────────────────────────
+let leads=[],curF='all',curP=1;
+const PER=8;
+const AVC=['#7c5cfc','#e84040','#e87d20','#3a9de8','#2ecc8e','#c9a84c','#ff6b9d'];
+
+// ── Fetch ────────────────────────────────────────────────────
+async function fetchLeads(){
+  if(DEMO){applyLeads(DEMO_LEADS);return}
+  const btn=document.getElementById('refBtn');
+  const pill=document.getElementById('statusPill');
+  try{
+    if(btn)btn.classList.add('spin');
+    const r=await fetch(N8N_URL,{method:'GET',headers:{'Accept':'application/json'}});
+    if(r.ok){
+      const raw=await r.text();
+      try{
+        const d=JSON.parse(raw);
+        const arr=Array.isArray(d)?d:(d.data?d.data:[d]);
+        if(arr.length>0){
+          applyLeads(arr);
+          if(pill)pill.textContent='מחובר ✓';
+          return;
+        }
+      }catch(e){console.error('JSON parse error:',e)}
+    }
+  }catch(e){console.warn('Fetch failed:',e.message)}
+  finally{if(btn)btn.classList.remove('spin')}
+  if(pill)pill.textContent='לא מחובר';
+  applyLeads(DEMO_LEADS);
+}
+
+// ── Support Expiry ────────────────────────────────────────────
+const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
+function checkSupportExpiry() {
+  leads.forEach(l => {
+    if (l.sale_status === 'purchased' && l.purchased_at) {
+      if (Date.now() - new Date(l.purchased_at) >= FOUR_MONTHS_MS) {
+        l.sale_status = 'support_ended';
+      }
+    }
+  });
+}
+
+function applyLeads(d){
+  let arr=Array.isArray(d)?d:[];
+  if(!Array.isArray(d)&&d&&d.data)arr=Array.isArray(d.data)?d.data:[d.data];
+  if(arr.length>0&&arr[0].json)arr=arr.map(i=>i.json);
+  leads=arr.map(l=>{
+    if(typeof l.answers==='string'){try{l.answers=JSON.parse(l.answers)}catch(e){l.answers={}}}
+    if(!l.answers||typeof l.answers!=='object')l.answers={};
+    if(!l.created_at)l.created_at=new Date().toISOString();
+    // Restore purchased_at from localStorage if missing
+    if(l.phone && !l.purchased_at) {
+      const stored = localStorage.getItem(`purchased_at_${l.phone}`);
+      if(stored) l.purchased_at = stored;
+    }
+    return l;
+  });
+  checkSupportExpiry();
+  updateKPI();updateCharts();updateAlert();updateCounts();render();renderSaleTable();
+}
+
+// ── KPI ──────────────────────────────────────────────────────
+function updateKPI(){
+  const h=leads.filter(l=>l.lead_type==='hot').length;
+  const w=leads.filter(l=>l.lead_type==='warm').length;
+  const c=leads.filter(l=>l.lead_type==='cold').length;
+  const a=leads.filter(l=>l.status==='in_progress').length;
+  [['kT',leads.length],['kH',h],['kW',w],['kC',c],['kA',a]].forEach(([id,v])=>{
+    const el=document.getElementById(id);let cur=0;
+    const t=setInterval(()=>{cur=Math.min(cur+Math.max(1,Math.ceil(v/20)),v);el.textContent=cur;if(cur>=v)clearInterval(t)},30);
+  });
+}
+
+// ── Alert ────────────────────────────────────────────────────
+function updateAlert(){
+  const hd=leads.filter(l=>l.lead_type==='hot'&&l.status==='completed');
+  document.getElementById('alertEl').classList.toggle('show',hd.length>0);
+  document.getElementById('alertChips').innerHTML=hd.slice(0,4).map(l=>`<span class="chip">${l.name}</span>`).join('');
+}
+
+// ── Charts ───────────────────────────────────────────────────
+function updateCharts(){
+  const h=leads.filter(l=>l.lead_type==='hot').length;
+  const w=leads.filter(l=>l.lead_type==='warm').length;
+  const c=leads.filter(l=>l.lead_type==='cold').length;
+  const d=leads.filter(l=>l.lead_type==='disqualified').length;
+  const tot=leads.length||1,ci=251.3;
+  [['lH',h],['lW',w],['lC',c],['lD',d],['dCtr',leads.length]].forEach(([id,v])=>document.getElementById(id).textContent=v);
+  const pH=(h/tot)*ci,pW=(w/tot)*ci,pC=(c/tot)*ci;
+  document.getElementById('dH').style.strokeDasharray=`${pH} ${ci-pH}`;
+  document.getElementById('dH').style.strokeDashoffset='62.8';
+  const oW=62.8-pH;
+  document.getElementById('dW').style.strokeDasharray=`${pW} ${ci-pW}`;
+  document.getElementById('dW').style.strokeDashoffset=oW;
+  document.getElementById('dC').style.strokeDasharray=`${pC} ${ci-pC}`;
+  document.getElementById('dC').style.strokeDashoffset=oW-pW;
+  const av={'בוקר (9-12)':0,'צהריים (12-16)':0,'ערב (16-20)':0};
+  leads.forEach(l=>{if(av[l.availability]!==undefined)av[l.availability]++});
+  const mx=Math.max(...Object.values(av),1);
+  const cols={'בוקר (9-12)':'#c9a84c','צהריים (12-16)':'#3a9de8','ערב (16-20)':'#e87d20'};
+  const lbls={'בוקר (9-12)':'בוקר ☀️','צהריים (12-16)':'צהריים 🌤️','ערב (16-20)':'ערב 🌙'};
+  document.getElementById('avBars').innerHTML=Object.entries(av).map(([k,v])=>`
+    <div class="bar-r"><span class="bar-lbl">${lbls[k]}</span>
+    <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${cols[k]}"></div></div>
+    <span class="bar-val">${v}</span></div>`).join('');
+}
+
+// ── Counts ───────────────────────────────────────────────────
+function updateCounts(){
+  document.getElementById('tc-all').textContent  = leads.length;
+  document.getElementById('tc-hot').textContent  = leads.filter(l=>l.lead_type==='hot').length;
+  document.getElementById('tc-warm').textContent = leads.filter(l=>l.lead_type==='warm').length;
+  document.getElementById('tc-cold').textContent = leads.filter(l=>l.lead_type==='cold').length;
+  document.getElementById('tc-prog').textContent = leads.filter(l=>l.status==='in_progress').length;
+  document.getElementById('tc-disq').textContent = leads.filter(l=>l.lead_type==='disqualified').length;
+}
+
+// ── Filter / sort ────────────────────────────────────────────
+function setFilter(btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');curF=btn.dataset.f;curP=1;render();
+}
+function getFiltered(){
+  const q=document.getElementById('srchIn').value.toLowerCase();
+  return leads.filter(l=>{
+    if(l.sale_status && l.sale_status !== 'pending') return false;
+    const mf=curF==='all'?true:curF==='hot'?l.lead_type==='hot':curF==='warm'?l.lead_type==='warm':
+      curF==='cold'?l.lead_type==='cold':curF==='prog'?l.status==='in_progress':l.lead_type==='disqualified';
+    const ms=!q||l.name.toLowerCase().includes(q)||(l.phone||'').includes(q);
+    return mf&&ms;
+  });
+}
+function getSorted(arr){
+  const s=document.getElementById('srtSel').value;
+  return[...arr].sort((a,b)=>s==='sd'?b.score-a.score:s==='sa'?a.score-b.score:s==='name'?a.name.localeCompare(b.name,'he'):new Date(b.created_at)-new Date(a.created_at));
+}
+
+// ── Phone links ──────────────────────────────────────────────
+function phoneLinks(phone) {
+  if (!phone) return '—';
+  return `<a href="https://wa.me/${phone}" target="_blank" title="WhatsApp" style="text-decoration:none;margin-left:6px;font-size:13px">💬</a><a href="tel:+${phone}" title="התקשר" style="text-decoration:none;margin-left:4px;font-size:13px">📞</a>`;
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function badge(type){
+  const m={hot:'🔥 חם',warm:'🌤️ ממוצע',cold:'❄️ קר',disqualified:'🚫 נפסל',pending:'⏳ בתהליך'};
+  const k={hot:'h',warm:'w',cold:'c',disqualified:'d',pending:'p'};
+  return`<span class="badge ${k[type]||'p'}">${m[type]||'⏳'}</span>`;
+}
+function scoreBar(sc,type){
+  const c={hot:'#e84040',warm:'#e87d20',cold:'#3a9de8',disqualified:'#555',pending:'#c9a84c'}[type]||'#c9a84c';
+  const pct=Math.min(100,(sc/22)*100);
+  return`<div class="sc-cell"><span class="sc-n" style="color:${c}">${sc}</span><div class="sc-bg"><div class="sc-fill" style="width:${pct}%;background:${c}"></div></div></div>`;
+}
+function statusEl(s){
+  return s==='completed'?'<span class="sdot done">הושלם</span>':s==='in_progress'?'<span class="sdot prog">בתהליך</span>':'<span class="sdot disq">נפסל</span>';
+}
+function fmtDate(iso){
+  const d=new Date(iso),df=Date.now()-d;
+  if(df<60000)return'עכשיו';if(df<3600000)return`${Math.floor(df/60000)} דק'`;
+  if(df<86400000)return`${Math.floor(df/3600000)} שע'`;
+  return d.toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
+}
+
+// ── Sale Status ──────────────────────────────────────────────
+const SALE_STATUSES = {
+  'pending': {label:'ממתין', color:'var(--sub)', bg:'rgba(255,255,255,0.05)'},
+  'thinking': {label:'עדיין חושב', color:'var(--warm)', bg:'var(--warm-bg)'},
+  'purchased': {label:'קנה', color:'var(--green)', bg:'var(--green-bg)'},
+  'not_relevant': {label:'לא רלוונטי', color:'var(--cold)', bg:'var(--cold-bg)'},
+  'no_answer': {label:'לא ענה', color:'var(--hot)', bg:'var(--hot-bg)'},
+  'support_ended': {label:'ליווי אישי הסתיים', color:'#7c5cfc', bg:'rgba(124,92,252,0.12)'}
+};
+
+function saleStatusSelect(lead) {
+  const current = lead.sale_status || 'pending';
+  const s = SALE_STATUSES[current] || SALE_STATUSES['pending'];
+  let opts = '';
+  for (const [key, val] of Object.entries(SALE_STATUSES)) {
+    opts += `<option value="${key}" ${key===current?'selected':''}>${val.label}</option>`;
+  }
+  return `<select class="sale-sel" style="background:${s.bg};color:${s.color};border:1px solid ${s.color}33;border-radius:8px;padding:4px 8px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none" onchange="updateSaleStatus('${lead.phone}',this.value,this)">${opts}</select>`;
+}
+
+async function updateSaleStatus(phone, status, el) {
+  const s = SALE_STATUSES[status] || SALE_STATUSES['pending'];
+  el.style.background = s.bg;
+  el.style.color = s.color;
+  el.style.borderColor = s.color + '33';
+  const lead = leads.find(l => l.phone === phone);
+  if (lead) {
+    lead.sale_status = status;
+    if (status === 'purchased') {
+      lead.purchased_at = new Date().toISOString();
+      localStorage.setItem(`purchased_at_${phone}`, lead.purchased_at);
+    }
+  }
+  render();
+  renderSaleTable();
+  try {
+    await fetch(N8N_URL.replace('leads-data','update-sale-status'), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({phone, sale_status: status})
+    });
+  } catch(e) { console.warn('Failed to update sale status:', e); }
+}
+
+// ── Render table ─────────────────────────────────────────────
+function render(){
+  const fl=getSorted(getFiltered());
+  const tot=fl.length,pages=Math.max(1,Math.ceil(tot/PER));
+  if(curP>pages)curP=1;
+  const sl=fl.slice((curP-1)*PER,curP*PER);
+  const tbody=document.getElementById('tbody');
+  document.getElementById('footCnt').textContent=`${tot} תוצאות`;
+  document.getElementById('emptyEl').style.display=sl.length?'none':'block';
+  tbody.innerHTML=sl.map((l,i)=>{
+    const gIdx=(curP-1)*PER+i;
+    const c=AVC[gIdx%AVC.length];
+    const av=`<div class="av" style="background:linear-gradient(135deg,${c}44,${c}22);color:${c};width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:1px solid rgba(255,255,255,.06)">${(l.name||'?')[0]}</div>`;
+    return`<tr>
+      <td>
+        <div class="name-btn" onclick="openDrawer(${l.id})">
+          ${av}
+          <div>
+            <div class="name-txt">${l.name}</div>
+            <small class="name-phone">${l.phone} ${phoneLinks(l.phone)}</small>
+          </div>
+          <span class="name-arrow">← פרטים</span>
+        </div>
+      </td>
+      <td>${badge(l.lead_type)}</td>
+      <td>${scoreBar(l.score,l.lead_type)}</td>
+      <td style="font-family:var(--mono);color:var(--sub)">${l.age||'—'}</td>
+      <td>${l.has_experience?'<span style="font-size:12px;color:var(--green);background:var(--green-bg);padding:3px 8px;border-radius:6px;font-weight:600">✓ כן</span>':'<span style="font-size:12px;color:var(--sub)">—</span>'}</td>
+      <td style="color:var(--sub);font-size:13px">${l.availability||'—'}</td>
+      <td style="color:var(--sub);font-size:13px">${l.meeting_type||'—'}</td>
+      <td>${statusEl(l.status)}</td>
+      <td>${saleStatusSelect(l)}</td>
+      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${fmtDate(l.created_at)}</td>
+      <td><button onclick="removeLead(${l.id},event)" title="הסר ליד" style="background:var(--hot-bg);border:1px solid rgba(232,64,64,.25);color:var(--hot);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">✕</button></td>
+    </tr>`;
+  }).join('');
+  const el=document.getElementById('pages');
+  el.innerHTML=pages<=1?'':Array.from({length:pages},(_,i)=>
+    `<button class="pg ${i+1===curP?'on':''}" onclick="goPage(${i+1})">${i+1}</button>`).join('');
+}
+function goPage(p){curP=p;render()}
+
+// ── DRAWER ────────────────────────────────────────────────────
+function openDrawer(id){
+  const lead=leads.find(l=>l.id===id);
+  if(!lead)return;
+
+  const type=lead.lead_type;
+  const gIdx=leads.indexOf(lead);
+  const c=AVC[gIdx%AVC.length];
+
+  const hero=document.getElementById('drwHero');
+  hero.className=`drw-hero ${type}`;
+
+  document.getElementById('drwAv').style.cssText=`background:linear-gradient(135deg,${c}44,${c}22);color:${c}`;
+  document.getElementById('drwAv').textContent=(lead.name||'?')[0];
+  document.getElementById('drwName').textContent=lead.name;
+  document.getElementById('drwPhone').textContent=lead.phone;
+
+  const typeLabel={hot:'🔥 חם',warm:'🌤️ ממוצע',cold:'❄️ קר',disqualified:'🚫 נפסל',pending:'⏳ בתהליך'};
+  const typeCls={hot:'h',warm:'w',cold:'c',disqualified:'d',pending:'p'};
+  const scoreColor={hot:'var(--hot)',warm:'var(--warm)',cold:'var(--cold)',disqualified:'#555',pending:'var(--gold)'}[type]||'var(--gold)';
+  document.getElementById('drwBadges').innerHTML=`
+    <span class="badge ${typeCls[type]||'p'}">${typeLabel[type]||'—'}</span>
+    <div class="score-pill" style="border-color:${scoreColor}20">
+      <span style="color:${scoreColor}">${lead.score}</span>
+      <span class="of">/ 22 נקודות</span>
+    </div>
+    ${lead.has_experience?'<span class="badge" style="background:var(--green-bg);color:var(--green);border-color:rgba(46,204,142,.25)">✓ בעל ניסיון</span>':''}
+  `;
+
+  document.getElementById('di-name').textContent   = lead.name||'—';
+  document.getElementById('di-age').textContent     = lead.age ? `${lead.age} שנים` : '—';
+  // Phone with call and WhatsApp buttons
+  document.getElementById('di-phone').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-family:var(--mono);font-size:12px">${lead.phone || '—'}</span>
+      <button id="callBtn-${lead.id}"
+        onclick="initiateCall(${lead.id}, '${lead.phone}')"
+        style="padding:5px 14px;background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,142,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        📞 התקשר
+      </button>
+      <a href="https://wa.me/${lead.phone}" target="_blank"
+        style="padding:5px 14px;background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:4px"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        💬 WhatsApp
+      </a>
+      <span style="font-size:11px;color:var(--sub);cursor:pointer;text-decoration:underline" onclick="resetAgentPhone()">שנה מספר שלי</span>
+    </div>`;
+  document.getElementById('di-email').textContent   = lead.email||'—';
+  document.getElementById('di-avail').textContent   = lead.availability||'—';
+  document.getElementById('di-meeting').textContent = lead.meeting_type||'—';
+  document.getElementById('di-date').textContent    = new Date(lead.created_at).toLocaleString('he-IL');
+  document.getElementById('di-score').textContent   = `${lead.score} / 22`;
+
+  document.getElementById('drwNotes').value = lead.notes || localStorage.getItem(`notes_${lead.phone}`) || '';
+  document.getElementById('drwNotes').dataset.phone = lead.phone;
+  document.getElementById('notesSaved').style.opacity = '0';
+
+  let ans={};
+  try{ans=typeof lead.answers==='string'?JSON.parse(lead.answers):(lead.answers||{})}catch{}
+
+  const ageVal=lead.age||99;
+  const drwAns=document.getElementById('drwAnswers');
+  drwAns.innerHTML=QUESTIONS.filter(q=>!q.ageGated||(ageVal>=12&&ageVal<=18)).map(q=>{
+    const chosen=ans[q.key];
+    if(chosen===undefined&&Object.keys(ans).length===0){
+      return`<div class="q-block"><div class="q-label">${q.label}</div><div style="color:var(--sub);font-size:13px;padding:8px 12px;background:var(--s2);border-radius:10px;border:1px solid var(--border)">טרם נענה</div></div>`;
+    }
+    const opts=q.opts.map((opt,i)=>{
+      const isChosen=Number(chosen)===(i+1);
+      const tone=q.tone[i];
+      const pts=q.pts[i];
+      const ptsStr=q.infoOnly?'מידע בלבד':pts===null?'—':pts>=2?`+${pts}`:pts<0?`${pts}`:`+${pts}`;
+      return`<div class="q-opt ${isChosen?`chosen ${tone}`:''}">
+        <div class="q-check">${isChosen?'✓':''}</div>
+        <span>${i+1}. ${opt}</span>
+        ${!q.infoOnly?`<span class="q-pts">${ptsStr}</span>`:`<span class="q-pts" style="color:var(--cold)">מידע</span>`}
+      </div>`;
+    }).join('');
+    const infoNote=q.infoOnly?'<div style="font-size:11px;color:var(--cold);margin-bottom:8px;padding:6px 10px;background:var(--cold-bg);border-radius:7px;border:1px solid rgba(58,157,232,.2)">ℹ️ שאלת מידע בלבד — לא משפיעה על הניקוד</div>':'';
+    return`<div class="q-block">${infoNote}<div class="q-label">${q.label}</div><div class="q-opts">${opts}</div></div>`;
+  }).join('');
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDrawer(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+
+// ── Call Initiation ───────────────────────────────────────────
+async function initiateCall(leadId, leadPhone) {
+  // Get or prompt for agent phone
+  let agentPhone = localStorage.getItem('agentPhone') || '';
+  if (!agentPhone) {
+    agentPhone = prompt('הכנס את מספר הטלפון שלך (כולל קוד מדינה, למשל: 972501234567 או +972501234567):');
+    if (!agentPhone) return;
+    agentPhone = agentPhone.replace(/[\s+\-()]/g, '');
+    localStorage.setItem('agentPhone', agentPhone);
+  }
+
+  const btn = document.getElementById('callBtn-' + leadId);
+  if (btn) {
+    btn.textContent = '⏳ מחבר...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+  }
+
+  try {
+    const res = await fetch('https://alon09.app.n8n.cloud/webhook/initiate-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        leadId: String(leadId),
+        leadPhone: String(leadPhone),
+        agentPhone: agentPhone
+      })
+    });
+
+    if (!res.ok) throw new Error('שגיאת שרת: ' + res.status);
+
+    if (btn) {
+      btn.textContent = '📞 שיחה מתחברת...';
+      btn.style.background = 'rgba(46,204,142,0.25)';
+      btn.style.color = 'var(--green)';
+      btn.style.borderColor = 'rgba(46,204,142,0.5)';
+      btn.style.opacity = '1';
+    }
+
+    // Reset after 60 seconds
+    setTimeout(() => {
+      if (btn) {
+        btn.textContent = '📞 התקשר';
+        btn.disabled = false;
+        btn.style.background = 'var(--green-bg)';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'rgba(46,204,142,0.35)';
+        btn.style.opacity = '1';
+      }
+    }, 60000);
+
+  } catch (e) {
+    if (btn) {
+      btn.textContent = '❌ שגיאה - נסה שוב';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.background = 'var(--hot-bg)';
+      btn.style.color = 'var(--hot)';
+    }
+    console.error('Call error:', e);
+    setTimeout(() => {
+      if (btn) {
+        btn.textContent = '📞 התקשר';
+        btn.style.background = 'var(--green-bg)';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'rgba(46,204,142,0.35)';
+      }
+    }, 4000);
+  }
+}
+
+function resetAgentPhone() {
+  localStorage.removeItem('agentPhone');
+  alert('מספר הטלפון שלך אופס. בשיחה הבאה תתבקש להכניס אותו מחדש.');
+}
+
+// ── Refresh ──────────────────────────────────────────────────
+async function doRefresh(){
+  const btn=document.getElementById('btnRef');
+  btn.classList.add('spin');btn.disabled=true;
+  await fetchLeads();
+  setTimeout(()=>{btn.classList.remove('spin');btn.disabled=false},600);
+}
+
+// ── Init ─────────────────────────────────────────────────────
+fetchLeads();
+
+// ── Sale Table ───────────────────────────────────────────────
+let curSaleFilter = 'all';
+
+function setSaleFilter(btn) {
+  document.querySelectorAll('.sale-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  curSaleFilter = btn.dataset.sf;
+  renderSaleTable();
+}
+
+function renderSaleTable() {
+  const saleLeads = leads.filter(l => l.sale_status && l.sale_status !== 'pending');
+  const el = id => document.getElementById(id);
+  if(el('sAll')) el('sAll').textContent = saleLeads.length;
+  if(el('sThink')) el('sThink').textContent = saleLeads.filter(l=>l.sale_status==='thinking').length;
+  if(el('sPurch')) el('sPurch').textContent = saleLeads.filter(l=>l.sale_status==='purchased').length;
+  if(el('sNoAns')) el('sNoAns').textContent = saleLeads.filter(l=>l.sale_status==='no_answer').length;
+  if(el('sNotRel')) el('sNotRel').textContent = saleLeads.filter(l=>l.sale_status==='not_relevant').length;
+  if(el('sSupEnd')) el('sSupEnd').textContent = saleLeads.filter(l=>l.sale_status==='support_ended').length;
+  const filtered = curSaleFilter === 'all' ? saleLeads : saleLeads.filter(l => l.sale_status === curSaleFilter);
+  const tbody = document.getElementById('saleTbody');
+  const emptyEl = document.getElementById('saleEmptyEl');
+  if(document.getElementById('saleFootCnt')) document.getElementById('saleFootCnt').textContent = `${filtered.length} תוצאות`;
+  if (!tbody) return;
+  if (emptyEl) emptyEl.style.display = filtered.length ? 'none' : 'block';
+  tbody.innerHTML = filtered.map(l => {
+    const s = SALE_STATUSES[l.sale_status] || SALE_STATUSES['pending'];
+    return `<tr>
+      <td><span style="font-weight:600;cursor:pointer;color:var(--gold);text-decoration:underline" onclick="openDrawer(${l.id})">${l.name || '—'}</span></td>
+      <td style="font-family:var(--mono);color:var(--sub);font-size:13px">${l.phone || '—'} ${phoneLinks(l.phone)}</td>
+      <td>${badge(l.lead_type)}</td>
+      <td>${scoreBar(l.score,l.lead_type)}</td>
+      <td style="font-family:var(--mono);color:var(--sub)">${l.age||'—'}</td>
+      <td style="color:var(--sub);font-size:13px">${l.meeting_type||'—'}</td>
+      <td>${saleStatusSelect(l)}</td>
+      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${fmtDate(l.updated_at||l.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Remove Lead ───────────────────────────────────────────────
+function removeLead(id, e) {
+  e.stopPropagation();
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  if (!confirm(`להסיר את ${lead.name} מהרשימה?`)) return;
+  leads = leads.filter(l => l.id !== id);
+  updateKPI(); updateCharts(); updateAlert(); updateCounts(); render(); renderSaleTable();
+}
+
+// ── Notes ────────────────────────────────────────────────────
+async function saveNotes() {
+  const textarea = document.getElementById('drwNotes');
+  const phone = textarea.dataset.phone;
+  const notes = textarea.value;
+  const savedEl = document.getElementById('notesSaved');
+
+  const lead = leads.find(l => l.phone === phone);
+  if (lead) lead.notes = notes;
+  localStorage.setItem(`notes_${phone}`, notes);
+
+  savedEl.textContent = '✓ נשמר בהצלחה';
+  savedEl.style.color = 'var(--green)';
+  savedEl.style.opacity = '1';
+  textarea.style.borderColor = 'rgba(46,204,142,0.5)';
+  setTimeout(() => { savedEl.style.opacity = '0'; textarea.style.borderColor = 'var(--border)'; }, 2000);
+
+  fetch(N8N_URL.replace('leads-data','update-sale-status'), {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({phone, notes})
+  }).catch(() => {});
+}
+
+</script>
+</body>
+</html>
