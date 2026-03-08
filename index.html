@@ -348,6 +348,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <script>
 // ── Config ──────────────────────────────────────────────────
 const N8N_URL='https://alon09.app.n8n.cloud/webhook/leads-data';
+const ZOOM_LINK='https://us05web.zoom.us/j/4919492998?pwd=pTPMBsqHU5QmpxaAgaYTqjhbqX15SG.1';
 const DEMO=false;
 const REFRESH=30000;
 
@@ -697,6 +698,12 @@ function openDrawer(id){
         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         💬 WhatsApp
       </a>
+      <button
+        onclick="sendZoomWhatsApp('${lead.phone}', '${lead.name}')"
+        style="padding:5px 14px;background:rgba(41,121,255,0.12);color:#4da6ff;border:1px solid rgba(41,121,255,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        🎥 שלח זום
+      </button>
       <span style="font-size:11px;color:var(--sub);cursor:pointer;text-decoration:underline" onclick="resetAgentPhone()">שנה מספר שלי</span>
     </div>`;
   document.getElementById('di-email').textContent   = lead.email||'—';
@@ -816,6 +823,12 @@ async function initiateCall(leadId, leadPhone) {
       }
     }, 4000);
   }
+}
+
+function sendZoomWhatsApp(phone, name) {
+  const msg = `שלום ${name}! 👋\nמצרף לך את הלינק לשיחת הזום שלנו:\n${ZOOM_LINK}\n\nמחכה לדבר איתך! 😊`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 function resetAgentPhone() {
