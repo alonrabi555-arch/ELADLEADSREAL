@@ -698,12 +698,11 @@ function openDrawer(id){
         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         💬 WhatsApp
       </a>
-      <button
-        onclick="sendZoomWhatsApp('${lead.phone}', '${lead.name}')"
-        style="padding:5px 14px;background:rgba(41,121,255,0.12);color:#4da6ff;border:1px solid rgba(41,121,255,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .2s"
+      <a href="${zoomWaUrl(lead.phone, lead.name)}" target="_blank"
+        style="padding:5px 14px;background:rgba(41,121,255,0.12);color:#4da6ff;border:1px solid rgba(41,121,255,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;transition:opacity .2s"
         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         🎥 שלח זום
-      </button>
+      </a>
       <span style="font-size:11px;color:var(--sub);cursor:pointer;text-decoration:underline" onclick="resetAgentPhone()">שנה מספר שלי</span>
     </div>`;
   document.getElementById('di-email').textContent   = lead.email||'—';
@@ -825,10 +824,9 @@ async function initiateCall(leadId, leadPhone) {
   }
 }
 
-function sendZoomWhatsApp(phone, name) {
+function zoomWaUrl(phone, name) {
   const msg = `שלום ${name}! 👋\nמצרף לך את הלינק לשיחת הזום שלנו:\n${ZOOM_LINK}\n\nמחכה לדבר איתך! 😊`;
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 
 function resetAgentPhone() {
