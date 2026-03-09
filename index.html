@@ -454,8 +454,7 @@ async function sendFarewellMessage(phone, name) {
   try {
     await fetch('https://alon09.app.n8n.cloud/webhook/support-ended', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({phone, name})
+      body: new URLSearchParams({phone, name})
     });
     console.log(`Farewell sent to ${name} (${phone})`);
   } catch(e) {
@@ -638,8 +637,7 @@ async function updateSaleStatus(phone, status, el) {
   try {
     await fetch(N8N_URL.replace('leads-data','update-sale-status'), {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({phone, sale_status: status})
+      body: new URLSearchParams({phone, sale_status: status})
     });
   } catch(e) { console.warn('Failed to update sale status:', e); }
 }
@@ -949,8 +947,7 @@ async function saveNotes() {
 
   fetch(N8N_URL.replace('leads-data','update-sale-status'), {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({phone, notes})
+    body: new URLSearchParams({phone, notes})
   }).catch(() => {});
 }
 
