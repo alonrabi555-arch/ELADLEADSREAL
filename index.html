@@ -635,10 +635,7 @@ async function updateSaleStatus(phone, status, el) {
   render();
   renderSaleTable();
   try {
-    await fetch(N8N_URL.replace('leads-data','update-sale-status'), {
-      method: 'POST',
-      body: new URLSearchParams({phone, sale_status: status})
-    });
+    await fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(phone)}&sale_status=${encodeURIComponent(status)}`);
   } catch(e) { console.warn('Failed to update sale status:', e); }
 }
 
@@ -945,10 +942,7 @@ async function saveNotes() {
   textarea.style.borderColor = 'rgba(46,204,142,0.5)';
   setTimeout(() => { savedEl.style.opacity = '0'; textarea.style.borderColor = 'var(--border)'; }, 2000);
 
-  fetch(N8N_URL.replace('leads-data','update-sale-status'), {
-    method: 'POST',
-    body: new URLSearchParams({phone, notes})
-  }).catch(() => {});
+  fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(phone)}&notes=${encodeURIComponent(notes)}`).catch(() => {});
 }
 
 </script>
