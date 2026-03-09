@@ -439,10 +439,44 @@ function checkSupportExpiry() {
     if (l.sale_status === 'purchased' && l.purchased_at) {
       if (Date.now() - new Date(l.purchased_at) >= FOUR_MONTHS_MS) {
         l.sale_status = 'support_ended';
+        // Send farewell message once per lead via n8n
+        const key = `farewellSent_${l.phone}`;
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, 'true');
+          sendFarewellMessage(l.phone, l.name);
+        }
       }
     }
   });
 }
+
+async function sendFarewellMessage(phone, name) {
+  try {
+    await fetch('https://alon09.app.n8n.cloud/webhook/support-ended', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone, name})
+    });
+    console.log(`Farewell sent to ${name} (${phone})`);
+  } catch(e) {
+    console.warn('Failed to send farewell message:', e);
+  }
+}
+
+// ── Console test helper ───────────────────────────────────────
+window.testSupportExpiry = function() {
+  const lead = leads.find(l => l.sale_status === 'purchased');
+  if (!lead) { console.warn('No purchased lead found. Set a lead to "קנה" first.'); return; }
+  const orig = lead.purchased_at;
+  lead.purchased_at = new Date(Date.now() - 5 * 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Remove farewellSent flag so webhook fires during test
+  localStorage.removeItem(`farewellSent_${lead.phone}`);
+  checkSupportExpiry();
+  renderSaleTable();
+  console.log(`✓ Tested support expiry for "${lead.name}". Status is now: ${lead.sale_status}`);
+  // Restore original purchased_at (status stays support_ended for visual check)
+  lead.purchased_at = orig;
+};
 
 function applyLeads(d){
   let arr=Array.isArray(d)?d:[];
@@ -844,6 +878,7 @@ async function doRefresh(){
 
 // ── Init ─────────────────────────────────────────────────────
 fetchLeads();
+setInterval(fetchLeads, 24 * 60 * 60 * 1000); // check once a day
 
 // ── Sale Table ───────────────────────────────────────────────
 let curSaleFilter = 'all';
