@@ -439,6 +439,8 @@ function checkSupportExpiry() {
     if (l.sale_status === 'purchased' && l.purchased_at) {
       if (Date.now() - new Date(l.purchased_at) >= FOUR_MONTHS_MS) {
         l.sale_status = 'support_ended';
+        // Persist to database
+        fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(l.phone)}&sale_status=support_ended`).catch(()=>{});
         // Send farewell message once per lead via n8n
         const key = `farewellSent_${l.phone}`;
         if (!localStorage.getItem(key)) {
@@ -452,10 +454,7 @@ function checkSupportExpiry() {
 
 async function sendFarewellMessage(phone, name) {
   try {
-    await fetch('https://alon09.app.n8n.cloud/webhook/support-ended', {
-      method: 'POST',
-      body: new URLSearchParams({phone, name})
-    });
+    await fetch(`https://alon09.app.n8n.cloud/webhook/support-ended?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`);
     console.log(`Farewell sent to ${name} (${phone})`);
   } catch(e) {
     console.warn('Failed to send farewell message:', e);
