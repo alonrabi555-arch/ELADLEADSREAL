@@ -702,7 +702,7 @@ function render(){
           ${av}
           <div>
             <div class="name-txt">${l.name}</div>
-            <small class="name-phone">${l.phone} ${phoneLinks(l.phone)}</small>
+            <small class="name-phone">${l.phone}</small>
           </div>
           <span class="name-arrow">← פרטים</span>
         </div>
@@ -948,7 +948,7 @@ function renderSaleTable() {
     const s = SALE_STATUSES[l.sale_status] || SALE_STATUSES['pending'];
     return `<tr>
       <td><span style="font-weight:600;cursor:pointer;color:var(--gold);text-decoration:underline" onclick="openDrawer(${l.id})">${l.name || '—'}</span></td>
-      <td style="font-family:var(--mono);color:var(--sub);font-size:13px">${l.phone || '—'} ${phoneLinks(l.phone)}</td>
+      <td style="font-family:var(--mono);color:var(--sub);font-size:13px">${l.phone || '—'}</td>
       <td>${badge(l.lead_type)}</td>
       <td>${scoreBar(l.score,l.lead_type)}</td>
       <td style="font-family:var(--mono);color:var(--sub)">${l.age||'—'}</td>
