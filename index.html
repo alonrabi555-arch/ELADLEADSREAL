@@ -171,6 +171,36 @@ tr:hover td{background:rgba(255,255,255,.015)}
 /* Sale status */
 .sale-sel{appearance:none;padding:5px 10px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none;border-radius:8px;min-width:100px}
 @keyframes fU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── Mobile Responsive ───────────────────────────────────── */
+@media (max-width:768px){
+  .a1,.a2{display:none}
+  .shell{padding:0 12px 60px}
+  header{flex-wrap:wrap;gap:10px;padding:16px 0}
+  .btxt h1{font-size:16px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:24px}
+  .ctrl{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;gap:6px;-webkit-overflow-scrolling:touch}
+  .ctrl .spacer{display:none}
+  .srt-sel,#srchIn{width:130px;flex-shrink:0}
+  .tab{padding:6px 10px;font-size:12px;white-space:nowrap;flex-shrink:0}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  th,td{padding:8px 6px;font-size:11px}
+  th{white-space:nowrap}
+  .chart-row{grid-template-columns:1fr}
+  .leg-item{min-width:auto}
+  .bar-lbl{min-width:70px}
+  .drawer{
+    left:0;right:0;top:auto;bottom:0;
+    width:100%;height:85vh;
+    transform:translateY(100%);
+    border-right:none;border-top:1px solid var(--border);
+    border-radius:20px 20px 0 0
+  }
+  .drawer.open{transform:none}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .donut-wrap{flex-wrap:wrap;justify-content:center}
+}
 </style>
 </head>
 <body>
