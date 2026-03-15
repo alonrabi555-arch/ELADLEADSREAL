@@ -541,7 +541,7 @@ function applyLeads(d){
       if(stored) l.purchased_at = stored;
     }
     return l;
-  });
+  }).filter(l => l.status !== 'opted_out');
   checkSupportExpiry();
   updateKPI();updateCharts();updateAlert();updateCounts();render();renderSaleTable();
 }

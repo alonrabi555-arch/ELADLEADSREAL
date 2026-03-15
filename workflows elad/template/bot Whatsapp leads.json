@@ -1,0 +1,1152 @@
+{
+  "name": "bot Whatsapp leads",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-wati",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "405c329c-4db6-44d6-bdf8-8b869814add8",
+      "name": "💬 Twilio Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        384,
+        624
+      ],
+      "webhookId": "6bdd08f6-0bf4-4bf7-94a4-75df5b62cd2b"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || $input.item.json;\n\n// Elementor form format (from landing page via lead-intake webhook)\nif (body['form[id]'] !== undefined || body.form_id !== undefined) {\n  let phone = body['fields[email][value]'] || \n              body['fields[phone][value]'] || \n              body['fields[field_629a3b0][value]'] || '';\n  let name = body['fields[name][value]'] || '';\n  let email = body['fields[field_629a3b0][value]'] || \n              body['fields[email][value]'] || '';\n  \n  for (const key of Object.keys(body)) {\n    if (key.includes('[value]')) {\n      const val = body[key];\n      if (typeof val === 'string' && (val.startsWith('05') || val.startsWith('972'))) {\n        phone = val;\n      }\n    }\n  }\n  \n  phone = phone.replace(/[\\s\\-\\(\\)]/g, '');\n  if (phone.startsWith('0')) phone = '972' + phone.substring(1);\n  if (phone.startsWith('+')) phone = phone.substring(1);\n  \n  return {\n    json: {\n      skip: false,\n      isFormSubmission: true,\n      phone: phone,\n      name: name,\n      email: email,\n      messageText: 'START',\n      isNewLead: true\n    }\n  };\n}\n\n// Twilio WhatsApp webhook format\n// Twilio sends: From=whatsapp:+972..., Body=message text, ProfileName=name\nconst twilioFrom = body.From || '';\nconst twilioBody = body.Body || '';\nconst twilioName = body.ProfileName || '';\n\nif (twilioFrom.includes('whatsapp:')) {\n  let phone = twilioFrom.replace('whatsapp:', '').replace('+', '').trim();\n  \n  return {\n    json: {\n      skip: false,\n      isFormSubmission: false,\n      phone: phone,\n      name: twilioName,\n      email: '',\n      messageText: twilioBody,\n      isNewLead: false\n    }\n  };\n}\n\n// WATI webhook format (fallback)\nconst wapiPhone = body.waId || body.from || '';\nconst wapiMessage = body.text?.body || body.text || body.body || '';\n\nif (wapiPhone && wapiMessage) {\n  let phone = wapiPhone.replace(/[\\s\\-\\(\\)]/g, '');\n  if (phone.startsWith('+')) phone = phone.substring(1);\n  \n  return {\n    json: {\n      skip: false,\n      isFormSubmission: false,\n      phone: phone,\n      name: body.senderName || '',\n      email: '',\n      messageText: wapiMessage,\n      isNewLead: false\n    }\n  };\n}\n\n// 360dialog format (fallback)\nconst contacts = body.contacts || [];\nconst messages = body.messages || [];\n\nif (!messages.length) {\n  return { json: { skip: true } };\n}\n\nconst msg = messages[0];\nconst contact = contacts[0] || {};\n\nlet phone = msg.from || '';\nphone = phone.replace(/[\\s\\-\\(\\)]/g, '');\nif (phone.startsWith('+')) phone = phone.substring(1);\n\nreturn {\n  json: {\n    skip: false,\n    isFormSubmission: false,\n    phone: phone,\n    name: contact.profile?.name || '',\n    email: '',\n    messageText: msg.text?.body || msg.button?.text || '',\n    isNewLead: false\n  }\n};"
+      },
+      "id": "ecd6ace4-52ad-4049-88bc-5c2e582d20cb",
+      "name": "🔍 פענוח Twilio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "3620588f-92e8-4b79-8c2e-3683336d6dd0"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1db9d339-0fc4-4a96-bf26-87de026b167d",
+      "name": "⏭️ בדיקת skip",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        768,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "phone",
+              "value": "={{ $json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19637f52-7a68-4669-86f1-1fd7bc7a460c",
+      "name": "📂 טעינת session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        960,
+        720
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const reply = $('🔍 פענוח Twilio').item.json;\nconst rows = $input.all();\nconst session = rows[0]?.json || {};\n\nconst TEMPLATES = {\n  'ASK_FAMILIARITY': 'HXe1528eca7b4f8c26071a6aecb72d6b37',\n  'ASK_EXPERIENCE': 'HX80d4d5e5dad532bb527356f671fab535',\n  'ASK_UNDERSTANDING': 'HX6f09b6c7d6cf1c165b59f3304d1b0139',\n  'ASK_HOURS': 'HXe3569a7041bfe591b19ed0f4ce0464bf',\n  'ASK_BUDGET': 'HXa8f28b04902f5001977d2b68e776327c',\n  'ASK_PARENTS': 'HXb899ed181841811b051ea347cf94ffd9',\n  'ASK_MEETING_INTRO': 'HX71be15d7e3eda960bcc31b16ab0be084',\n  'ASK_AVAILABILITY': 'HXbbe65873fa6c5d1a8f07ef7827ab7477',\n};\n\nif (!session.phone && !reply.isFormSubmission && !reply.isNewLead) {\n  return { json: { _skip: true, phone: reply.phone } };\n}\n\nconst phone = reply.phone || session.phone;\nconst message = reply.messageText || '';\nconst currentState = session.state || 'WAIT_CONFIRM';\nlet score = parseFloat(session.score || 0);\nlet answers = {};\ntry {\n  const rawAns = session.answers || '{}';\n  if (typeof rawAns === 'object' && rawAns !== null) {\n    answers = rawAns;\n  } else if (typeof rawAns === 'string') {\n    answers = JSON.parse(rawAns);\n  }\n} catch(e) { answers = {}; }\nlet has_experience = session.has_experience === true || session.has_experience === 'true';\n\nlet state = currentState;\nlet responseMsg = '';\nlet contentSid = null;\nlet _done = false;\nlet _disqualified = false;\nlet _skip = false;\nlet _optedOut = false;\n\nlet lead_type = session.lead_type || 'pending';\nlet status = session.status || 'in_progress';\nlet age = session.age || null;\nlet availability = session.availability || null;\nlet meeting_type = session.meeting_type || null;\nlet completed_at = null;\n\nconst msg = message.toLowerCase().trim();\n\n// For list picker responses, Twilio sends the item title or ListPick:item_id\n// For quick reply, Twilio sends the button title\nfunction getChoice(text) {\n  const t = text.trim();\n  if (/^[1-4]$/.test(t)) return parseInt(t);\n  // Match by list picker ID format\n  const idMatch = t.match(/^(\\d+)$/);\n  if (idMatch) return parseInt(idMatch[1]);\n  // Match by content\n  if (t.includes('הסתפרתי') || t.includes('כמה שצריך') || t.includes('10,000') || t.includes('10000') || t.includes('יודעים ותומכים')) return 4;\n  if (t.includes('תקופה') || t.includes('עוקב') || t.includes('8-10') || t.includes('7000') || t.includes('7,000') || t.includes('מעל 15') || t.includes('ראיתי הכל') || t.includes('יודעים') || t.includes('שכנוע') || t.includes('ערב')) return 3;\n  if (t.includes('מזמן') || t.includes('סרטונים') || t.includes('צפיתי') || t.includes('6-7') || t.includes('4500') || t.includes('4,500') || t.includes('חברים') || t.includes('ראיתי קצת') || t.includes('זרקתי') || t.includes('טלפון') || t.includes('צהריים')) return 2;\n  if (t.includes('שמעתי') || t.includes('השבוע') || t.includes('אין לי') || t.includes('3-4') || t.includes('1500') || t.includes('1,500') || t.includes('לא ראיתי') || t.includes('לא סיפרתי') || t.includes('לא היה') || t.includes('זום') || t.includes('בוקר')) return 1;\n  return null;\n}\n\nif (currentState === 'DONE') {\n  const negKeywords = ['לא', 'no', 'בטל', 'עזוב', 'תפסיק', 'stop'];\n  const isNeg = negKeywords.some(k => msg.includes(k));\n  if (isNeg) {\n    state = 'DONE_RETRY';\n    responseMsg = 'אתה בטוח?\nזה יקח רק 2 דקות';\n  } else {\n    _skip = true;\n  }\n} else if (currentState === 'OPTED_OUT') {\n  _skip = true;\n} else switch(currentState) {\n\n  case 'WAIT_CONFIRM': {\n    state = 'ASK_AGE';\n    responseMsg = 'מעולה! בן כמה אתה?';\n    break;\n  }\n\n  case 'ASK_AGE': {\n    const m = message.match(/\\d+/);\n    if (!m) { responseMsg = 'לא הצלחתי לזהות גיל 😅 תכתוב לי רק את המספר'; break; }\n    const ageVal = parseInt(m[0]);\n    answers.age = ageVal;\n    age = ageVal;\n    if (ageVal <= 11) {\n      _disqualified = true;\n      responseMsg = 'הבנתי, מצטער אבל הכניסה לאקדמיה היא מגיל 13 ורק חריגים בגיל 12.\\nנשמח לשמוע ממך בהמשך :)';\n      status = 'disqualified';\n      state = 'DISQUALIFIED';\n      break;\n    }\n    if (ageVal === 12) score += 1;\n    else if (ageVal <= 14) score += 3;\n    else score += 5;\n    state = 'ASK_FAMILIARITY';\n    contentSid = TEMPLATES['ASK_FAMILIARITY'];\n    break;\n  }\n\n  case 'ASK_FAMILIARITY': {\n    const c = getChoice(msg);\n    if (!c) { contentSid = TEMPLATES['ASK_FAMILIARITY']; break; }\n    score += {1:0, 2:1, 3:2, 4:4}[c];\n    answers.familiarity = c;\n    state = 'ASK_EXPERIENCE';\n    contentSid = TEMPLATES['ASK_EXPERIENCE'];\n    break;\n  }\n\n  case 'ASK_EXPERIENCE': {\n    const c = getChoice(msg);\n    if (!c) { contentSid = TEMPLATES['ASK_EXPERIENCE']; break; }\n    answers.experience = c;\n    if (c >= 3) has_experience = true;\n    state = 'ASK_UNDERSTANDING';\n    contentSid = TEMPLATES['ASK_UNDERSTANDING'];\n    break;\n  }\n\n  case 'ASK_UNDERSTANDING': {\n    const c = getChoice(msg);\n    if (!c || c > 3) { contentSid = TEMPLATES['ASK_UNDERSTANDING']; break; }\n    score += {1:0, 2:0.5, 3:2}[c];\n    answers.understanding = c;\n    state = 'ASK_HOURS';\n    contentSid = TEMPLATES['ASK_HOURS'];\n    break;\n  }\n\n  case 'ASK_HOURS': {\n    const c = getChoice(msg);\n    if (!c) { contentSid = TEMPLATES['ASK_HOURS']; break; }\n    score += {1:0, 2:1, 3:2, 4:4}[c];\n    answers.hours = c;\n    state = 'ASK_BUDGET';\n    contentSid = TEMPLATES['ASK_BUDGET'];\n    break;\n  }\n\n  case 'ASK_BUDGET': {\n    const c = getChoice(msg);\n    if (!c) { contentSid = TEMPLATES['ASK_BUDGET']; break; }\n    score += {1:-2, 2:1, 3:2, 4:2}[c];\n    answers.budget = c;\n    const ageVal = answers.age || 0;\n    if (ageVal >= 12 && ageVal <= 18) {\n      state = 'ASK_PARENTS';\n      contentSid = TEMPLATES['ASK_PARENTS'];\n    } else {\n      state = 'ASK_MEETING_INTRO';\n      contentSid = TEMPLATES['ASK_MEETING_INTRO'];\n    }\n    break;\n  }\n\n  case 'ASK_PARENTS': {\n    const c = getChoice(msg);\n    if (!c) { contentSid = TEMPLATES['ASK_PARENTS']; break; }\n    score += {1:0, 2:0, 3:1, 4:3}[c];\n    answers.parents = c;\n    state = 'ASK_MEETING_INTRO';\n    contentSid = TEMPLATES['ASK_MEETING_INTRO'];\n    break;\n  }\n\n  case 'ASK_MEETING_INTRO': {\n    const c = getChoice(msg);\n    if (!c || c > 2) { contentSid = TEMPLATES['ASK_MEETING_INTRO']; break; }\n    meeting_type = c === 1 ? 'זום' : 'טלפון';\n    answers.meetingType = meeting_type;\n    state = 'ASK_AVAILABILITY';\n    contentSid = TEMPLATES['ASK_AVAILABILITY'];\n    break;\n  }\n\n  case 'ASK_AVAILABILITY': {\n    const c = getChoice(msg);\n    if (!c || c > 3) { contentSid = TEMPLATES['ASK_AVAILABILITY']; break; }\n    availability = {1:'בוקר (9-12)', 2:'צהריים (12-16)', 3:'ערב (16-20)'}[c];\n    answers.availability = availability;\n    lead_type = score >= 16 ? 'hot' : score >= 10 ? 'warm' : 'cold';\n    answers.finalScore = score;\n    answers.leadType = lead_type;\n    state = 'DONE';\n    status = 'completed';\n    _done = true;\n    completed_at = new Date().toISOString();\n    responseMsg = 'העברתי אותך לשלב הבא!\\nיחזרו אליך לקביעת שיחת התאמה בהקדם האפשרי ובהתאם למקום פנוי🤝';\n    break;\n  }\n\n  case 'DONE_RETRY': {\n    const negKeywords = ['לא', 'no', 'בטל', 'עזוב', 'תפסיק', 'stop'];\n    const isNeg = negKeywords.some(k => msg.includes(k));\n    if (isNeg) {\n      state = 'OPTED_OUT';\n      status = 'opted_out';\n      _optedOut = true;\n    } else {\n      _skip = true;\n    }\n    break;\n  }\n\n  default:\n    _skip = true;\n}\n\nreturn {\n  json: {\n    _skip,\n    _disqualified,\n    _done,\n    _optedOut,\n    _responseMsg: responseMsg,\n    _contentSid: contentSid,\n    phone,\n    name: reply.name || session.name || '',\n    email: session.email || '',\n    state,\n    score,\n    answers: answers,\n    has_experience,\n    lead_type,\n    status,\n    age,\n    availability,\n    meeting_type,\n    completed_at,\n    updated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "8e010699-87e5-4da2-afef-e1143b340e19",
+      "name": "🧠 מנוע שיחה",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "skip-after-engine-001"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a132a86d-fc69-43a1-8eb6-47a2d6f4b1f5",
+      "name": "⏭️ שיחה הסתיימה?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._disqualified }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "567b0bdb-b88d-42df-a1c6-887c5c9143e0"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4813dfbf-473f-4e18-9a49-de6bdd0092f3",
+      "name": "🚫 נפסל?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._done }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "done-check-001"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5285d97e-a1bf-4df3-a06f-9c4233bf4632",
+      "name": "✅ הושלם?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\nconst phone = item.phone;\nconst contentSid = item._contentSid;\nconst body = item._responseMsg || '';\n\nconst accountSid = 'TWILIO_ACCOUNT_SID';\nconst authToken = 'TWILIO_AUTH_TOKEN';\n\nconst fromNum = 'whatsapp:+972559398343';\nconst toNum = 'whatsapp:+' + phone;\n\nlet formBody = 'From=' + encodeURIComponent(fromNum) + '&To=' + encodeURIComponent(toNum);\n\nif (contentSid) {\n  formBody += '&ContentSid=' + encodeURIComponent(contentSid);\n} else {\n  formBody += '&Body=' + encodeURIComponent(body);\n}\n\nconst url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;\n\nconst response = await this.helpers.httpRequest({\n  method: 'POST',\n  url: url,\n  headers: {\n    'Authorization': 'Basic ' + Buffer.from(accountSid + ':' + authToken).toString('base64'),\n    'Content-Type': 'application/x-www-form-urlencoded'\n  },\n  body: formBody\n});\n\nreturn { json: { ...item, _twilioResponse: response } };"
+      },
+      "id": "913a66a0-776a-489b-9e46-4146b790fa2d",
+      "name": "📱 שאלה הבאה",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $json.phone }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json._responseMsg }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "135a5e19-c3b7-4518-bd00-1791231652f4",
+      "name": "📱 הודעת פסילה",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        528
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Ska5dd8jpjmqwDsm",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "columnToMatchOn": "phone",
+        "options": {}
+      },
+      "id": "265d2d3c-b67d-404b-9877-55dc8bc9d4c3",
+      "name": "💾 עדכון session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "columnToMatchOn": "phone",
+        "options": {}
+      },
+      "id": "855b8024-9067-400a-97e1-4d4a13cde13f",
+      "name": "📊 עדכון סופי ב-DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        896
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $('🧠 מנוע שיחה').item.json.phone }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $('🧠 מנוע שיחה').item.json._responseMsg }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4af3a74a-edd6-4727-8e0f-b76d4dbe8966",
+      "name": "📱 הודעת סיום",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        896
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Ska5dd8jpjmqwDsm",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "columnToMatchOn": "phone",
+        "options": {}
+      },
+      "id": "1fd35761-923a-4691-a52f-ad7feef56590",
+      "name": "📊 עדכון פסילה ב-DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        528
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "1fc9ac04-e4c1-438a-ba54-5627c9235196",
+      "name": "✔️ תגובת Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "path": "leads-data",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "rawBody": false,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "1c336631-bffe-4b51-b066-804b901aeb31",
+      "name": "📡 API - שליפת לידים",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        736,
+        992
+      ],
+      "webhookId": "85fefeb5-f890-44fa-8d23-8021ecbff6b3"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "limit": 200,
+        "sort": {
+          "values": [
+            {
+              "column": "created_at",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "81809dd6-da6d-4a93-b943-551230691d2f",
+      "name": "📊 שליפת כל הלידים",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        960,
+        976
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $input.all().map(item => item.json) }}",
+        "options": {}
+      },
+      "id": "76829fef-2512-484d-a68b-842b57e1502c",
+      "name": "📤 החזרת JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3968071c-5fb8-47de-971d-9b00b82982d6",
+      "name": "📥 ליד מדף נחיתה1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        800,
+        256
+      ],
+      "webhookId": "f05f575c-4ce3-42d6-81cc-65d773231dcf"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || $input.item.json;\n\nlet phone = '';\nlet name = '';\nlet email = '';\n\n// Twilio WhatsApp format\nif (body.WaId || (body.From && body.From.includes('whatsapp:'))) {\n  phone = body.WaId || body.From.replace('whatsapp:', '').replace('+', '');\n  name = body.ProfileName || 'חבר';\n  email = '';\n}\n// Elementor form format\nelse if (body['form[id]'] !== undefined || body.form_id !== undefined) {\n  for (const key of Object.keys(body)) {\n    if (key.includes('[value]')) {\n      const val = body[key];\n      if (typeof val === 'string' && (val.startsWith('05') || val.startsWith('972') || val.startsWith('+972'))) {\n        phone = val;\n      }\n    }\n  }\n  name = body['fields[name][value]'] || body['fields[field_name][value]'] || 'חבר';\n  email = body['fields[email][value]'] || body['fields[field_email][value]'] || '';\n}\n// Generic JSON format\nelse {\n  phone = body.phone || body.telephone || body.mobile || body.Phone || body.tel || '';\n  name = body.name || body.firstName || body.Name || body.full_name || 'חבר';\n  email = body.email || body.Email || '';\n}\n\n// Normalize phone\nphone = phone.replace(/[^0-9]/g, '');\nif (phone.startsWith('0')) phone = '972' + phone.slice(1);\nif (!phone.startsWith('972') && phone.length > 0) phone = '972' + phone;\n\n// Validate phone\nif (phone.length < 10) {\n  const bodyStr = JSON.stringify(body);\n  const phoneMatch = bodyStr.match(/0[5][0-9]{8}/);\n  if (phoneMatch) {\n    phone = '972' + phoneMatch[0].slice(1);\n  }\n}\n\nreturn {\n  json: {\n    _responseMsg: `היי ${name} מה נשמע?\\nראיתי שהשארת פרטים לאקדמיה של אלעד רבי, אשמח לשאול אותך כמה שאלות קלילות כדי שאוכל להעביר אותך לשלב הבא של שיחות ההתאמה🤝`,\n    phone,\n    name,\n    email,\n    session_id: `${phone}_${Date.now()}`,\n    state: 'WAIT_CONFIRM',\n    score: 0,\n    answers: '{}',\n    has_experience: false,\n    lead_type: 'pending',\n    status: 'in_progress'\n  }\n};"
+      },
+      "id": "9cc15f56-ebfc-4cd2-b314-0ebde905d0fd",
+      "name": "🔧 אתחול ליד1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $json.phone }}"
+            },
+            {
+              "name": "ContentSid",
+              "value": "HX75276434dbc9873ff1dbecd5ef87069c"
+            },
+            {
+              "name": "ContentVariables",
+              "value": "={{ JSON.stringify({1: $json.name || ''}) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "77d53bc2-45e7-42aa-a622-749447fd9fdc",
+      "name": "📱 WhatsApp - הודעת פתיחה1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        272
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Ska5dd8jpjmqwDsm",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "leads",
+          "mode": "name"
+        },
+        "columnToMatchOn": "phone",
+        "options": {}
+      },
+      "id": "df63c725-f6d7-4967-9e20-1a5f783bd17b",
+      "name": "💾 שמירה ראשונית ב-DB1",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        256
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\": \"ok\", \"message\": \"Lead received\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "b9ffd617-5ed7-4aab-9bec-7db530faa39f",
+      "name": "✔️ תגובה לדף נחיתה",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('🧠 מנוע שיחה').item.json;\nreturn {\n  json: {\n    phone: src.phone || '',\n    name: src.name || '',\n    email: src.email || '',\n    state: src.state || '',\n    score: src.score || 0,\n    answers: src.answers || {},\n    has_experience: src.has_experience || false,\n    lead_type: src.lead_type || 'pending',\n    status: src.status || 'in_progress',\n    age: src.age || null,\n    availability: src.availability || null,\n    meeting_type: src.meeting_type || null,\n    completed_at: src.completed_at || null,\n    session_id: src.session_id || null,\n    updated_at: src.updated_at || new Date().toISOString()\n  }\n};"
+      },
+      "id": "5f52cc6f-01c5-408a-90c0-300afc39a46a",
+      "name": "📋 הכנה לDB - session",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('🧠 מנוע שיחה').item.json;\nreturn {\n  json: {\n    phone: src.phone || '',\n    name: src.name || '',\n    email: src.email || '',\n    state: src.state || '',\n    score: src.score || 0,\n    answers: src.answers || {},\n    has_experience: src.has_experience || false,\n    lead_type: src.lead_type || 'pending',\n    status: src.status || 'in_progress',\n    age: src.age || null,\n    availability: src.availability || null,\n    meeting_type: src.meeting_type || null,\n    completed_at: src.completed_at || null,\n    session_id: src.session_id || null,\n    updated_at: src.updated_at || new Date().toISOString()\n  }\n};"
+      },
+      "id": "11acfe70-150e-4e5a-93de-3e3b5eeed6c9",
+      "name": "📋 הכנה לDB - סופי",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('🧠 מנוע שיחה').item.json;\nreturn {\n  json: {\n    phone: src.phone || '',\n    name: src.name || '',\n    email: src.email || '',\n    state: src.state || '',\n    score: src.score || 0,\n    answers: src.answers || {},\n    has_experience: src.has_experience || false,\n    lead_type: src.lead_type || 'pending',\n    status: src.status || 'in_progress',\n    age: src.age || null,\n    availability: src.availability || null,\n    meeting_type: src.meeting_type || null,\n    completed_at: src.completed_at || null,\n    session_id: src.session_id || null,\n    updated_at: src.updated_at || new Date().toISOString()\n  }\n};"
+      },
+      "id": "8284e9ed-f973-4f62-aa32-6afd48c308c4",
+      "name": "📋 הכנה לDB - פסילה",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('🔧 אתחול ליד1').item.json;\nreturn {\n  json: {\n    phone: src.phone || '',\n    name: src.name || '',\n    email: src.email || '',\n    state: src.state || '',\n    score: src.score || 0,\n    answers: src.answers || {},\n    has_experience: src.has_experience || false,\n    lead_type: src.lead_type || 'pending',\n    status: src.status || 'in_progress',\n    age: src.age || null,\n    availability: src.availability || null,\n    meeting_type: src.meeting_type || null,\n    completed_at: src.completed_at || null,\n    session_id: src.session_id || null,\n    updated_at: src.updated_at || new Date().toISOString()\n  }\n};"
+      },
+      "id": "140bf0c4-e409-4ab0-82a6-f9c670232cf4",
+      "name": "📋 הכנה לDB - ראשוני",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        368
+      ]
+    },
+    {
+      "id": "hot-lead-check-001",
+      "name": "🔥 ליד חם?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2280,
+        960
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('🧠 מנוע שיחה').item.json.lead_type }}",
+              "rightValue": "hot",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "hot-check-cond-001"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "hot-lead-notify-001",
+      "name": "📤 התראת ליד חם",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        896
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_N8N_INSTANCE_URL/webhook/hot-lead-alert",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('🧠 מנוע שיחה').item.json.phone }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $('🧠 מנוע שיחה').item.json.name }}"
+            },
+            {
+              "name": "score",
+              "value": "={{ $('🧠 מנוע שיחה').item.json.score }}"
+            },
+            {
+              "name": "answers",
+              "value": "={{ JSON.stringify($('🧠 מנוע שיחה').item.json.answers) }}"
+            },
+            {
+              "name": "completed_at",
+              "value": "={{ $('🧠 מנוע שיחה').item.json.completed_at }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._optedOut }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "opted-out-check-001"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "opted-out-if-001",
+      "name": "🚫 ביטל?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        370
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('🧠 מנוע שיחה').item.json;\nreturn {\n  json: {\n    phone: src.phone || '',\n    name: src.name || '',\n    email: src.email || '',\n    state: src.state || '',\n    score: src.score || 0,\n    answers: src.answers || {},\n    has_experience: src.has_experience || false,\n    lead_type: src.lead_type || 'pending',\n    status: src.status || 'in_progress',\n    age: src.age || null,\n    availability: src.availability || null,\n    meeting_type: src.meeting_type || null,\n    completed_at: src.completed_at || null,\n    session_id: src.session_id || null,\n    updated_at: src.updated_at || new Date().toISOString()\n  }\n};"
+      },
+      "id": "cancel-db-prep-001",
+      "name": "📋 הכנה לDB - ביטול",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "💬 Twilio Webhook": {
+      "main": [
+        [
+          {
+            "node": "🔍 פענוח Twilio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 פענוח Twilio": {
+      "main": [
+        [
+          {
+            "node": "⏭️ בדיקת skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏭️ בדיקת skip": {
+      "main": [
+        [
+          {
+            "node": "📂 טעינת session",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "✔️ תגובת Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📂 טעינת session": {
+      "main": [
+        [
+          {
+            "node": "🧠 מנוע שיחה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 מנוע שיחה": {
+      "main": [
+        [
+          {
+            "node": "⏭️ שיחה הסתיימה?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⏭️ שיחה הסתיימה?": {
+      "main": [
+        [
+          {
+            "node": "✔️ תגובת Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🚫 ביטל?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚫 נפסל?": {
+      "main": [
+        [
+          {
+            "node": "📱 הודעת פסילה",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "✅ הושלם?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ הושלם?": {
+      "main": [
+        [
+          {
+            "node": "📋 הכנה לDB - סופי",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📱 שאלה הבאה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📱 שאלה הבאה": {
+      "main": [
+        [
+          {
+            "node": "📋 הכנה לDB - session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📱 הודעת פסילה": {
+      "main": [
+        [
+          {
+            "node": "📋 הכנה לDB - פסילה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 עדכון session": {
+      "main": [
+        [
+          {
+            "node": "✔️ תגובת Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 עדכון סופי ב-DB": {
+      "main": [
+        [
+          {
+            "node": "📱 הודעת סיום",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔥 ליד חם?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔥 ליד חם?": {
+      "main": [
+        [
+          {
+            "node": "📤 התראת ליד חם",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "📱 הודעת סיום": {
+      "main": [
+        [
+          {
+            "node": "✔️ תגובת Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 עדכון פסילה ב-DB": {
+      "main": [
+        [
+          {
+            "node": "✔️ תגובת Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📡 API - שליפת לידים": {
+      "main": [
+        [
+          {
+            "node": "📊 שליפת כל הלידים",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 שליפת כל הלידים": {
+      "main": [
+        [
+          {
+            "node": "📤 החזרת JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 ליד מדף נחיתה1": {
+      "main": [
+        [
+          {
+            "node": "🔧 אתחול ליד1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 אתחול ליד1": {
+      "main": [
+        [
+          {
+            "node": "✔️ תגובה לדף נחיתה",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📱 WhatsApp - הודעת פתיחה1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📱 WhatsApp - הודעת פתיחה1": {
+      "main": [
+        [
+          {
+            "node": "📋 הכנה לDB - ראשוני",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 הכנה לDB - session": {
+      "main": [
+        [
+          {
+            "node": "💾 עדכון session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 הכנה לDB - סופי": {
+      "main": [
+        [
+          {
+            "node": "📊 עדכון סופי ב-DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 הכנה לDB - פסילה": {
+      "main": [
+        [
+          {
+            "node": "📊 עדכון פסילה ב-DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 הכנה לDB - ראשוני": {
+      "main": [
+        [
+          {
+            "node": "💾 שמירה ראשונית ב-DB1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚫 ביטל?": {
+      "main": [
+        [
+          {
+            "node": "📋 הכנה לDB - ביטול",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🚫 נפסל?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 הכנה לDB - ביטול": {
+      "main": [
+        [
+          {
+            "node": "💾 עדכון session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "4e7de4ef-e38e-4d3d-b7f4-8e116f8cc156",
+  "meta": {
+    "instanceId": "6c37907e1b667f4fe265a385e43b00de3d66c0d998e82aa2a464dd3480597b8e"
+  },
+  "id": "IvFMfGwFXjDdxHYf",
+  "tags": []
+}
