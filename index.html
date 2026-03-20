@@ -1053,6 +1053,7 @@ async function loadConversation() {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     _renderMessages(data.messages || []);
+    window.open('https://wa.me/' + convPhone, '_blank');
     if (!convInterval) {
       convInterval = setInterval(() => { if (convPhone) loadConversation(); }, 15000);
     }
@@ -1079,6 +1080,7 @@ async function takeoverConversation() {
     document.getElementById('convInputWrap').style.display = 'block';
     document.getElementById('convMsgsWrap').style.display = 'block';
     _convStatus('בשליטה — הבוט עצר. כל הודעה שתשלח תגיע ישירות מהמספר של הבוט.');
+    window.open('https://wa.me/' + convPhone, '_blank');
     loadConversation();
   } catch (e) {
     _convStatus(`שגיאה: ${e.message}`);
