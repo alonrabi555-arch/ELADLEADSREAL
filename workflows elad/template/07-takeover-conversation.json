@@ -1,0 +1,67 @@
+{
+  "name": "takeover-conversation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "takeover-conversation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-takeover-001",
+      "name": "📡 Webhook - קח שליטה",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "takeover-webhook-001"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads SET human_agent = true WHERE phone = '{{ $json.body.phone }}'",
+        "options": {}
+      },
+      "id": "pg-takeover-001",
+      "name": "🔒 הפעל שליטת סוכן",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"ok\", \"human_agent\": true}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "resp-takeover-001",
+      "name": "✔️ תגובה",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "📡 Webhook - קח שליטה": {
+      "main": [[{ "node": "🔒 הפעל שליטת סוכן", "type": "main", "index": 0 }]]
+    },
+    "🔒 הפעל שליטת סוכן": {
+      "main": [[{ "node": "✔️ תגובה", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

@@ -1,0 +1,81 @@
+{
+  "name": "conversation-history",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "conversation-history",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-conv-hist-001",
+      "name": "📡 Webhook - שיחה",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "conv-hist-webhook-001"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, direction, body, sent_at FROM messages WHERE phone = '{{ $json.query.phone }}' ORDER BY sent_at ASC LIMIT 200",
+        "options": {}
+      },
+      "id": "pg-conv-hist-001",
+      "name": "📂 שליפת הודעות",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst messages = items.map(i => i.json);\nreturn { json: { messages } };"
+      },
+      "id": "code-conv-hist-001",
+      "name": "🔧 עיצוב תגובה",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "resp-conv-hist-001",
+      "name": "✔️ תגובה",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "📡 Webhook - שיחה": {
+      "main": [[{ "node": "📂 שליפת הודעות", "type": "main", "index": 0 }]]
+    },
+    "📂 שליפת הודעות": {
+      "main": [[{ "node": "🔧 עיצוב תגובה", "type": "main", "index": 0 }]]
+    },
+    "🔧 עיצוב תגובה": {
+      "main": [[{ "node": "✔️ תגובה", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

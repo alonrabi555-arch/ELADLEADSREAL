@@ -1,0 +1,67 @@
+{
+  "name": "release-conversation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "release-conversation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-release-001",
+      "name": "📡 Webhook - שחרר לבוט",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "release-webhook-001"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE leads SET human_agent = false WHERE phone = '{{ $json.body.phone }}'",
+        "options": {}
+      },
+      "id": "pg-release-001",
+      "name": "🔓 שחרר לבוט",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"ok\", \"human_agent\": false}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "resp-release-001",
+      "name": "✔️ תגובה",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "📡 Webhook - שחרר לבוט": {
+      "main": [[{ "node": "🔓 שחרר לבוט", "type": "main", "index": 0 }]]
+    },
+    "🔓 שחרר לבוט": {
+      "main": [[{ "node": "✔️ תגובה", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

@@ -1,0 +1,121 @@
+{
+  "name": "send-whatsapp-message",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-whatsapp-message",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wh-send-wa-001",
+      "name": "📡 Webhook - שליחה",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "send-wa-webhook-001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:+{{ $json.body.phone }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.body.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-send-wa-001",
+      "name": "📱 שליחה ב-Twilio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Ska5dd8jpjmqwDsm",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookBody = $('📡 Webhook - שליחה').item.json.body;\nreturn {\n  json: {\n    phone: webhookBody.phone,\n    direction: 'out',\n    body: webhookBody.message\n  }\n};"
+      },
+      "id": "code-send-wa-001",
+      "name": "🔧 הכנה ללוג",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (phone, direction, body) VALUES ('{{ $json.phone }}', 'out', '{{ $json.body.replace(/'/g, \"''\") }}')",
+        "options": {}
+      },
+      "id": "pg-send-wa-log-001",
+      "name": "💾 לוג הודעה יוצאת",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"ok\"}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "resp-send-wa-001",
+      "name": "✔️ תגובה",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "📡 Webhook - שליחה": {
+      "main": [[{ "node": "📱 שליחה ב-Twilio", "type": "main", "index": 0 }]]
+    },
+    "📱 שליחה ב-Twilio": {
+      "main": [[{ "node": "🔧 הכנה ללוג", "type": "main", "index": 0 }]]
+    },
+    "🔧 הכנה ללוג": {
+      "main": [[{ "node": "💾 לוג הודעה יוצאת", "type": "main", "index": 0 }]]
+    },
+    "💾 לוג הודעה יוצאת": {
+      "main": [[{ "node": "✔️ תגובה", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

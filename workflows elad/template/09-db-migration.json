@@ -1,0 +1,39 @@
+{
+  "name": "db-migration-whatsapp-takeover",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-001",
+      "name": "▶ הפעלה ידנית",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "ALTER TABLE leads ADD COLUMN IF NOT EXISTS human_agent BOOLEAN DEFAULT FALSE;\n\nCREATE TABLE IF NOT EXISTS messages (\n  id SERIAL PRIMARY KEY,\n  phone TEXT NOT NULL,\n  direction TEXT NOT NULL CHECK (direction IN ('in', 'out')),\n  body TEXT NOT NULL,\n  sent_at TIMESTAMPTZ DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS messages_phone_idx ON messages(phone);\n\nSELECT 'Migration complete' AS result;",
+        "options": {}
+      },
+      "id": "pg-migration-001",
+      "name": "🗃️ הרצת Migration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "▶ הפעלה ידנית": {
+      "main": [[{ "node": "🗃️ הרצת Migration", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

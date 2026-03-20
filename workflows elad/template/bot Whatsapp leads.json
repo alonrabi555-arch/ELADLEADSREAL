@@ -800,6 +800,64 @@
         700,
         320
       ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.human_agent }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "human-agent-cond-001"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-human-agent-001",
+      "name": "🔒 בשליטת סוכן?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1160, 720]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('🔍 פענוח Twilio').item.json;\nreturn {\n  json: {\n    phone: parsed.phone || '',\n    direction: 'in',\n    body: parsed.messageText || ''\n  }\n};"
+      },
+      "id": "code-log-incoming-001",
+      "name": "📥 לוג הודעה נכנסת",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 620]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO messages (phone, direction, body) VALUES ('{{ $json.phone }}', 'in', '{{ $json.body.replace(/'/g, \"''\") }}')",
+        "options": {}
+      },
+      "id": "pg-log-incoming-001",
+      "name": "💾 שמירת הודעה נכנסת",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1560, 620],
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -848,7 +906,36 @@
       "main": [
         [
           {
+            "node": "🔒 בשליטת סוכן?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔒 בשליטת סוכן?": {
+      "main": [
+        [
+          {
+            "node": "📥 לוג הודעה נכנסת",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "🧠 מנוע שיחה",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 לוג הודעה נכנסת": {
+      "main": [
+        [
+          {
+            "node": "💾 שמירת הודעה נכנסת",
             "type": "main",
             "index": 0
           }
