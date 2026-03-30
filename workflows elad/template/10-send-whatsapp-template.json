@@ -1,0 +1,78 @@
+{
+  "name": "10 - Send WhatsApp Template",
+  "nodes": [
+    {
+      "id": "webhook-send-template",
+      "name": "Webhook - Receive Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-whatsapp-template",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "send-whatsapp-template-webhook"
+    },
+    {
+      "id": "http-twilio-template",
+      "name": "Send Template via Twilio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_TWILIO_CREDENTIAL_ID",
+          "name": "Twilio Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "From", "value": "whatsapp:+972559398343"},
+            {"name": "To", "value": "=whatsapp:+{{ $json.body.phone }}"},
+            {"name": "ContentSid", "value": "HXb6d3faf00409a71e7c542e63d07ad1aa"},
+            {"name": "ContentVariables", "value": "={{ JSON.stringify({\"1\": $json.body.customerName, \"2\": $json.body.salesperson}) }}"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "respond-template",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\":\"ok\"}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {"name": "Access-Control-Allow-Origin", "value": "*"}
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Receive Request": {
+      "main": [[{"node": "Send Template via Twilio", "type": "main", "index": 0}]]
+    },
+    "Send Template via Twilio": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  }
+}

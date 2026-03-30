@@ -1,1 +1,250 @@
-{"updatedAt":"2026-03-30T15:19:06.594Z","createdAt":"2026-03-30T15:19:06.594Z","id":"5qgGEPcaftbdRim8","name":"05 - Conversation History","description":null,"active":true,"isArchived":false,"nodes":[{"id":"webhook-history","name":"📡 Webhook - History","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[240,300],"parameters":{"httpMethod":"GET","path":"conversation-history","responseMode":"responseNode"},"webhookId":"conversation-history-webhook"},{"id":"http-outgoing","name":"📤 Outgoing Messages","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[460,200],"credentials":{"httpBasicAuth":{"id":"Gd4Ns3jzFpxmsoPD","name":"Twilio Basic Auth"}},"parameters":{"method":"GET","url":"https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json","authentication":"genericCredentialType","genericAuthType":"httpBasicAuth","sendQuery":true,"queryParameters":{"parameters":[{"name":"From","value":"whatsapp:+972559398343"},{"name":"To","value":"={{ 'whatsapp:+' + $json.query.phone }}"},{"name":"PageSize","value":"50"}]}}},{"id":"http-incoming","name":"📥 Incoming Messages","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[460,400],"credentials":{"httpBasicAuth":{"id":"Gd4Ns3jzFpxmsoPD","name":"Twilio Basic Auth"}},"parameters":{"method":"GET","url":"https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json","authentication":"genericCredentialType","genericAuthType":"httpBasicAuth","sendQuery":true,"queryParameters":{"parameters":[{"name":"From","value":"={{ 'whatsapp:+' + $('📡 Webhook - History').item.json.query.phone }}"},{"name":"To","value":"whatsapp:+972559398343"},{"name":"PageSize","value":"50"}]}}},{"id":"code-merge","name":"🔀 Merge & Sort","type":"n8n-nodes-base.code","typeVersion":2,"position":[680,300],"parameters":{"jsCode":"const outgoing = $('📤 Outgoing Messages').first().json.messages || [];\nconst incoming = $('📥 Incoming Messages').first().json.messages || [];\nconst all = [\n  ...outgoing.map(m => ({ direction:'out', body: m.body, sent_at: m.date_sent, is_agent: false })),\n  ...incoming.map(m => ({ direction:'in',  body: m.body, sent_at: m.date_sent, is_agent: false }))\n].sort((a,b) => new Date(a.sent_at) - new Date(b.sent_at));\nreturn [{ json: { messages: all } }];"}},{"id":"respond-history","name":"✔️ Respond","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[900,300],"parameters":{"respondWith":"json","responseBody":"={{ JSON.stringify($json) }}","options":{"responseCode":200,"responseHeaders":{"entries":[{"name":"Access-Control-Allow-Origin","value":"*"}]}}}}],"connections":{"📡 Webhook - History":{"main":[[{"node":"📤 Outgoing Messages","type":"main","index":0},{"node":"📥 Incoming Messages","type":"main","index":0}]]},"📤 Outgoing Messages":{"main":[[{"node":"🔀 Merge & Sort","type":"main","index":0}]]},"📥 Incoming Messages":{"main":[[{"node":"🔀 Merge & Sort","type":"main","index":0}]]},"🔀 Merge & Sort":{"main":[[{"node":"✔️ Respond","type":"main","index":0}]]}},"settings":{"callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"8607e526-e532-47ef-a3cc-7cead05be320","activeVersionId":"8607e526-e532-47ef-a3cc-7cead05be320","versionCounter":3,"triggerCount":1,"shared":[{"updatedAt":"2026-03-30T15:19:06.595Z","createdAt":"2026-03-30T15:19:06.595Z","role":"workflow:owner","workflowId":"5qgGEPcaftbdRim8","projectId":"FMgQA8IpOGp5Mc3G","project":{"updatedAt":"2026-02-19T20:44:58.675Z","createdAt":"2026-02-19T20:43:52.636Z","id":"FMgQA8IpOGp5Mc3G","name":"alon rabi <alonrabi555@gmail.com>","type":"personal","icon":null,"description":null,"creatorId":"e4b0ec0d-397c-4b16-a795-a322d71f6645"}}],"tags":[],"activeVersion":{"updatedAt":"2026-03-30T15:19:06.620Z","createdAt":"2026-03-30T15:19:06.620Z","versionId":"8607e526-e532-47ef-a3cc-7cead05be320","workflowId":"5qgGEPcaftbdRim8","nodes":[{"id":"webhook-history","name":"📡 Webhook - History","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[240,300],"parameters":{"httpMethod":"GET","path":"conversation-history","responseMode":"responseNode"},"webhookId":"conversation-history-webhook"},{"id":"http-outgoing","name":"📤 Outgoing Messages","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[460,200],"credentials":{"httpBasicAuth":{"id":"Gd4Ns3jzFpxmsoPD","name":"Twilio Basic Auth"}},"parameters":{"method":"GET","url":"https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json","authentication":"genericCredentialType","genericAuthType":"httpBasicAuth","sendQuery":true,"queryParameters":{"parameters":[{"name":"From","value":"whatsapp:+972559398343"},{"name":"To","value":"={{ 'whatsapp:+' + $json.query.phone }}"},{"name":"PageSize","value":"50"}]}}},{"id":"http-incoming","name":"📥 Incoming Messages","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[460,400],"credentials":{"httpBasicAuth":{"id":"Gd4Ns3jzFpxmsoPD","name":"Twilio Basic Auth"}},"parameters":{"method":"GET","url":"https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json","authentication":"genericCredentialType","genericAuthType":"httpBasicAuth","sendQuery":true,"queryParameters":{"parameters":[{"name":"From","value":"={{ 'whatsapp:+' + $('📡 Webhook - History').item.json.query.phone }}"},{"name":"To","value":"whatsapp:+972559398343"},{"name":"PageSize","value":"50"}]}}},{"id":"code-merge","name":"🔀 Merge & Sort","type":"n8n-nodes-base.code","typeVersion":2,"position":[680,300],"parameters":{"jsCode":"const outgoing = $('📤 Outgoing Messages').first().json.messages || [];\nconst incoming = $('📥 Incoming Messages').first().json.messages || [];\nconst all = [\n  ...outgoing.map(m => ({ direction:'out', body: m.body, sent_at: m.date_sent, is_agent: false })),\n  ...incoming.map(m => ({ direction:'in',  body: m.body, sent_at: m.date_sent, is_agent: false }))\n].sort((a,b) => new Date(a.sent_at) - new Date(b.sent_at));\nreturn [{ json: { messages: all } }];"}},{"id":"respond-history","name":"✔️ Respond","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[900,300],"parameters":{"respondWith":"json","responseBody":"={{ JSON.stringify($json) }}","options":{"responseCode":200,"responseHeaders":{"entries":[{"name":"Access-Control-Allow-Origin","value":"*"}]}}}}],"connections":{"📡 Webhook - History":{"main":[[{"node":"📤 Outgoing Messages","type":"main","index":0},{"node":"📥 Incoming Messages","type":"main","index":0}]]},"📤 Outgoing Messages":{"main":[[{"node":"🔀 Merge & Sort","type":"main","index":0}]]},"📥 Incoming Messages":{"main":[[{"node":"🔀 Merge & Sort","type":"main","index":0}]]},"🔀 Merge & Sort":{"main":[[{"node":"✔️ Respond","type":"main","index":0}]]}},"authors":"alon rabi","name":null,"description":null,"autosaved":false,"workflowPublishHistory":[{"createdAt":"2026-03-30T15:19:16.254Z","id":554,"workflowId":"5qgGEPcaftbdRim8","versionId":"8607e526-e532-47ef-a3cc-7cead05be320","event":"activated","userId":"e4b0ec0d-397c-4b16-a795-a322d71f6645"}]}}
+{
+  "updatedAt": "2026-03-30T17:28:19.537Z",
+  "createdAt": "2026-03-30T15:19:06.594Z",
+  "id": "5qgGEPcaftbdRim8",
+  "name": "05 - Conversation History",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-history",
+      "name": "📡 Webhook - History",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "conversation-history",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "conversation-history-webhook"
+    },
+    {
+      "id": "http-outgoing",
+      "name": "📤 Outgoing Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Gd4Ns3jzFpxmsoPD",
+          "name": "Twilio Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "To",
+              "value": "={{ 'whatsapp:+' + $json.query.phone }}"
+            },
+            {
+              "name": "PageSize",
+              "value": "50"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "http-incoming",
+      "name": "📥 Incoming Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        400
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "Gd4Ns3jzFpxmsoPD",
+          "name": "Twilio Basic Auth"
+        }
+      },
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_TWILIO_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "={{ 'whatsapp:+' + $('📡 Webhook - History').item.json.query.phone }}"
+            },
+            {
+              "name": "To",
+              "value": "whatsapp:+972559398343"
+            },
+            {
+              "name": "PageSize",
+              "value": "50"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "merge-node",
+      "name": "🔗 Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "mode": "append"
+      }
+    },
+    {
+      "id": "code-merge",
+      "name": "🔀 Merge & Sort",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nlet allMessages = [];\nfor (const item of items) {\n  const messages = item.json.messages || [];\n  for (const m of messages) {\n    allMessages.push({\n      direction: m.direction === \"inbound\" ? \"in\" : \"out\",\n      body: m.body,\n      sent_at: m.date_sent,\n      is_agent: false\n    });\n  }\n}\nallMessages.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));\nreturn [{ json: { messages: allMessages } }];"
+      }
+    },
+    {
+      "id": "respond-history",
+      "name": "✔️ Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "📡 Webhook - History": {
+      "main": [
+        [
+          {
+            "node": "📤 Outgoing Messages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📥 Incoming Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📤 Outgoing Messages": {
+      "main": [
+        [
+          {
+            "node": "🔗 Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Incoming Messages": {
+      "main": [
+        [
+          {
+            "node": "🔗 Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🔗 Merge": {
+      "main": [
+        [
+          {
+            "node": "🔀 Merge & Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔀 Merge & Sort": {
+      "main": [
+        [
+          {
+            "node": "✔️ Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "2c569da7-7d05-4976-8be9-929d2ad33a35",
+  "activeVersionId": null,
+  "versionCounter": 5,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-30T15:19:06.595Z",
+      "createdAt": "2026-03-30T15:19:06.595Z",
+      "role": "workflow:owner",
+      "workflowId": "5qgGEPcaftbdRim8",
+      "projectId": "FMgQA8IpOGp5Mc3G",
+      "project": {
+        "updatedAt": "2026-02-19T20:44:58.675Z",
+        "createdAt": "2026-02-19T20:43:52.636Z",
+        "id": "FMgQA8IpOGp5Mc3G",
+        "name": "alon rabi <alonrabi555@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e4b0ec0d-397c-4b16-a795-a322d71f6645"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}

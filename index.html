@@ -315,6 +315,11 @@ tr:hover td{background:rgba(255,255,255,.015)}
         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         🔓 שחרר לבוט
       </button>
+      <button id="convTemplateBtn" onclick="toggleTemplateForm()"
+        style="padding:7px 16px;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        📨 שלח תבנית
+      </button>
     </div>
     <div id="convMsgsWrap" style="display:none">
       <div class="conv-msgs" id="convMsgs"></div>
@@ -326,6 +331,20 @@ tr:hover td{background:rgba(255,255,255,.015)}
           <button class="conv-send-btn" id="convSendBtn" onclick="sendAgentMessage()">שלח ▶</button>
         </div>
         <p style="margin-top:8px;font-size:11px;color:var(--sub)">Enter לשליחה · Shift+Enter לשורה חדשה</p>
+      </div>
+    </div>
+    <div id="convTemplateWrap" style="display:none;margin-top:12px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px">
+      <p style="font-size:12px;color:var(--gold);font-weight:700;margin:0 0 10px">📨 תבנית WhatsApp — פותחת חלון 24 שעות</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="tmplCustomerName" type="text" placeholder="שם לקוח"
+          style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;direction:rtl;width:100%;box-sizing:border-box">
+        <input id="tmplSalesperson" type="text" placeholder="שם איש מכירות"
+          style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;direction:rtl;width:100%;box-sizing:border-box">
+        <button id="tmplSendBtn" onclick="sendTemplate()"
+          style="padding:9px 18px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
+          onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+          📨 שלח תבנית
+        </button>
       </div>
     </div>
     <div id="convStatus" style="font-size:12px;color:var(--sub);margin-top:4px"></div>
@@ -462,6 +481,7 @@ const WA_HISTORY_URL='https://alon09.app.n8n.cloud/webhook/conversation-history'
 const WA_SEND_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
 const WA_TAKEOVER_URL='https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL='https://alon09.app.n8n.cloud/webhook/release-conversation';
+const WA_TEMPLATE_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
 const DEMO=false;
 const REFRESH=30000;
 
@@ -897,6 +917,7 @@ function openDrawer(id){
   // Init conversation panel for this lead
   _convReset();
   convPhone=lead.phone;
+  convLeadName=lead.name||'';
   if(lead.human_agent){
     convInControl=true;
     document.getElementById('convTakeBtn').style.display='none';
@@ -924,7 +945,7 @@ function closeDrawer(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
 
 // ── WhatsApp Conversation Takeover ────────────────────────────
-let convPhone=null,convInterval=null,convInControl=false;
+let convPhone=null,convInterval=null,convInControl=false,convLeadName='';
 
 function _convStatus(msg){const el=document.getElementById('convStatus');if(el)el.textContent=msg;}
 
@@ -1049,6 +1070,40 @@ function _convReset(){
   if(el('convReleaseBtn'))el('convReleaseBtn').style.display='none';
   if(el('convAgentBadge'))el('convAgentBadge').style.display='none';
   if(el('convStatus'))el('convStatus').textContent='';
+  if(el('convTemplateWrap'))el('convTemplateWrap').style.display='none';
+  if(el('tmplCustomerName'))el('tmplCustomerName').value='';
+  if(el('tmplSalesperson'))el('tmplSalesperson').value='';
+  convLeadName='';
+}
+
+function toggleTemplateForm(){
+  const wrap=document.getElementById('convTemplateWrap');
+  if(!wrap)return;
+  const open=wrap.style.display==='none';
+  wrap.style.display=open?'block':'none';
+  if(open){
+    const nameInput=document.getElementById('tmplCustomerName');
+    if(nameInput&&!nameInput.value&&convLeadName)nameInput.value=convLeadName;
+  }
+}
+
+async function sendTemplate(){
+  if(!convPhone)return;
+  const customerName=(document.getElementById('tmplCustomerName')?.value||'').trim();
+  const salesperson=(document.getElementById('tmplSalesperson')?.value||'').trim();
+  if(!customerName||!salesperson){_convStatus('נא למלא שם לקוח ושם איש מכירות.');return;}
+  const btn=document.getElementById('tmplSendBtn');
+  if(btn){btn.disabled=true;btn.textContent='...שולח';}
+  try{
+    const r=await fetch(WA_TEMPLATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone,customerName,salesperson})});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    _convStatus('✅ תבנית נשלחה! הלקוח יקבל הודעה ברגעים הקרובים.');
+    document.getElementById('convTemplateWrap').style.display='none';
+  }catch(e){
+    _convStatus(`שגיאה בשליחת תבנית: ${e.message}`);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='📨 שלח תבנית';}
+  }
 }
 
 // ── Call Initiation ───────────────────────────────────────────
