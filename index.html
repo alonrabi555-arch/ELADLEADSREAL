@@ -171,6 +171,24 @@ tr:hover td{background:rgba(255,255,255,.015)}
 /* Sale status */
 .sale-sel{appearance:none;padding:5px 10px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none;border-radius:8px;min-width:100px}
 @keyframes fU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* WhatsApp Conversation Panel */
+.conv-msgs{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 0;margin-bottom:12px;scrollbar-width:thin}
+.conv-msgs::-webkit-scrollbar{width:4px}.conv-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.msg-bubble{max-width:85%;padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;position:relative}
+.msg-in{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.2);align-self:flex-end;border-bottom-right-radius:4px}
+.msg-out{background:var(--s3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-out.agent{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.25)}
+.msg-time{font-size:10px;color:var(--sub);margin-top:4px;display:block}
+.msg-label{font-size:10px;font-weight:700;margin-bottom:3px;display:block}
+.msg-in .msg-label{color:rgba(37,211,102,.8)}.msg-out .msg-label{color:var(--sub)}.msg-out.agent .msg-label{color:var(--gold)}
+.conv-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(232,64,64,.12);border:1px solid rgba(232,64,64,.3);color:var(--hot)}
+.conv-input-wrap{display:flex;gap:8px;align-items:flex-end;margin-top:4px}
+.conv-textarea{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-family:var(--body);font-size:13px;resize:none;outline:none;min-height:44px;max-height:120px;line-height:1.5;direction:rtl;transition:border-color .2s}
+.conv-textarea:focus{border-color:var(--gold)}
+.conv-send-btn{padding:10px 18px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;height:44px}
+.conv-send-btn:hover{opacity:.85}.conv-send-btn:disabled{opacity:.4;cursor:default}
+.conv-loading{text-align:center;padding:20px;color:var(--sub);font-size:13px}
+.conv-empty{text-align:center;padding:20px;color:var(--sub);font-size:13px}
 
 /* ── Mobile Responsive ───────────────────────────────────── */
 @media (max-width:768px){
@@ -272,6 +290,45 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div id="coachingSection" class="drw-sec" style="display:none">
     <div class="drw-sec-title">💡 ניתוח מאמן</div>
     <div id="coachingText" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;padding:14px;background:rgba(255,200,50,0.07);border:1px solid rgba(255,200,50,0.25);border-radius:12px;direction:rtl"></div>
+  </div>
+
+  <!-- Section: WhatsApp Conversation -->
+  <div class="drw-sec" id="convSection">
+    <div class="drw-sec-title" style="display:flex;align-items:center;gap:8px">
+      💬 שיחת WhatsApp
+      <span id="convAgentBadge" class="conv-badge" style="display:none">🔴 בשליטת סוכן</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button id="convViewBtn" onclick="loadConversation()"
+        style="padding:7px 16px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'">
+        👁 צפה בשיחה
+      </button>
+      <button id="convTakeBtn" onclick="takeoverConversation()"
+        style="padding:7px 16px;background:var(--hot-bg);color:var(--hot);border:1px solid rgba(232,64,64,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        🎯 קח שליטה
+      </button>
+      <button id="convReleaseBtn" onclick="releaseConversation()"
+        style="display:none;padding:7px 16px;background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,142,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        🔓 שחרר לבוט
+      </button>
+    </div>
+    <div id="convMsgsWrap" style="display:none">
+      <div class="conv-msgs" id="convMsgs"></div>
+      <div id="convInputWrap" style="display:none">
+        <div class="conv-input-wrap">
+          <textarea id="convMsgText" class="conv-textarea" rows="1" placeholder="כתוב הודעה..."
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAgentMessage()}"></textarea>
+          <button class="conv-send-btn" id="convSendBtn" onclick="sendAgentMessage()">שלח ▶</button>
+        </div>
+        <p style="margin-top:8px;font-size:11px;color:var(--sub)">Enter לשליחה · Shift+Enter לשורה חדשה</p>
+      </div>
+    </div>
+    <div id="convStatus" style="font-size:12px;color:var(--sub);margin-top:4px"></div>
   </div>
 
 </div>
@@ -401,6 +458,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 // ── Config ──────────────────────────────────────────────────
 const N8N_URL='https://alon09.app.n8n.cloud/webhook/leads-data';
 const ZOOM_LINK='https://us05web.zoom.us/j/4919492998?pwd=pTPMBsqHU5QmpxaAgaYTqjhbqX15SG.1';
+const WA_HISTORY_URL='https://alon09.app.n8n.cloud/webhook/conversation-history';
+const WA_SEND_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
+const WA_TAKEOVER_URL='https://alon09.app.n8n.cloud/webhook/takeover-conversation';
+const WA_RELEASE_URL='https://alon09.app.n8n.cloud/webhook/release-conversation';
 const DEMO=false;
 const REFRESH=30000;
 
@@ -833,6 +894,20 @@ function openDrawer(id){
     return`<div class="q-block">${infoNote}<div class="q-label">${q.label}</div><div class="q-opts">${opts}</div></div>`;
   }).join('');
 
+  // Init conversation panel for this lead
+  _convReset();
+  convPhone=lead.phone;
+  if(lead.human_agent){
+    convInControl=true;
+    document.getElementById('convTakeBtn').style.display='none';
+    document.getElementById('convReleaseBtn').style.display='';
+    document.getElementById('convAgentBadge').style.display='';
+    document.getElementById('convInputWrap').style.display='block';
+    document.getElementById('convMsgsWrap').style.display='block';
+    _convStatus('בשליטה — הבוט עצר.');
+    loadConversation();
+  }
+
   document.getElementById('overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.body.style.overflow='hidden';
@@ -843,9 +918,138 @@ function closeDrawer(){
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
   document.body.style.overflow='';
+  _convReset();
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+
+// ── WhatsApp Conversation Takeover ────────────────────────────
+let convPhone=null,convInterval=null,convInControl=false;
+
+function _convStatus(msg){const el=document.getElementById('convStatus');if(el)el.textContent=msg;}
+
+function _fmtConvTime(isoStr){
+  if(!isoStr)return'';
+  try{return new Date(isoStr).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});}catch{return'';}
+}
+
+function _renderMessages(messages){
+  const wrap=document.getElementById('convMsgs');
+  if(!wrap)return;
+  if(!messages||messages.length===0){wrap.innerHTML='<div class="conv-empty">אין הודעות עדיין</div>';return;}
+  wrap.innerHTML=messages.map(m=>{
+    const isIn=m.direction==='in';
+    const agentClass=(!isIn&&m.is_agent)?' agent':'';
+    const label=isIn?'ליד':(m.is_agent?'סוכן':'בוט');
+    return`<div class="msg-bubble ${isIn?'msg-in':'msg-out'+agentClass}">
+      <span class="msg-label">${label}</span>
+      <span>${(m.body||'').replace(/\n/g,'<br>')}</span>
+      <span class="msg-time">${_fmtConvTime(m.sent_at)}</span>
+    </div>`;
+  }).join('');
+  wrap.scrollTop=wrap.scrollHeight;
+}
+
+async function loadConversation(){
+  if(!convPhone)return;
+  const wrap=document.getElementById('convMsgsWrap');
+  const msgs=document.getElementById('convMsgs');
+  if(!wrap||!msgs)return;
+  wrap.style.display='block';
+  msgs.innerHTML='<div class="conv-loading">טוען שיחה...</div>';
+  _convStatus('');
+  try{
+    const r=await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(convPhone)}`);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const data=await r.json();
+    _renderMessages(data.messages||[]);
+    if(!convInterval){convInterval=setInterval(()=>{if(convPhone)loadConversation();},15000);}
+  }catch(e){
+    msgs.innerHTML=`<div class="conv-empty">שגיאה בטעינה: ${e.message}</div>`;
+  }
+}
+
+async function takeoverConversation(){
+  if(!convPhone)return;
+  const btn=document.getElementById('convTakeBtn');
+  if(btn){btn.disabled=true;btn.textContent='...מעביר שליטה';}
+  try{
+    const r=await fetch(WA_TAKEOVER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone})});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    convInControl=true;
+    document.getElementById('convTakeBtn').style.display='none';
+    document.getElementById('convReleaseBtn').style.display='';
+    document.getElementById('convAgentBadge').style.display='';
+    document.getElementById('convInputWrap').style.display='block';
+    document.getElementById('convMsgsWrap').style.display='block';
+    _convStatus('בשליטה — הבוט עצר. כל הודעה שתשלח תגיע ישירות מהמספר של הבוט.');
+    loadConversation();
+  }catch(e){
+    _convStatus(`שגיאה: ${e.message}`);
+    if(btn){btn.disabled=false;btn.textContent='🎯 קח שליטה';}
+  }
+}
+
+async function releaseConversation(){
+  if(!convPhone)return;
+  const btn=document.getElementById('convReleaseBtn');
+  if(btn){btn.disabled=true;btn.textContent='...מחזיר לבוט';}
+  try{
+    const r=await fetch(WA_RELEASE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone})});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    convInControl=false;
+    document.getElementById('convTakeBtn').style.display='';
+    document.getElementById('convTakeBtn').disabled=false;
+    document.getElementById('convTakeBtn').textContent='🎯 קח שליטה';
+    document.getElementById('convReleaseBtn').style.display='none';
+    document.getElementById('convAgentBadge').style.display='none';
+    document.getElementById('convInputWrap').style.display='none';
+    _convStatus('הבוט חזר לשליטה על השיחה.');
+  }catch(e){
+    _convStatus(`שגיאה: ${e.message}`);
+    if(btn){btn.disabled=false;btn.textContent='🔓 שחרר לבוט';}
+  }
+}
+
+async function sendAgentMessage(){
+  if(!convPhone||!convInControl)return;
+  const ta=document.getElementById('convMsgText');
+  const btn=document.getElementById('convSendBtn');
+  const msg=(ta?ta.value:'').trim();
+  if(!msg)return;
+  if(btn)btn.disabled=true;
+  try{
+    const r=await fetch(WA_SEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone,message:msg})});
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    if(ta){ta.value='';ta.style.height='auto';}
+    const wrap=document.getElementById('convMsgs');
+    if(wrap){
+      const now=new Date().toISOString();
+      const div=document.createElement('div');
+      div.className='msg-bubble msg-out agent';
+      div.innerHTML=`<span class="msg-label">סוכן</span><span>${msg.replace(/\n/g,'<br>')}</span><span class="msg-time">${_fmtConvTime(now)}</span>`;
+      wrap.appendChild(div);
+      wrap.scrollTop=wrap.scrollHeight;
+    }
+    _convStatus('');
+  }catch(e){
+    _convStatus(`שגיאה בשליחה: ${e.message}`);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+function _convReset(){
+  convPhone=null;convInControl=false;
+  if(convInterval){clearInterval(convInterval);convInterval=null;}
+  const el=id=>document.getElementById(id);
+  if(el('convMsgsWrap'))el('convMsgsWrap').style.display='none';
+  if(el('convInputWrap'))el('convInputWrap').style.display='none';
+  if(el('convTakeBtn')){el('convTakeBtn').style.display='';el('convTakeBtn').disabled=false;el('convTakeBtn').textContent='🎯 קח שליטה';}
+  if(el('convReleaseBtn'))el('convReleaseBtn').style.display='none';
+  if(el('convAgentBadge'))el('convAgentBadge').style.display='none';
+  if(el('convStatus'))el('convStatus').textContent='';
+}
 
 // ── Call Initiation ───────────────────────────────────────────
 async function initiateCall(leadId, leadPhone) {
