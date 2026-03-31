@@ -1012,11 +1012,14 @@ async function takeoverConversation(){
 }
 
 async function releaseConversation(){
-  if(!convPhone)return;
+  console.log('[release] convPhone=', convPhone, 'convInControl=', convInControl);
+  if(!convPhone){alert('שגיאה: אין טלפון — פתח מחדש את הפאנל ונסה שוב.');return;}
   const btn=document.getElementById('convReleaseBtn');
   if(btn){btn.disabled=true;btn.textContent='...מחזיר לבוט';}
   try{
+    console.log('[release] sending to', WA_RELEASE_URL, 'phone=', convPhone);
     const r=await fetch(WA_RELEASE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone})});
+    console.log('[release] response status=', r.status);
     if(!r.ok)throw new Error(`HTTP ${r.status}`);
     convInControl=false;
     document.getElementById('convTakeBtn').style.display='';
@@ -1027,6 +1030,8 @@ async function releaseConversation(){
     document.getElementById('convInputWrap').style.display='none';
     _convStatus('הבוט חזר לשליטה על השיחה.');
   }catch(e){
+    console.error('[release] error:', e);
+    alert(`שגיאה בשחרור: ${e.message}`);
     _convStatus(`שגיאה: ${e.message}`);
     if(btn){btn.disabled=false;btn.textContent='🔓 שחרר לבוט';}
   }
