@@ -1,1 +1,306 @@
-{"updatedAt":"2026-03-30T15:16:25.154Z","createdAt":"2026-03-30T15:16:25.154Z","id":"C2lZ2mAX27bD387p","name":"07 - Takeover Conversation","description":null,"active":true,"isArchived":false,"nodes":[{"id":"webhook-takeover","name":"?? Webhook - Takeover","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[240,300],"parameters":{"httpMethod":"POST","path":"takeover-conversation","responseMode":"responseNode"},"webhookId":"takeover-conversation-webhook"},{"id":"postgres-takeover","name":"?? Set human_agent true","type":"n8n-nodes-base.postgres","typeVersion":2.5,"position":[460,300],"credentials":{"postgres":{"id":"TARjpUNg1aNm6MC4","name":"Postgres account"}},"parameters":{"operation":"executeQuery","query":"UPDATE public.leads SET human_agent = true WHERE phone = '{{ $json.body.phone }}'"}},{"id":"respond-takeover","name":"?? Respond","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[680,300],"parameters":{"respondWith":"json","responseBody":"{\"status\":\"ok\",\"human_agent\":true}","options":{"responseCode":200,"responseHeaders":{"entries":[{"name":"Access-Control-Allow-Origin","value":"*"}]}}}}],"connections":{"?? Webhook - Takeover":{"main":[[{"node":"?? Set human_agent true","type":"main","index":0}]]},"?? Set human_agent true":{"main":[[{"node":"?? Respond","type":"main","index":0}]]}},"settings":{"callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"5b74ba88-936f-465f-bccd-cce04b3e6720","activeVersionId":"5b74ba88-936f-465f-bccd-cce04b3e6720","versionCounter":3,"triggerCount":1,"shared":[{"updatedAt":"2026-03-30T15:16:25.156Z","createdAt":"2026-03-30T15:16:25.156Z","role":"workflow:owner","workflowId":"C2lZ2mAX27bD387p","projectId":"FMgQA8IpOGp5Mc3G","project":{"updatedAt":"2026-02-19T20:44:58.675Z","createdAt":"2026-02-19T20:43:52.636Z","id":"FMgQA8IpOGp5Mc3G","name":"alon rabi <alonrabi555@gmail.com>","type":"personal","icon":null,"description":null,"creatorId":"e4b0ec0d-397c-4b16-a795-a322d71f6645"}}],"tags":[],"activeVersion":{"updatedAt":"2026-03-30T15:16:25.180Z","createdAt":"2026-03-30T15:16:25.180Z","versionId":"5b74ba88-936f-465f-bccd-cce04b3e6720","workflowId":"C2lZ2mAX27bD387p","nodes":[{"id":"webhook-takeover","name":"?? Webhook - Takeover","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[240,300],"parameters":{"httpMethod":"POST","path":"takeover-conversation","responseMode":"responseNode"},"webhookId":"takeover-conversation-webhook"},{"id":"postgres-takeover","name":"?? Set human_agent true","type":"n8n-nodes-base.postgres","typeVersion":2.5,"position":[460,300],"credentials":{"postgres":{"id":"TARjpUNg1aNm6MC4","name":"Postgres account"}},"parameters":{"operation":"executeQuery","query":"UPDATE public.leads SET human_agent = true WHERE phone = '{{ $json.body.phone }}'"}},{"id":"respond-takeover","name":"?? Respond","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[680,300],"parameters":{"respondWith":"json","responseBody":"{\"status\":\"ok\",\"human_agent\":true}","options":{"responseCode":200,"responseHeaders":{"entries":[{"name":"Access-Control-Allow-Origin","value":"*"}]}}}}],"connections":{"?? Webhook - Takeover":{"main":[[{"node":"?? Set human_agent true","type":"main","index":0}]]},"?? Set human_agent true":{"main":[[{"node":"?? Respond","type":"main","index":0}]]}},"authors":"alon rabi","name":null,"description":null,"autosaved":false,"workflowPublishHistory":[{"createdAt":"2026-03-30T15:16:32.016Z","id":551,"workflowId":"C2lZ2mAX27bD387p","versionId":"5b74ba88-936f-465f-bccd-cce04b3e6720","event":"activated","userId":"e4b0ec0d-397c-4b16-a795-a322d71f6645"}]}}
+{
+  "updatedAt": "2026-03-30T15:16:25.154Z",
+  "createdAt": "2026-03-30T15:16:25.154Z",
+  "id": "C2lZ2mAX27bD387p",
+  "name": "07 - Takeover Conversation",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "webhook-takeover",
+      "name": "?? Webhook - Takeover",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "takeover-conversation",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "takeover-conversation-webhook"
+    },
+    {
+      "id": "postgres-takeover",
+      "name": "?? Set human_agent true",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.leads SET human_agent = true WHERE phone = '{{ $json.phone }}'"
+      }
+    },
+    {
+      "id": "respond-takeover",
+      "name": "?? Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"ok\",\"human_agent\":true}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "set-phone-takeover-07",
+      "name": "Extract Phone",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-phone-07",
+              "name": "phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "?? Webhook - Takeover": {
+      "main": [
+        [
+          {
+            "node": "Extract Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "?? Set human_agent true": {
+      "main": [
+        [
+          {
+            "node": "?? Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Phone": {
+      "main": [
+        [
+          {
+            "node": "?? Set human_agent true",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "5b74ba88-936f-465f-bccd-cce04b3e6720",
+  "activeVersionId": "5b74ba88-936f-465f-bccd-cce04b3e6720",
+  "versionCounter": 3,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-30T15:16:25.156Z",
+      "createdAt": "2026-03-30T15:16:25.156Z",
+      "role": "workflow:owner",
+      "workflowId": "C2lZ2mAX27bD387p",
+      "projectId": "FMgQA8IpOGp5Mc3G",
+      "project": {
+        "updatedAt": "2026-02-19T20:44:58.675Z",
+        "createdAt": "2026-02-19T20:43:52.636Z",
+        "id": "FMgQA8IpOGp5Mc3G",
+        "name": "alon rabi <alonrabi555@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e4b0ec0d-397c-4b16-a795-a322d71f6645"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-30T15:16:25.180Z",
+    "createdAt": "2026-03-30T15:16:25.180Z",
+    "versionId": "5b74ba88-936f-465f-bccd-cce04b3e6720",
+    "workflowId": "C2lZ2mAX27bD387p",
+    "nodes": [
+      {
+        "id": "webhook-takeover",
+        "name": "?? Webhook - Takeover",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "takeover-conversation",
+          "responseMode": "responseNode"
+        },
+        "webhookId": "takeover-conversation-webhook"
+      },
+      {
+        "id": "postgres-takeover",
+        "name": "?? Set human_agent true",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          460,
+          300
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+            "name": "Postgres account"
+          }
+        },
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE public.leads SET human_agent = true WHERE phone = '{{ $json.phone }}'"
+        }
+      },
+      {
+        "id": "respond-takeover",
+        "name": "?? Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          680,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{\"status\":\"ok\",\"human_agent\":true}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "set-phone-takeover-07",
+        "name": "Extract Phone",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3,
+        "position": [
+          -180,
+          300
+        ],
+        "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "assign-phone-07",
+                "name": "phone",
+                "value": "={{ $json.body.phone }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "?? Webhook - Takeover": {
+        "main": [
+          [
+            {
+              "node": "Extract Phone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "?? Set human_agent true": {
+        "main": [
+          [
+            {
+              "node": "?? Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Phone": {
+        "main": [
+          [
+            {
+              "node": "?? Set human_agent true",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "alon rabi",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-30T15:16:32.016Z",
+        "id": 551,
+        "workflowId": "C2lZ2mAX27bD387p",
+        "versionId": "5b74ba88-936f-465f-bccd-cce04b3e6720",
+        "event": "activated",
+        "userId": "e4b0ec0d-397c-4b16-a795-a322d71f6645"
+      }
+    ]
+  }
+}
