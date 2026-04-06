@@ -388,6 +388,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <button class="tab fc"  data-f="cold" onclick="setFilter(this)">❄️ קר <span class="tcnt" id="tc-cold">0</span></button>
   <button class="tab fa"  data-f="prog" onclick="setFilter(this)">⏳ בתהליך <span class="tcnt" id="tc-prog">0</span></button>
   <button class="tab"     data-f="disq" onclick="setFilter(this)">🚫 נפסלו <span class="tcnt" id="tc-disq">0</span></button>
+  <button class="tab" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="tc-visitors">–</span></button>
   <div class="spacer"></div>
   <select class="srt-sel" id="srtSel" onchange="render()">
     <option value="date">תאריך — חדש ראשון</option>
@@ -402,7 +403,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 </div>
 
 <!-- Table -->
-<div class="tbl-wrap">
+<div class="tbl-wrap" id="leadsTableWrap">
   <table>
     <thead><tr>
       <th>שם</th><th>סיווג</th><th>ניקוד</th>
@@ -415,6 +416,23 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div class="tbl-foot">
     <span id="footCnt">0 תוצאות</span>
     <div class="pages" id="pages"></div>
+  </div>
+</div>
+
+<!-- Visitors Section -->
+<div id="visitorsSection" style="display:none;animation:fU .4s ease both">
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>תאריך</th><th>פלטפורמה</th><th>מכשיר</th><th>דפדפן</th><th>דף כניסה</th><th>זמן באתר</th><th>דפים</th>
+      </tr></thead>
+      <tbody id="visTbody"></tbody>
+    </table>
+    <div class="empty" id="visEmptyEl" style="display:none"><div class="empty-i">👁️</div><p>אין נתוני מבקרים עדיין</p></div>
+    <div class="tbl-foot">
+      <span id="visFootCnt">0 מבקרים</span>
+      <div class="pages" id="visPages"></div>
+    </div>
   </div>
 </div>
 
@@ -482,6 +500,7 @@ const WA_SEND_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
 const WA_TAKEOVER_URL='https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL='https://alon09.app.n8n.cloud/webhook/release-conversation';
 const WA_TEMPLATE_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
+const VISITORS_URL='https://alon09.app.n8n.cloud/webhook/visitors-data';
 const DEMO=false;
 const REFRESH=30000;
 
@@ -537,6 +556,7 @@ const QUESTIONS=[
 // ── State ────────────────────────────────────────────────────
 let leads=[],curF='all',curP=1;
 const PER=8;
+let visitors=[],visPage=1,visLoaded=false;
 const AVC=['#7c5cfc','#e84040','#e87d20','#3a9de8','#2ecc8e','#c9a84c','#ff6b9d'];
 
 // ── Fetch ────────────────────────────────────────────────────
@@ -686,6 +706,7 @@ function updateCounts(){
 
 // ── Filter / sort ────────────────────────────────────────────
 function setFilter(btn){
+  switchToLeads();
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');curF=btn.dataset.f;curP=1;render();
 }
@@ -1250,6 +1271,85 @@ function removeLead(id, e) {
   if (!confirm(`להסיר את ${lead.name} מהרשימה?`)) return;
   leads = leads.filter(l => l.id !== id);
   updateKPI(); updateCharts(); updateAlert(); updateCounts(); render(); renderSaleTable();
+}
+
+// ── Visitors ─────────────────────────────────────────────────
+function platformLabel(src) {
+  const map = {facebook:'פייסבוק',instagram:'אינסטגרם',google:'גוגל',tiktok:'טיקטוק',whatsapp:'וואטסאפ',organic:'אורגני',youtube:'יוטיוב'};
+  return map[(src||'').toLowerCase()] || src || 'ישיר';
+}
+function fmtSeconds(s) {
+  if (!s || s < 1) return '–';
+  if (s < 60) return s + 'ש׳';
+  const m = Math.floor(s/60), sec = s%60;
+  return m + 'ד׳' + (sec ? ' ' + sec + 'ש׳' : '');
+}
+function deviceIcon(d) {
+  return d === 'mobile' ? '📱' : d === 'tablet' ? '💻' : '🖥️';
+}
+
+async function fetchVisitors() {
+  try {
+    const r = await fetch(VISITORS_URL);
+    visitors = await r.json();
+    if (!Array.isArray(visitors)) visitors = [];
+  } catch(e) { visitors = []; }
+  visLoaded = true;
+  document.getElementById('tc-visitors').textContent = visitors.length;
+  renderVisitors();
+}
+
+function renderVisitors() {
+  const tbody = document.getElementById('visTbody');
+  const emptyEl = document.getElementById('visEmptyEl');
+  const footCnt = document.getElementById('visFootCnt');
+  const pagesEl = document.getElementById('visPages');
+  if (!tbody) return;
+  const total = visitors.length;
+  const totalPages = Math.max(1, Math.ceil(total / PER));
+  if (visPage > totalPages) visPage = 1;
+  const slice = visitors.slice((visPage-1)*PER, visPage*PER);
+  if (footCnt) footCnt.textContent = `${total} מבקרים`;
+  if (emptyEl) emptyEl.style.display = total ? 'none' : 'block';
+  tbody.innerHTML = slice.map(v => {
+    const pages = Array.isArray(v.pages_visited) ? v.pages_visited : (v.pages_visited ? JSON.parse(v.pages_visited) : [v.landing_page]);
+    const pagesStr = pages.length > 1 ? `<span title="${pages.join(' → ')}" style="cursor:help">${pages.length} דפים</span>` : (pages[0] || '–');
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--sub)">${fmtDate(v.created_at)}</td>
+      <td><span style="font-weight:600;color:var(--gold)">${platformLabel(v.utm_source)}</span>${v.utm_campaign ? `<br><span style="font-size:11px;color:var(--sub)">${v.utm_campaign}</span>` : ''}</td>
+      <td style="font-size:16px">${deviceIcon(v.device_type)}<span style="font-size:11px;color:var(--sub);margin-right:4px">${v.device_type||'–'}</span></td>
+      <td style="color:var(--sub);font-size:13px">${v.browser||'–'}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--sub);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.landing_page||''}">${v.landing_page||'–'}</td>
+      <td style="font-family:var(--mono);color:var(--text)">${fmtSeconds(v.time_on_site)}</td>
+      <td style="font-size:13px;color:var(--sub)">${pagesStr}</td>
+    </tr>`;
+  }).join('');
+  // Pagination
+  if (pagesEl) {
+    let html = '';
+    if (visPage > 1) html += `<button class="page-btn" onclick="visPage--;renderVisitors()">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      if (totalPages <= 7 || i===1 || i===totalPages || Math.abs(i-visPage)<=1) {
+        html += `<button class="page-btn${i===visPage?' on':''}" onclick="visPage=${i};renderVisitors()">${i}</button>`;
+      } else if (Math.abs(i-visPage)===2) html += `<span style="color:var(--sub);padding:0 4px">…</span>`;
+    }
+    if (visPage < totalPages) html += `<button class="page-btn" onclick="visPage++;renderVisitors()">›</button>`;
+    pagesEl.innerHTML = html;
+  }
+}
+
+function switchToVisitors() {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('tabVisitors').classList.add('on');
+  document.getElementById('leadsTableWrap').style.display = 'none';
+  document.getElementById('visitorsSection').style.display = 'block';
+  if (!visLoaded) fetchVisitors();
+}
+
+function switchToLeads() {
+  document.getElementById('tabVisitors').classList.remove('on');
+  document.getElementById('leadsTableWrap').style.display = '';
+  document.getElementById('visitorsSection').style.display = 'none';
 }
 
 // ── Notes ────────────────────────────────────────────────────
