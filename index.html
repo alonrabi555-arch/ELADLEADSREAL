@@ -458,8 +458,8 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
   </div>
   <div class="cc">
-    <div class="cc-title">זמינות לשיחות</div>
-    <div class="bars" id="avBars"></div>
+    <div class="cc-title">מקורות תנועה</div>
+    <div class="bars" id="srcBars"><div style="color:var(--sub);font-size:13px;padding:16px 0">ממתין לנתוני מבקרים...</div></div>
   </div>
 </div>
 
@@ -683,15 +683,27 @@ function updateCharts(){
   document.getElementById('dW').style.strokeDashoffset=oW;
   document.getElementById('dC').style.strokeDasharray=`${pC} ${ci-pC}`;
   document.getElementById('dC').style.strokeDashoffset=oW-pW;
-  const av={'בוקר (9-12)':0,'צהריים (12-16)':0,'ערב (16-20)':0};
-  leads.forEach(l=>{if(av[l.availability]!==undefined)av[l.availability]++});
-  const mx=Math.max(...Object.values(av),1);
-  const cols={'בוקר (9-12)':'#c9a84c','צהריים (12-16)':'#3a9de8','ערב (16-20)':'#e87d20'};
-  const lbls={'בוקר (9-12)':'בוקר ☀️','צהריים (12-16)':'צהריים 🌤️','ערב (16-20)':'ערב 🌙'};
-  document.getElementById('avBars').innerHTML=Object.entries(av).map(([k,v])=>`
-    <div class="bar-r"><span class="bar-lbl">${lbls[k]}</span>
-    <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${cols[k]}"></div></div>
-    <span class="bar-val">${v}</span></div>`).join('');
+}
+
+function updateSourceChart(){
+  const el=document.getElementById('srcBars');
+  if(!el)return;
+  if(!visitors.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;padding:16px 0">אין נתונים עדיין</div>';return;}
+  const SRC_COLORS={facebook:'#1877F2',instagram:'#E1306C',tiktok:'#69C9D0',google:'#4285F4',whatsapp:'#25D366',youtube:'#FF0000',organic:'#2ecc8e'};
+  const SRC_LABELS={facebook:'פייסבוק 📘',instagram:'אינסטגרם 📸',tiktok:'טיקטוק 🎵',google:'גוגל 🔍',whatsapp:'וואטסאפ 💬',youtube:'יוטיוב ▶️',organic:'אורגני 🌿'};
+  const counts={};
+  visitors.forEach(v=>{
+    const k=(v.utm_source||'').toLowerCase()||'ישיר';
+    counts[k]=(counts[k]||0)+1;
+  });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mx=sorted[0]?.[1]||1;
+  el.innerHTML=sorted.map(([k,v])=>`
+    <div class="bar-r">
+      <span class="bar-lbl">${SRC_LABELS[k]||k}</span>
+      <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${SRC_COLORS[k]||'#c9a84c'};transition:width 1s ease"></div></div>
+      <span class="bar-val">${v}</span>
+    </div>`).join('');
 }
 
 // ── Counts ───────────────────────────────────────────────────
@@ -1221,6 +1233,7 @@ async function doRefresh(){
 
 // ── Init ─────────────────────────────────────────────────────
 fetchLeads();
+fetchVisitors();
 setInterval(fetchLeads, 24 * 60 * 60 * 1000); // check once a day
 
 // ── Sale Table ───────────────────────────────────────────────
@@ -1297,6 +1310,7 @@ async function fetchVisitors() {
   visLoaded = true;
   document.getElementById('tc-visitors').textContent = visitors.length;
   renderVisitors();
+  updateSourceChart();
 }
 
 function renderVisitors() {
