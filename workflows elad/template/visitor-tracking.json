@@ -1,0 +1,319 @@
+{
+  "name": "Visitor Tracking",
+  "nodes": [
+    {
+      "id": "vt-webhook-track",
+      "name": "Webhook - Track Visitor",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        500
+      ],
+      "parameters": {
+        "path": "visitor-track",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "webhookId": "visitor-track-001"
+    },
+    {
+      "id": "vt-upsert",
+      "name": "Upsert Visitor",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        460,
+        500
+      ],
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "visitors",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.body.session_id }}",
+            "landing_page": "={{ $json.body.landing_page }}",
+            "referrer": "={{ $json.body.referrer }}",
+            "utm_source": "={{ $json.body.utm_source }}",
+            "utm_medium": "={{ $json.body.utm_medium }}",
+            "utm_campaign": "={{ $json.body.utm_campaign }}",
+            "device_type": "={{ $json.body.device_type }}",
+            "browser": "={{ $json.body.browser }}",
+            "time_on_site": "={{ $json.body.time_on_site }}",
+            "pages_visited": "={{ JSON.stringify($json.body.pages_visited) }}",
+            "screen_width": "={{ $json.body.screen_width }}"
+          },
+          "matchingColumns": [
+            "session_id"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "vt-respond-track",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        500
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      }
+    },
+    {
+      "id": "vt-webhook-data",
+      "name": "Webhook - Visitors Data",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        700
+      ],
+      "parameters": {
+        "path": "visitors-data",
+        "httpMethod": "GET",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "webhookId": "visitors-data-001"
+    },
+    {
+      "id": "vt-select",
+      "name": "Select Visitors",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        460,
+        700
+      ],
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "value": "visitors",
+          "mode": "name"
+        },
+        "limit": 500,
+        "sort": {
+          "values": [
+            {
+              "column": "created_at",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "vt-respond-data",
+      "name": "Return Visitors JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        700
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $input.all().map(item => item.json) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "vt-setup-webhook",
+      "name": "Setup Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "path": "visitor-setup",
+        "httpMethod": "GET",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "visitor-setup-001"
+    },
+    {
+      "id": "vt-create-table",
+      "name": "Create Visitors Table",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS public.visitors (id SERIAL PRIMARY KEY, session_id TEXT UNIQUE, landing_page TEXT, referrer TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, device_type TEXT, browser TEXT, time_on_site INTEGER, pages_visited JSONB, screen_width INTEGER, created_at TIMESTAMP DEFAULT NOW());",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "TARjpUNg1aNm6MC4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "vt-setup-respond",
+      "name": "Setup Done",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Track Visitor": {
+      "main": [
+        [
+          {
+            "node": "Upsert Visitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Visitor": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Visitors Data": {
+      "main": [
+        [
+          {
+            "node": "Select Visitors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Visitors": {
+      "main": [
+        [
+          {
+            "node": "Return Visitors JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Visitors Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Visitors Table": {
+      "main": [
+        [
+          {
+            "node": "Setup Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "active": false,
+  "id": "1fpbhlfMhfBpJZsI"
+}
