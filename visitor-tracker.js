@@ -81,15 +81,16 @@
     if (sessionStorage.getItem(SENT_KEY)) return;
 
     var payload = buildPayload();
-    var blob = new Blob([payload], { type: 'application/json' });
+    // Use text/plain to avoid CORS preflight (simple request)
+    var blob = new Blob([payload], { type: 'text/plain' });
     var ok = navigator.sendBeacon ? navigator.sendBeacon(ENDPOINT, blob) : false;
 
     if (!ok) {
-      // Fallback: sync XHR (last resort, may be blocked on unload)
+      // Fallback: async XHR with no-cors
       try {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', ENDPOINT, false);
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.open('POST', ENDPOINT, true);
+        xhr.setRequestHeader('Content-Type', 'text/plain');
         xhr.send(payload);
       } catch (e) {}
     }

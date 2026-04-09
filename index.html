@@ -1357,7 +1357,7 @@ function switchToVisitors() {
   document.getElementById('tabVisitors').classList.add('on');
   document.getElementById('leadsTableWrap').style.display = 'none';
   document.getElementById('visitorsSection').style.display = 'block';
-  if (!visLoaded) fetchVisitors();
+  fetchVisitors();
 }
 
 function switchToLeads() {
