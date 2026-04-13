@@ -1121,31 +1121,46 @@
     if (!STT_SUPPORTED) return;
     const btn = document.getElementById('pmb-' + idx);
 
-    // Toggle: if already recording this paragraph, stop
+    // If already recording — user pressed "סיימתי", stop and let onend handle score
     if (btn._rec) {
       btn._rec.stop();
       return;
     }
 
     synth.cancel();
+    document.getElementById('pms-' + idx).textContent = '';
 
     const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new SR();
     rec.lang           = 'en-US';
-    rec.interimResults = false;
+    rec.continuous     = true;   // keep listening until user stops
+    rec.interimResults = true;   // accumulate speech
     btn._rec = rec;
+
+    let finalTranscript = '';
+
     btn.classList.add('recording');
-    btn.textContent = '⏹ עצור';
+    btn.textContent = '⏹ סיימתי';
 
     rec.onresult = (event) => {
-      const heard      = event.results[0][0].transcript;
-      const confidence = event.results[0][0].confidence;
+      // Accumulate only final (committed) segments — don't show score yet
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+    };
+
+    // Score only fires after user presses ⏹ → rec.stop() → onend
+    rec.onend = () => {
       btn._rec = null;
       btn.classList.remove('recording');
-
-      const wordResults = compareWords(para.dataset.text || para.textContent, heard);
+      if (!finalTranscript.trim()) {
+        btn.textContent = '🎤 קרא בקול';
+        return;
+      }
+      const wordResults = compareWords(para.dataset.text || para.textContent, finalTranscript);
       highlightParaWords(para, wordResults);
-
       const correct = wordResults.filter(r => r.correct).length;
       const total   = wordResults.length;
       const pct     = Math.round((correct / total) * 100);
@@ -1155,18 +1170,11 @@
       else                { scoreEl.textContent = `⚠️ ${correct}/${total} מילים — נסה שוב`; btn.textContent = '🎤 נסה שוב'; }
     };
 
-    rec.onerror = () => {
+    rec.onerror = (e) => {
       btn._rec = null;
       btn.classList.remove('recording');
       btn.textContent = '🎤 קרא בקול';
-    };
-
-    rec.onend = () => {
-      btn._rec = null;
-      if (btn.classList.contains('recording')) {
-        btn.classList.remove('recording');
-        btn.textContent = '🎤 קרא שוב';
-      }
+      console.warn('Para read error:', e.error);
     };
 
     rec.start();
