@@ -983,9 +983,7 @@
   let recognition = null;
   let isRecording = false;
 
-  if (!STT_SUPPORTED) {
-    document.getElementById('mic-btn').style.display = 'none';
-  }
+  // Always show mic btn — check support at click time for better error messages
 
   function toggleVoiceMode() {
     voiceMode = document.getElementById('voice-toggle').checked;
@@ -1008,10 +1006,10 @@
   }
 
   function startListening() {
-    if (!STT_SUPPORTED) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('הדפדפן שלך לא תומך במיקרופון.\nנסה Safari או Chrome.'); return; }
     synth.cancel(); // stop TTS before recording
 
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SR();
     recognition.lang            = 'en-US';
     recognition.interimResults  = false;
@@ -1118,47 +1116,70 @@
   }
 
   function startParaRead(para, idx) {
-    if (!STT_SUPPORTED) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('הדפדפן שלך לא תומך במיקרופון.\nנסה Safari.'); return; }
+
     const btn = document.getElementById('pmb-' + idx);
 
-    // If already recording — user pressed "סיימתי", stop and let onend handle score
-    if (btn._rec) {
-      btn._rec.stop();
+    // User pressed "סיימתי" — stop and show score
+    if (btn._active) {
+      btn._active = false;
+      if (btn._rec) { try { btn._rec.stop(); } catch(e) {} }
       return;
     }
 
     synth.cancel();
     document.getElementById('pms-' + idx).textContent = '';
-
-    const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang           = 'en-US';
-    rec.continuous     = true;   // keep listening until user stops
-    rec.interimResults = true;   // accumulate speech
-    btn._rec = rec;
-
-    let finalTranscript = '';
-
+    btn._active = true;
+    btn._rec    = null;
     btn.classList.add('recording');
     btn.textContent = '⏹ סיימתי';
 
-    rec.onresult = (event) => {
-      // Accumulate only final (committed) segments — don't show score yet
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
-        }
-      }
-    };
+    let finalTranscript = '';
 
-    // Score only fires after user presses ⏹ → rec.stop() → onend
-    rec.onend = () => {
-      btn._rec = null;
+    // iOS Safari doesn't support continuous:true — we restart after each phrase
+    function launchRec() {
+      if (!btn._active) { showParaScore(); return; }
+      const rec = new SR();
+      rec.lang           = 'en-US';
+      rec.continuous     = false;
+      rec.interimResults = false;
+      btn._rec = rec;
+
+      rec.onresult = (event) => {
+        if (event.results[0] && event.results[0].isFinal) {
+          finalTranscript += event.results[0][0].transcript + ' ';
+        }
+      };
+
+      rec.onend = () => {
+        btn._rec = null;
+        if (btn._active) {
+          // Auto-restart so user can keep reading
+          setTimeout(launchRec, 150);
+        } else {
+          showParaScore();
+        }
+      };
+
+      rec.onerror = (e) => {
+        btn._rec = null;
+        if (e.error === 'no-speech' && btn._active) {
+          setTimeout(launchRec, 150); // restart silently on no-speech
+        } else if (e.error !== 'aborted') {
+          btn._active = false;
+          btn.classList.remove('recording');
+          btn.textContent = '🎤 קרא בקול';
+          console.warn('Para read error:', e.error);
+        }
+      };
+
+      try { rec.start(); } catch(e) { btn._active = false; btn.classList.remove('recording'); btn.textContent = '🎤 קרא בקול'; }
+    }
+
+    function showParaScore() {
       btn.classList.remove('recording');
-      if (!finalTranscript.trim()) {
-        btn.textContent = '🎤 קרא בקול';
-        return;
-      }
+      if (!finalTranscript.trim()) { btn.textContent = '🎤 קרא בקול'; return; }
       const wordResults = compareWords(para.dataset.text || para.textContent, finalTranscript);
       highlightParaWords(para, wordResults);
       const correct = wordResults.filter(r => r.correct).length;
@@ -1168,16 +1189,9 @@
       if (pct >= 85)      { scoreEl.textContent = `✅ ${correct}/${total} מילים — מצוין!`; btn.textContent = '🔄 קרא שוב'; }
       else if (pct >= 60) { scoreEl.textContent = `👍 ${correct}/${total} מילים — טוב`;    btn.textContent = '🔄 קרא שוב'; }
       else                { scoreEl.textContent = `⚠️ ${correct}/${total} מילים — נסה שוב`; btn.textContent = '🎤 נסה שוב'; }
-    };
+    }
 
-    rec.onerror = (e) => {
-      btn._rec = null;
-      btn.classList.remove('recording');
-      btn.textContent = '🎤 קרא בקול';
-      console.warn('Para read error:', e.error);
-    };
-
-    rec.start();
+    launchRec();
   }
 
   function compareWords(expectedText, heardText) {
