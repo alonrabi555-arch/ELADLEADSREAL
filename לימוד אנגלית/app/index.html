@@ -982,6 +982,8 @@
   let voiceMode   = true;
   let recognition = null;
   let isRecording = false;
+  let accumulatedTranscript  = '';
+  let accumulatedConfidences = [];
 
   // Always show mic btn — check support at click time for better error messages
 
@@ -1008,62 +1010,92 @@
   function startListening() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { alert('הדפדפן שלך לא תומך במיקרופון.\nנסה Safari או Chrome.'); return; }
-    synth.cancel(); // stop TTS before recording
+    synth.cancel();
 
-    recognition = new SR();
-    recognition.lang            = 'en-US';
-    recognition.interimResults  = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous      = false;
+    isRecording = true;
+    recognition = null;
+    accumulatedTranscript  = '';
+    accumulatedConfidences = [];
 
-    recognition.onstart = () => {
-      isRecording = true;
-      const btn = document.getElementById('mic-btn');
-      btn.classList.add('recording');
-      btn.textContent = '⏹';
-      btn.title = 'עצור הקלטה';
-      document.getElementById('voice-status').classList.add('active');
-      document.getElementById('chat-input').placeholder = 'מקשיב לך...';
+    const btn = document.getElementById('mic-btn');
+    btn.classList.add('recording');
+    btn.textContent = '⏹';
+    btn.title = 'עצור הקלטה';
+    document.getElementById('voice-status').classList.add('active');
+    document.getElementById('chat-input').placeholder = 'מקשיב לך...';
+
+    launchRecSeg();
+  }
+
+  function launchRecSeg() {
+    if (!isRecording) { deliverAccumulatedTranscript(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang           = 'en-US';
+    rec.continuous     = false;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    recognition = rec;
+
+    rec.onresult = (event) => {
+      const r = event.results[0][0];
+      accumulatedTranscript += r.transcript + ' ';
+      accumulatedConfidences.push(r.confidence);
     };
 
-    recognition.onresult = (event) => {
-      const result     = event.results[0][0];
-      const transcript = result.transcript;
-      const confidence = result.confidence;
-      document.getElementById('chat-input').value = transcript;
-      stopListening();
-      showPronFeedback(confidence);
-      // Auto-send only if understood clearly; otherwise let user retry or edit
-      if (confidence >= 0.60) {
-        setTimeout(() => sendMessage(), 1100);
-      }
+    rec.onend = () => {
+      if (recognition === rec) recognition = null;
+      if (isRecording) setTimeout(launchRecSeg, 150);
+      else deliverAccumulatedTranscript();
     };
 
-    recognition.onerror = (event) => {
-      console.warn('Speech error:', event.error);
-      stopListening();
+    rec.onerror = (event) => {
       if (event.error === 'not-allowed') {
+        isRecording = false;
         alert('נא לאפשר גישה למיקרופון בדפדפן.');
       }
+      // onend fires after onerror and handles restart or finish
     };
 
-    recognition.onend = () => { stopListening(); };
+    try { rec.start(); } catch(e) {
+      recognition = null;
+      isRecording = false;
+      stopListeningUI();
+    }
+  }
 
-    recognition.start();
+  function deliverAccumulatedTranscript() {
+    const transcript  = accumulatedTranscript.trim();
+    const confidences = accumulatedConfidences.slice();
+    accumulatedTranscript  = '';
+    accumulatedConfidences = [];
+    stopListeningUI();
+    if (!transcript) return;
+    const avgConf = confidences.length
+      ? confidences.reduce((a, b) => a + b, 0) / confidences.length
+      : 0.8;
+    showPronFeedback(avgConf);
+    if (avgConf >= 0.60) sendVoiceMessage(transcript, avgConf);
   }
 
   function stopListening() {
     isRecording = false;
     if (recognition) {
       try { recognition.stop(); } catch(e) {}
-      recognition = null;
+      // onend will fire → deliverAccumulatedTranscript
+    } else {
+      deliverAccumulatedTranscript();
     }
+  }
+
+  function stopListeningUI() {
     const btn = document.getElementById('mic-btn');
     btn.classList.remove('recording');
     btn.textContent = '🎤';
     btn.title = 'דבר את התשובה';
     document.getElementById('voice-status').classList.remove('active');
     document.getElementById('chat-input').placeholder = 'Type or speak your answer...';
+    recognition = null;
   }
 
   function showPronFeedback(confidence) {
@@ -1224,20 +1256,35 @@
     const input = document.getElementById('chat-input');
     const text  = input.value.trim();
     if (!text) return;
-
-    addUserMessage(text);
     input.value = '';
-    document.getElementById('send-btn').disabled = true;
+    await sendToBot(text, { voice: false });
+    input.focus();
+  }
 
+  async function sendVoiceMessage(transcript, confidence) {
+    await sendToBot(transcript, { voice: true, confidence });
+  }
+
+  async function sendToBot(text, opts) {
+    const isVoice = !!(opts && opts.voice);
+    addUserMessage((isVoice ? '🎤 ' : '') + text);
     chatHistory.push({ role: 'user', content: text });
+
+    document.getElementById('send-btn').disabled = true;
+    document.getElementById('mic-btn').disabled  = true;
 
     const typingEl = addTypingIndicator();
 
     try {
+      const payload = { message: text, history: chatHistory, articleContent };
+      if (isVoice) {
+        payload.voice      = true;
+        payload.confidence = opts.confidence;
+      }
       const res = await fetch(ENDPOINTS.quiz, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: chatHistory, articleContent })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       typingEl.remove();
@@ -1250,7 +1297,7 @@
     }
 
     document.getElementById('send-btn').disabled = false;
-    input.focus();
+    document.getElementById('mic-btn').disabled  = false;
   }
 
   function addBotMessage(text) {
