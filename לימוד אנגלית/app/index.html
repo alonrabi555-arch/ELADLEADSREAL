@@ -208,10 +208,28 @@
       border-top: 1px solid #333;
       padding-top: 6px;
     }
+    .tooltip-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tooltip .speak-btn {
+      display: none;
+      flex: 0 0 auto;
+      background: #2c2c2c;
+      border: 1px solid #555;
+      color: #ccc;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .tooltip .speak-btn:hover { background: #3a3a3a; color: #fff; }
+    .tooltip .speak-btn.ready { display: block; }
     .tooltip .save-btn {
       display: none;
-      margin-top: 10px;
-      width: 100%;
+      flex: 1;
       background: #2c2c2c;
       border: 1px solid #555;
       color: #fff;
@@ -662,7 +680,10 @@
   <span class="heb" id="tip-heb"></span>
   <span class="pron" id="tip-pron"></span>
   <span class="eng-small" id="tip-eng"></span>
-  <button class="save-btn" id="save-btn" onclick="toggleSaveWord()"></button>
+  <div class="tooltip-btns">
+    <button class="speak-btn" id="speak-btn" onclick="speakWord()" title="שמע הגייה">🔊</button>
+    <button class="save-btn" id="save-btn" onclick="toggleSaveWord()"></button>
+  </div>
 </div>
 
 <script>
@@ -913,6 +934,7 @@
     document.getElementById('tip-heb').textContent  = '...';
     document.getElementById('tip-pron').textContent = '';
     document.getElementById('tip-eng').textContent  = word;
+    document.getElementById('speak-btn').classList.remove('ready');
     const saveBtn = document.getElementById('save-btn');
     saveBtn.classList.remove('ready');
     tooltip.classList.add('visible');
@@ -947,10 +969,21 @@
     span.classList.remove('loading');
     span.classList.add('translated');
 
-    // Show save button
+    document.getElementById('speak-btn').classList.add('ready');
     const saveBtn = document.getElementById('save-btn');
     saveBtn.classList.add('ready');
     updateSaveBtn(span.dataset.word);
+  }
+
+  function speakWord() {
+    const word = currentWord ? currentWord.dataset.word : null;
+    if (!word) return;
+    synth.cancel();
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.lang  = 'en-US';
+    utt.rate  = 0.75;
+    utt.pitch = 1;
+    synth.speak(utt);
   }
 
   function onWordEnter(e) { clearTimeout(hideTimer); }
