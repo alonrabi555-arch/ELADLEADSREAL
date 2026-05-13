@@ -244,6 +244,17 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <p style="margin-top:10px;font-size:12px;color:var(--sub)">💡 סיכום שיחה יתווסף כאן אוטומטית לאחר שיחה של 4 דקות ויותר</p>
   </div>
 
+  <!-- Section: Suggested Followup Message -->
+  <div class="drw-sec" id="followupSection" style="display:none">
+    <div class="drw-sec-title">💌 הצעת הודעת פולואפ (48 שעות אחרי השיחה)</div>
+    <textarea id="drwFollowup" readonly style="width:100%;min-height:100px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-family:var(--body);font-size:14px;resize:vertical;outline:none;line-height:1.6;direction:rtl"></textarea>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <button onclick="copyFollowup()" style="padding:10px 24px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">📋 העתק לזיכרון</button>
+      <span id="followupCopied" style="color:var(--green);font-size:13px;opacity:0;transition:opacity .3s"></span>
+    </div>
+    <p style="margin-top:10px;font-size:12px;color:var(--sub)">💡 ההצעה נוצרת אוטומטית על־ידי AI אחרי כל שיחת מכירות. בעוד 48 שעות תקבל גם תזכורת בדיסקורד.</p>
+  </div>
+
   <!-- Section: WhatsApp Conversation -->
   <div class="drw-sec" id="convSection">
     <div class="drw-sec-title" style="display:flex;align-items:center;gap:8px">
@@ -783,6 +794,17 @@ function openDrawer(id){
   if (summaryBanner) summaryBanner.style.display = notesVal.includes('📞 סיכום שיחת מכירות') ? 'flex' : 'none';
   document.getElementById('notesSaved').style.opacity = '0';
 
+  // Suggested followup
+  const followupVal = cleanNotes(lead.suggested_followup_message) || '';
+  const followupSec = document.getElementById('followupSection');
+  if (followupVal) {
+    document.getElementById('drwFollowup').value = followupVal;
+    document.getElementById('drwFollowup').dataset.phone = lead.phone;
+    followupSec.style.display = 'block';
+  } else {
+    followupSec.style.display = 'none';
+  }
+
   let ans={};
   try{ans=typeof lead.answers==='string'?JSON.parse(lead.answers):(lead.answers||{})}catch{}
 
@@ -1134,6 +1156,23 @@ async function saveNotes() {
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({phone, notes})
   }).catch(() => {});
+}
+
+async function copyFollowup() {
+  const ta = document.getElementById('drwFollowup');
+  const copied = document.getElementById('followupCopied');
+  try {
+    await navigator.clipboard.writeText(ta.value);
+    copied.textContent = '✓ הועתק לזיכרון';
+    copied.style.opacity = '1';
+    setTimeout(() => { copied.style.opacity = '0'; }, 2000);
+  } catch (e) {
+    ta.select();
+    document.execCommand('copy');
+    copied.textContent = '✓ הועתק';
+    copied.style.opacity = '1';
+    setTimeout(() => { copied.style.opacity = '0'; }, 2000);
+  }
 }
 
 </script>
