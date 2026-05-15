@@ -424,7 +424,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
   <div class="tbl-wrap">
     <table>
       <thead><tr>
-        <th>תאריך</th><th>פלטפורמה</th><th>מכשיר</th><th>דפדפן</th><th>דף כניסה</th><th>זמן באתר</th><th>דפים</th>
+        <th>תאריך</th><th>פלטפורמה</th><th>מיקום</th><th>מכשיר</th><th>דפדפן</th><th>דף כניסה</th><th>זמן באתר</th><th>דפים</th>
       </tr></thead>
       <tbody id="visTbody"></tbody>
     </table>
@@ -1331,6 +1331,7 @@ function renderVisitors() {
     return `<tr>
       <td style="font-family:var(--mono);font-size:12px;color:var(--sub)">${fmtDate(v.created_at)}</td>
       <td><span style="font-weight:600;color:var(--gold)">${platformLabel(v.utm_source)}</span>${v.utm_campaign ? `<br><span style="font-size:11px;color:var(--sub)">${v.utm_campaign}</span>` : ''}</td>
+      <td style="font-size:13px;color:var(--text)">${v.city ? `📍 ${v.city}` : '–'}${v.country && v.country !== 'Israel' ? `<br><span style="font-size:11px;color:var(--sub)">${v.country}</span>` : ''}</td>
       <td style="font-size:16px">${deviceIcon(v.device_type)}<span style="font-size:11px;color:var(--sub);margin-right:4px">${v.device_type||'–'}</span></td>
       <td style="color:var(--sub);font-size:13px">${v.browser||'–'}</td>
       <td style="font-family:var(--mono);font-size:12px;color:var(--sub);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.landing_page||''}">${v.landing_page||'–'}</td>
