@@ -1331,7 +1331,7 @@ function renderVisitors() {
     return `<tr>
       <td style="font-family:var(--mono);font-size:12px;color:var(--sub)">${fmtDate(v.created_at)}</td>
       <td><span style="font-weight:600;color:var(--gold)">${platformLabel(v.utm_source)}</span>${v.utm_campaign ? `<br><span style="font-size:11px;color:var(--sub)">${v.utm_campaign}</span>` : ''}</td>
-      <td style="font-size:13px;color:var(--text)">${v.city ? `📍 ${v.city}` : '–'}${v.country && v.country !== 'Israel' ? `<br><span style="font-size:11px;color:var(--sub)">${v.country}</span>` : ''}</td>
+      <td style="font-size:13px;color:var(--text)">${v.city ? `📍 ${v.city}` : '–'}${v.country && v.country !== 'ישראל' ? `<br><span style="font-size:11px;color:var(--sub)">${v.country}</span>` : ''}</td>
       <td style="font-size:16px">${deviceIcon(v.device_type)}<span style="font-size:11px;color:var(--sub);margin-right:4px">${v.device_type||'–'}</span></td>
       <td style="color:var(--sub);font-size:13px">${v.browser||'–'}</td>
       <td style="font-family:var(--mono);font-size:12px;color:var(--sub);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.landing_page||''}">${v.landing_page||'–'}</td>
