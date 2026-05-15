@@ -693,7 +693,7 @@ function updateSourceChart(){
   const SRC_LABELS={facebook:'פייסבוק 📘',instagram:'אינסטגרם 📸',tiktok:'טיקטוק 🎵',google:'גוגל 🔍',whatsapp:'וואטסאפ 💬',youtube:'יוטיוב ▶️',organic:'אורגני 🌿'};
   const counts={};
   visitors.forEach(v=>{
-    const k=(v.utm_source||'').toLowerCase()||'ישיר';
+    const k=(v.utm_source||'').toLowerCase()||'google';
     counts[k]=(counts[k]||0)+1;
   });
   const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
