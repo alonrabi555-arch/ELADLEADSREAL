@@ -461,6 +461,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="cc-title">מקורות תנועה</div>
     <div class="bars" id="srcBars"><div style="color:var(--sub);font-size:13px;padding:16px 0">ממתין לנתוני מבקרים...</div></div>
   </div>
+  <div class="cc">
+    <div class="cc-title">📍 מיקומים גיאוגרפיים</div>
+    <div class="bars" id="locBars"><div style="color:var(--sub);font-size:13px;padding:16px 0">ממתין לנתוני מבקרים...</div></div>
+  </div>
 </div>
 
 <!-- After-Sale Table -->
@@ -1311,6 +1315,33 @@ async function fetchVisitors() {
   document.getElementById('tc-visitors').textContent = visitors.length;
   renderVisitors();
   updateSourceChart();
+  updateLocationChart();
+}
+
+function updateLocationChart(){
+  const el=document.getElementById('locBars');
+  if(!el)return;
+  if(!visitors.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;padding:16px 0">אין נתונים עדיין</div>';return;}
+  // Group by city; fall back to country for visitors without city
+  const counts={};
+  visitors.forEach(v=>{
+    let k = (v.city||'').trim();
+    if(!k){
+      k = (v.country||'').trim() || 'לא ידוע';
+    } else if (v.country && v.country !== 'ישראל') {
+      k = k + ', ' + v.country;
+    }
+    counts[k]=(counts[k]||0)+1;
+  });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const mx=sorted[0]?.[1]||1;
+  const colors=['#c9a84c','#e84040','#3a9de8','#2ecc8e','#e87d20','#7c5cfc','#ff6b9d','#5c5c5c'];
+  el.innerHTML=sorted.map(([k,v],i)=>`
+    <div class="bar-r">
+      <span class="bar-lbl">📍 ${k}</span>
+      <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${colors[i]||'#c9a84c'};transition:width 1s ease"></div></div>
+      <span class="bar-val">${v}</span>
+    </div>`).join('');
 }
 
 function renderVisitors() {
