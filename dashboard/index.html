@@ -1120,13 +1120,27 @@ function renderSaleTable() {
 }
 
 // ── Remove Lead ───────────────────────────────────────────────
-function removeLead(id, e) {
+async function removeLead(id, e) {
   e.stopPropagation();
   const lead = leads.find(l => l.id === id);
   if (!lead) return;
-  if (!confirm(`להסיר את ${lead.name} מהרשימה?`)) return;
+  if (!confirm(`למחוק את ${lead.name} מה-DB לצמיתות? לא ניתן לשחזר.`)) return;
+
+  // Remove from UI immediately for instant feedback
   leads = leads.filter(l => l.id !== id);
   updateKPI(); updateCharts(); updateAlert(); updateCounts(); render(); renderSaleTable();
+
+  // Delete from DB
+  try {
+    const r = await fetch(N8N_URL.replace('leads-data', 'delete-lead'), {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone: lead.phone})
+    });
+    if (!r.ok) throw new Error('Server returned ' + r.status);
+  } catch (err) {
+    alert('המחיקה מה-DB נכשלה: ' + err.message + '\nרענן את הדף כדי לראות את המצב האמיתי.');
+  }
 }
 
 // ── Notes ────────────────────────────────────────────────────
