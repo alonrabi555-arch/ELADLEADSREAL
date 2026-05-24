@@ -325,7 +325,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 <!-- Controls -->
 <div class="ctrl">
-  <button class="tab on"  data-f="all"  onclick="setFilter(this)">הכל <span class="tcnt" id="tc-all">0</span></button>
+  <button class="tab on"  data-f="done" onclick="setFilter(this)">✅ הושלם <span class="tcnt" id="tc-done">0</span></button>
   <button class="tab fh"  data-f="hot"  onclick="setFilter(this)">🔥 חם <span class="tcnt" id="tc-hot">0</span></button>
   <button class="tab fw"  data-f="warm" onclick="setFilter(this)">🌤️ ממוצע <span class="tcnt" id="tc-warm">0</span></button>
   <button class="tab fc"  data-f="cold" onclick="setFilter(this)">❄️ קר <span class="tcnt" id="tc-cold">0</span></button>
@@ -477,7 +477,7 @@ const QUESTIONS=[
 ];
 
 // ── State ────────────────────────────────────────────────────
-let leads=[],curF='all',curP=1;
+let leads=[],curF='done',curP=1;
 const PER=8;
 const AVC=['#7c5cfc','#e84040','#e87d20','#3a9de8','#2ecc8e','#c9a84c','#ff6b9d'];
 
@@ -586,12 +586,13 @@ function updateCharts(){
 
 // ── Counts ───────────────────────────────────────────────────
 function updateCounts(){
-  document.getElementById('tc-all').textContent  = leads.length;
+  const isDisq = l => l.lead_type==='disqualified' || l.status==='disqualified';
+  document.getElementById('tc-done').textContent = leads.filter(l=>l.status==='completed' && !isDisq(l)).length;
   document.getElementById('tc-hot').textContent  = leads.filter(l=>l.lead_type==='hot').length;
   document.getElementById('tc-warm').textContent = leads.filter(l=>l.lead_type==='warm').length;
   document.getElementById('tc-cold').textContent = leads.filter(l=>l.lead_type==='cold').length;
-  document.getElementById('tc-prog').textContent = leads.filter(l=>l.status==='in_progress').length;
-  document.getElementById('tc-disq').textContent = leads.filter(l=>l.lead_type==='disqualified').length;
+  document.getElementById('tc-prog').textContent = leads.filter(l=>l.status==='in_progress' && !isDisq(l)).length;
+  document.getElementById('tc-disq').textContent = leads.filter(isDisq).length;
 }
 
 // ── Filter / sort ────────────────────────────────────────────
@@ -603,8 +604,13 @@ function getFiltered(){
   const q=document.getElementById('srchIn').value.toLowerCase();
   return leads.filter(l=>{
     if(l.sale_status && l.sale_status !== 'pending') return false;
-    const mf=curF==='all'?true:curF==='hot'?l.lead_type==='hot':curF==='warm'?l.lead_type==='warm':
-      curF==='cold'?l.lead_type==='cold':curF==='prog'?l.status==='in_progress':l.lead_type==='disqualified';
+    const isDisq = l.lead_type==='disqualified' || l.status==='disqualified';
+    const mf=curF==='done'?(l.status==='completed' && !isDisq):
+      curF==='hot'?l.lead_type==='hot':
+      curF==='warm'?l.lead_type==='warm':
+      curF==='cold'?l.lead_type==='cold':
+      curF==='prog'?(l.status==='in_progress' && !isDisq):
+      isDisq;
     const ms=!q||l.name.toLowerCase().includes(q)||(l.phone||'').includes(q);
     return mf&&ms;
   });
