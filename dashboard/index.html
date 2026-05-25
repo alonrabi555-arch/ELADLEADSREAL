@@ -268,6 +268,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'">
         👁 צפה בשיחה
       </button>
+      <button id="convRefreshBtn" onclick="loadConversation()" title="רענן שיחה"
+        style="padding:7px 12px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'">
+        🔄 רענן
+      </button>
       <button id="convTakeBtn" onclick="takeoverConversation()"
         style="padding:7px 16px;background:var(--hot-bg);color:var(--hot);border:1px solid rgba(232,64,64,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
@@ -905,7 +911,7 @@ async function loadConversation(){
     if(!r.ok)throw new Error(`HTTP ${r.status}`);
     const data=await r.json();
     _renderMessages(data.messages||[]);
-    if(!convInterval){convInterval=setInterval(()=>{if(convPhone)loadConversation();},15000);}
+    // Auto-refresh disabled — use the 🔄 refresh button next to "צפה בשיחה" instead
   }catch(e){
     msgs.innerHTML=`<div class="conv-empty">שגיאה בטעינה: ${e.message}</div>`;
   }
