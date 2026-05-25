@@ -876,6 +876,8 @@ function _renderMessages(messages){
   const wrap=document.getElementById('convMsgs');
   if(!wrap)return;
   if(!messages||messages.length===0){wrap.innerHTML='<div class="conv-empty">אין הודעות עדיין</div>';return;}
+  // Check if user was at bottom BEFORE re-render (within 30px tolerance)
+  const wasAtBottom = (wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight) < 30;
   wrap.innerHTML=messages.map(m=>{
     const isIn=m.direction==='in';
     const agentClass=(!isIn&&m.is_agent)?' agent':'';
@@ -886,7 +888,8 @@ function _renderMessages(messages){
       <span class="msg-time">${_fmtConvTime(m.sent_at)}</span>
     </div>`;
   }).join('');
-  wrap.scrollTop=wrap.scrollHeight;
+  // Only auto-scroll if user was already at the bottom
+  if(wasAtBottom) wrap.scrollTop=wrap.scrollHeight;
 }
 
 async function loadConversation(){
