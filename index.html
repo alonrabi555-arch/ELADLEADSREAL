@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>אלעד רבי | לוח לידים</title>
+<title>אלעד רבי | CRM לידים v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -17,6 +17,7 @@
   --warm:#e87d20;--warm-bg:rgba(232,125,32,0.12);
   --cold:#3a9de8;--cold-bg:rgba(58,157,232,0.12);
   --green:#2ecc8e;--green-bg:rgba(46,204,142,0.1);
+  --purple:#a06cd5;--purple-bg:rgba(160,108,213,0.12);
   --mono:'DM Mono',monospace;--body:'Heebo',sans-serif;
 }
 html{scroll-behavior:smooth}
@@ -25,7 +26,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 .amb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
 .a1{width:500px;height:500px;top:-150px;left:40%;background:radial-gradient(circle,rgba(201,168,76,0.06),transparent 70%)}
 .a2{width:400px;height:400px;bottom:0;right:-100px;background:radial-gradient(circle,rgba(232,64,64,0.05),transparent 70%)}
-.shell{position:relative;z-index:1;max-width:1480px;margin:0 auto;padding:0 28px 80px}
+.shell{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:0 28px 80px}
 header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 24px;border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:14px}
 .bmark{width:44px;height:44px;background:var(--gold-bg);border:1px solid rgba(201,168,76,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -40,33 +41,64 @@ header{display:flex;align-items:center;justify-content:space-between;padding:28p
 .btn-ref:hover{border-color:var(--border2);color:var(--text)}
 .btn-ref.spin{animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:24px 0}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px 22px;transition:border-color .2s}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:24px 0}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px 18px;transition:border-color .2s}
 .kpi:hover{border-color:var(--border2)}
-.kpi-lbl{font-size:12px;color:var(--sub);margin-bottom:8px;font-weight:500}
-.kpi-val{font-size:32px;font-weight:900;font-family:var(--mono);letter-spacing:-1px}
-.kpi-sub{font-size:11px;color:var(--sub);margin-top:4px}
-.kt .kpi-val{color:var(--gold)}
-.kh .kpi-val{color:var(--hot)}
-.kw .kpi-val{color:var(--warm)}
-.kc .kpi-val{color:var(--cold)}
-.ka .kpi-val{color:var(--green)}
-.alert{display:none;background:var(--hot-bg);border:1px solid rgba(232,64,64,.25);border-radius:14px;padding:14px 18px;margin-bottom:20px;align-items:center;gap:14px;animation:fU .4s ease}
-.alert.show{display:flex}
-@keyframes fU{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.a-ico{font-size:22px}
-.a-body strong{font-size:14px;font-weight:700;color:var(--hot)}
-.a-body p{font-size:12px;color:var(--sub);margin-top:2px}
-.a-chips{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
-.chip{background:rgba(232,64,64,.15);border:1px solid rgba(232,64,64,.3);color:var(--hot);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.kpi-lbl{font-size:11px;color:var(--sub);margin-bottom:6px;font-weight:500}
+.kpi-val{font-size:26px;font-weight:900;font-family:var(--mono);letter-spacing:-1px}
+.kn .kpi-val{color:var(--cold)}
+.ka .kpi-val{color:var(--gold)}
+.ko .kpi-val{color:var(--warm)}
+.kr .kpi-val{color:var(--hot)}
+.kw .kpi-val{color:var(--green)}
+.kp .kpi-val{color:var(--purple)}
+.krev .kpi-val{color:var(--green);font-size:20px}
+
+/* ==========================================
+   CALL LIST section
+   ========================================== */
+.call-section{margin:28px 0 20px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.section-title .cnt-badge{background:var(--hot-bg);color:var(--hot);border:1px solid rgba(232,64,64,.3);font-size:12px;font-family:var(--mono);padding:2px 8px;border-radius:10px;font-weight:700}
+.call-tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.call-empty{padding:24px;text-align:center;color:var(--sub);font-size:13px}
+
+/* urgency levels */
+.urg-fire{color:var(--hot);font-weight:800;font-size:16px}
+.urg-warn{color:var(--warm);font-weight:700;font-size:15px}
+.urg-norm{color:var(--sub);font-size:14px}
+.urg-reason-hot{color:var(--hot);font-weight:700;font-size:12px}
+.urg-reason-warn{color:var(--warm);font-weight:600;font-size:12px}
+.urg-reason-norm{color:var(--sub);font-size:12px}
+
+/* WhatsApp CTA button */
+.wa-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:all .15s}
+.wa-btn:hover{background:rgba(37,211,102,.2)}
+
+/* Source badge */
+.src-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-family:var(--mono);color:var(--sub)}
+.src-badge.tiktok{color:#ee1d52}
+.src-badge.instagram{color:#c13584}
+.src-badge.facebook{color:#1877f2}
+.src-badge.google{color:#4285f4}
+.src-badge.organic{color:var(--green)}
+
+/* ==========================================
+   Main table section
+   ========================================== */
 .ctrl{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .tab{background:var(--s2);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .tab:hover{border-color:var(--border2);color:var(--text)}
 .tab.on{background:var(--gold-bg);border-color:rgba(201,168,76,.4);color:var(--gold)}
-.tab.fh.on{background:var(--hot-bg);border-color:rgba(232,64,64,.4);color:var(--hot)}
-.tab.fw.on{background:var(--warm-bg);border-color:rgba(232,125,32,.4);color:var(--warm)}
-.tab.fc.on{background:var(--cold-bg);border-color:rgba(58,157,232,.4);color:var(--cold)}
-.tab.fa.on{background:var(--green-bg);border-color:rgba(46,204,142,.4);color:var(--green)}
+.tab.fn.on{background:var(--cold-bg);border-color:rgba(58,157,232,.4);color:var(--cold)}
+.tab.fa.on{background:var(--gold-bg);border-color:rgba(201,168,76,.4);color:var(--gold)}
+.tab.fo.on{background:var(--warm-bg);border-color:rgba(232,125,32,.4);color:var(--warm)}
+.tab.fr.on{background:var(--hot-bg);border-color:rgba(232,64,64,.4);color:var(--hot)}
+.tab.fw.on{background:var(--green-bg);border-color:rgba(46,204,142,.4);color:var(--green)}
+.tab.fp.on{background:var(--purple-bg);border-color:rgba(160,108,213,.4);color:var(--purple)}
 .tcnt{background:rgba(255,255,255,.08);border-radius:8px;padding:1px 6px;font-size:11px;font-family:var(--mono)}
 .spacer{flex:1}
 .srt-sel{background:var(--s2);border:1px solid var(--border);color:var(--sub);padding:7px 12px;border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;outline:none}
@@ -74,1356 +106,899 @@ header{display:flex;align-items:center;justify-content:space-between;padding:28p
 .srch-i{position:absolute;right:10px;font-size:14px;pointer-events:none}
 #srchIn{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 32px 7px 12px;border-radius:10px;font-family:var(--body);font-size:13px;width:200px;outline:none;transition:border-color .2s}
 #srchIn:focus{border-color:var(--border2)}
+
+/* Table */
 .tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
 thead{background:var(--s2);border-bottom:1px solid var(--border)}
 th{padding:12px 14px;text-align:right;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap}
-td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.015)}
-.name-btn{display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .15s}
-.name-btn:hover{opacity:.85}
-.name-btn:hover .name-arrow{opacity:1}
+tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
+.name-cell{display:flex;align-items:center;gap:10px}
 .name-txt{font-weight:600;font-size:14px}
 .name-phone{color:var(--sub);font-size:12px;font-family:var(--mono)}
-.name-arrow{font-size:11px;color:var(--gold);opacity:0;transition:opacity .15s;white-space:nowrap}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid transparent}
-.badge.h{background:var(--hot-bg);color:var(--hot);border-color:rgba(232,64,64,.25)}
-.badge.w{background:var(--warm-bg);color:var(--warm);border-color:rgba(232,125,32,.25)}
-.badge.c{background:var(--cold-bg);color:var(--cold);border-color:rgba(58,157,232,.25)}
-.badge.d{background:rgba(100,100,120,.1);color:#666;border-color:rgba(100,100,120,.2)}
-.badge.p{background:var(--gold-bg);color:var(--gold);border-color:rgba(201,168,76,.25)}
-.sc-cell{display:flex;align-items:center;gap:8px}
-.sc-n{font-family:var(--mono);font-size:13px;font-weight:700;min-width:24px}
-.sc-bg{width:60px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.sc-fill{height:100%;border-radius:2px;transition:width .6s ease}
-.sdot{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
-.sdot.done{background:var(--green-bg);color:var(--green)}
-.sdot.prog{background:var(--gold-bg);color:var(--gold)}
-.sdot.disq{background:rgba(100,100,120,.1);color:#666}
-.tbl-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--sub)}
-.pages{display:flex;gap:4px}
-.pg{background:var(--s2);border:1px solid var(--border);color:var(--sub);width:30px;height:30px;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.pg:hover{border-color:var(--border2);color:var(--text)}
-.pg.on{background:var(--gold-bg);border-color:rgba(201,168,76,.4);color:var(--gold)}
+.city-cell{color:var(--sub);font-size:12px}
+
+/* Stage badges */
+.stage-badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.stage-NEW     {background:var(--cold-bg);  color:var(--cold);  border-color:rgba(58,157,232,.25)}
+.stage-ACTIVE  {background:var(--gold-bg);  color:var(--gold);  border-color:rgba(201,168,76,.25)}
+.stage-OBJECTION{background:var(--warm-bg); color:var(--warm);  border-color:rgba(232,125,32,.25)}
+.stage-READY   {background:var(--hot-bg);   color:var(--hot);   border-color:rgba(232,64,64,.25)}
+.stage-WON     {background:var(--green-bg); color:var(--green); border-color:rgba(46,204,142,.25)}
+.stage-NURTURE {background:var(--purple-bg);color:var(--purple);border-color:rgba(160,108,213,.25)}
+.stage-DEAD    {background:rgba(100,100,120,.1);color:#666;     border-color:rgba(100,100,120,.2)}
+
+/* Readiness bar */
+.rd-cell{display:flex;align-items:center;gap:8px;min-width:100px}
+.rd-n{font-family:var(--mono);font-size:13px;font-weight:700;min-width:22px}
+.rd-bg{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.rd-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* Next action */
+.next-cell{color:var(--sub);font-size:12px}
+.next-cell.due{color:var(--warm);font-weight:600}
+.next-cell.overdue{color:var(--hot);font-weight:700}
+
+/* Empty state */
 .empty{padding:48px;text-align:center}
 .empty-i{font-size:32px;margin-bottom:12px}
 .empty p{color:var(--sub);font-size:14px}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
-.cc{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px 24px}
-.cc-title{font-size:14px;font-weight:700;margin-bottom:18px;color:var(--sub)}
-.donut-wrap{display:flex;align-items:center;gap:24px}
-.donut-leg{display:flex;flex-direction:column;gap:10px}
-.leg-item{display:flex;align-items:center;justify-content:space-between;gap:24px;min-width:160px}
-.leg-lbl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)}
-.leg-dot{width:8px;height:8px;border-radius:50%}
-.leg-val{font-family:var(--mono);font-size:14px;font-weight:700}
-.bars{display:flex;flex-direction:column;gap:14px}
-.bar-r{display:flex;align-items:center;gap:10px}
-.bar-lbl{font-size:13px;color:var(--sub);min-width:100px;text-align:right}
-.bar-track{flex:1;height:8px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
-.bar-seg{height:100%;border-radius:4px;transition:width .8s ease}
-.bar-val{font-family:var(--mono);font-size:13px;font-weight:700;min-width:24px;text-align:left}
+
 /* Drawer */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
 .overlay.open{opacity:1;pointer-events:all}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:520px;background:var(--s1);border-right:1px solid var(--border);z-index:101;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:600px;max-width:100vw;background:var(--s1);border-right:1px solid var(--border);z-index:101;transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto}
 .drawer.open{transform:none}
-.drw-hero{padding:28px;background:var(--s2);border-bottom:1px solid var(--border)}
-.drw-hero.hot{background:linear-gradient(135deg,rgba(232,64,64,.1),var(--s2))}
-.drw-hero.warm{background:linear-gradient(135deg,rgba(232,125,32,.1),var(--s2))}
-.drw-hero.cold{background:linear-gradient(135deg,rgba(58,157,232,.1),var(--s2))}
+.drw-hero{padding:24px 28px;background:var(--s2);border-bottom:1px solid var(--border)}
 .drw-top{display:flex;align-items:center;gap:14px}
-.drw-av{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+.drw-av{width:48px;height:48px;border-radius:14px;background:var(--gold-bg);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
 .drw-info{flex:1}
 .drw-info h2{font-size:18px;font-weight:800}
 .drw-info p{font-size:13px;color:var(--sub);font-family:var(--mono);margin-top:2px}
 .drw-close{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--sub);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .drw-close:hover{background:rgba(255,255,255,.1);color:var(--text)}
-.drw-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
-.score-pill{background:rgba(255,255,255,.04);border:1px solid;border-radius:20px;padding:4px 12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
-.of{font-size:11px;color:var(--sub);font-weight:400}
-.drw-sec{padding:20px 24px;border-bottom:1px solid var(--border)}
+.drw-meta{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.drw-sec{padding:18px 24px;border-bottom:1px solid var(--border)}
 .drw-sec:last-child{border-bottom:none}
-.drw-sec-title{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ifield label{font-size:11px;color:var(--sub);display:block;margin-bottom:4px}
+.drw-sec-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+/* Profile fields */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ifield label{font-size:11px;color:var(--sub);display:block;margin-bottom:3px}
 .ifield .v{font-size:13px;font-weight:500}
 .ifield .mn{font-family:var(--mono);font-size:12px}
-.ifield .gold{color:var(--gold);font-family:var(--mono);font-weight:700;font-size:15px}
-.q-block{margin-bottom:16px}
-.q-label{font-size:13px;font-weight:600;margin-bottom:10px;line-height:1.5}
-.q-opts{display:flex;flex-direction:column;gap:6px}
-.q-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);font-size:12px;transition:all .2s}
-.q-opt.chosen.pos{background:var(--green-bg);border-color:rgba(46,204,142,.3)}
-.q-opt.chosen.mid{background:var(--gold-bg);border-color:rgba(201,168,76,.3)}
-.q-opt.chosen.neg{background:var(--hot-bg);border-color:rgba(232,64,64,.3)}
-.q-opt.chosen.neu{background:var(--cold-bg);border-color:rgba(58,157,232,.3)}
-.q-check{width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700}
-.q-opt.chosen .q-check{background:var(--green);border-color:var(--green);color:#000}
-.q-opt.chosen.neg .q-check{background:var(--hot);border-color:var(--hot);color:#000}
-.q-opt.chosen.mid .q-check{background:var(--gold);border-color:var(--gold);color:#000}
-.q-opt.chosen.neu .q-check{background:var(--cold);border-color:var(--cold);color:#000}
-.q-pts{margin-right:auto;font-family:var(--mono);font-size:11px;color:var(--sub)}
-.q-opt.chosen.pos .q-pts{color:var(--green)}
-.q-opt.chosen.neg .q-pts{color:var(--hot)}
-.q-opt.chosen.mid .q-pts{color:var(--gold)}
-/* Sale status */
-.sale-sel{appearance:none;padding:5px 10px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none;border-radius:8px;min-width:100px}
-@keyframes fU{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-/* WhatsApp Conversation Panel */
-.conv-msgs{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 0;margin-bottom:12px;scrollbar-width:thin}
-.conv-msgs::-webkit-scrollbar{width:4px}.conv-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
-.msg-bubble{max-width:85%;padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;position:relative}
-.msg-in{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.2);align-self:flex-end;border-bottom-right-radius:4px}
-.msg-out{background:var(--s3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
-.msg-out.agent{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.25)}
-.msg-time{font-size:10px;color:var(--sub);margin-top:4px;display:block}
-.msg-label{font-size:10px;font-weight:700;margin-bottom:3px;display:block}
-.msg-in .msg-label{color:rgba(37,211,102,.8)}.msg-out .msg-label{color:var(--sub)}.msg-out.agent .msg-label{color:var(--gold)}
-.conv-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(232,64,64,.12);border:1px solid rgba(232,64,64,.3);color:var(--hot)}
-.conv-input-wrap{display:flex;gap:8px;align-items:flex-end;margin-top:4px}
-.conv-textarea{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-family:var(--body);font-size:13px;resize:none;outline:none;min-height:44px;max-height:120px;line-height:1.5;direction:rtl;transition:border-color .2s}
-.conv-textarea:focus{border-color:var(--gold)}
-.conv-send-btn{padding:10px 18px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;height:44px}
-.conv-send-btn:hover{opacity:.85}.conv-send-btn:disabled{opacity:.4;cursor:default}
-.conv-loading{text-align:center;padding:20px;color:var(--sub);font-size:13px}
-.conv-empty{text-align:center;padding:20px;color:var(--sub);font-size:13px}
 
-/* ── Mobile Responsive ───────────────────────────────────── */
+/* Timeline */
+.timeline{position:relative;padding-right:18px}
+.timeline::before{content:'';position:absolute;right:6px;top:6px;bottom:6px;width:1px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:14px;font-size:13px}
+.tl-dot{position:absolute;right:-15px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--s1)}
+.tl-dot.in{background:var(--cold)}
+.tl-dot.out{background:var(--gold)}
+.tl-dot.asset{background:var(--purple)}
+.tl-dot.stage{background:var(--green)}
+.tl-dot.escalate{background:var(--hot)}
+.tl-ts{font-size:10px;color:var(--sub);font-family:var(--mono);margin-bottom:2px}
+.tl-action{font-weight:600;color:var(--text)}
+.tl-note{color:var(--sub);font-size:12px;margin-top:2px;line-height:1.4}
+
+/* Assets sent */
+.assets-list{display:flex;flex-direction:column;gap:6px}
+.asset-tag{display:flex;align-items:center;justify-content:space-between;background:var(--s3);padding:6px 12px;border-radius:8px;border:1px solid var(--border);font-size:12px}
+.asset-tag .a-name{font-weight:600}
+.asset-tag .a-when{color:var(--sub);font-family:var(--mono);font-size:11px}
+
+/* Objections */
+.objs{display:flex;flex-wrap:wrap;gap:6px}
+.obj-chip{background:var(--warm-bg);color:var(--warm);border:1px solid rgba(232,125,32,.25);padding:3px 10px;border-radius:14px;font-size:11px;font-weight:600}
+
+/* Actions */
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act-btn{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+.act-btn:hover{border-color:var(--border2);background:var(--s3)}
+.act-btn.hot{color:var(--hot);border-color:rgba(232,64,64,.3)}
+.act-btn.hot:hover{background:var(--hot-bg)}
+.act-btn.green{color:var(--green);border-color:rgba(46,204,142,.3)}
+.act-btn.green:hover{background:var(--green-bg)}
+.act-btn.gold{color:var(--gold);border-color:rgba(201,168,76,.3)}
+.act-btn.gold:hover{background:var(--gold-bg)}
+
+/* Divider label */
+.sec-divider{font-size:13px;font-weight:700;color:var(--sub);margin:28px 0 14px;display:flex;align-items:center;gap:10px}
+.sec-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Analytics / visitors charts */
+.analytics-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0 28px}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px 22px}
+.cc-title{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.bar-r{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar-lbl{font-size:13px;min-width:130px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.bar-seg{height:100%;border-radius:4px;transition:width 1s ease}
+.bar-val{font-size:12px;font-family:var(--mono);color:var(--sub);min-width:32px;text-align:left}
+
+/* Visitors tab + section */
+.tab.fv.on{background:rgba(105,201,208,.1);border-color:rgba(105,201,208,.4);color:#69c9d0}
+
 @media (max-width:768px){
+  .analytics-row{grid-template-columns:1fr}
   .a1,.a2{display:none}
   .shell{padding:0 12px 60px}
   header{flex-wrap:wrap;gap:10px;padding:16px 0}
   .btxt h1{font-size:16px}
-
-  /* KPI: 2 columns */
-  .kpi-row{grid-template-columns:repeat(2,1fr) !important}
-  .kpi-val{font-size:24px}
-  .kpi{padding:14px 16px}
-
-  /* Controls: tabs wrap 1-2 rows, sort+search below */
-  .ctrl{flex-wrap:wrap;gap:6px;align-items:center}
-  .tab{padding:5px 9px;font-size:12px;white-space:nowrap;flex-shrink:0}
-  .ctrl .spacer{width:100%;height:0;order:100;flex:none}
-  .ctrl .srt-sel{order:101;flex:1;min-width:0}
-  .ctrl .srch{order:102;flex:1}
-  #srchIn{width:100%}
-
-  /* Tables: horizontal scroll */
-  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  th,td{padding:8px 6px;font-size:11px}
-  th{white-space:nowrap}
-
-  /* Charts: stack vertically */
-  .chart-row{grid-template-columns:1fr}
-  .leg-item{min-width:auto}
-  .bar-lbl{min-width:70px}
-  .donut-wrap{flex-wrap:wrap;justify-content:center}
-
-  /* Drawer: full-width bottom sheet */
-  .drawer{
-    left:0 !important;right:0 !important;
-    top:auto !important;bottom:0 !important;
-    width:100% !important;height:85vh;
-    transform:translateY(100%) !important;
-    border-right:none;border-top:1px solid var(--border);
-    border-radius:20px 20px 0 0;
-    transition:transform .35s cubic-bezier(.4,0,.2,1)
-  }
-  .drawer.open{transform:translateY(0) !important}
-  .info-grid{grid-template-columns:1fr 1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .info-grid{grid-template-columns:1fr}
+  .act-grid{grid-template-columns:1fr}
+  .drawer{width:100vw}
+  th.hide-mobile,td.hide-mobile{display:none}
 }
 </style>
 </head>
 <body>
-<div class="amb a1"></div><div class="amb a2"></div>
-
-<!-- Profile Drawer -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="drw-hero" id="drwHero">
-    <div class="drw-top">
-      <div class="drw-av" id="drwAv"></div>
-      <div class="drw-info">
-        <h2 id="drwName"></h2>
-        <p id="drwPhone"></p>
-      </div>
-      <button class="drw-close" onclick="closeDrawer()">✕</button>
-    </div>
-    <div class="drw-badges" id="drwBadges"></div>
-  </div>
-
-  <!-- Section: Contact -->
-  <div class="drw-sec">
-    <div class="drw-sec-title">פרטי קשר</div>
-    <div class="info-grid">
-      <div class="ifield"><label>שם מלא</label><div class="v" id="di-name"></div></div>
-      <div class="ifield"><label>גיל</label><div class="v" id="di-age"></div></div>
-      <div class="ifield"><label>טלפון</label><div class="v mn" id="di-phone"></div></div>
-      <div class="ifield"><label>אימייל</label><div class="v mn" id="di-email"></div></div>
-      <div class="ifield"><label>זמינות לשיחה</label><div class="v" id="di-avail"></div></div>
-      <div class="ifield"><label>אופן שיחה</label><div class="v" id="di-meeting"></div></div>
-      <div class="ifield"><label>נרשם</label><div class="v mn" id="di-date"></div></div>
-      <div class="ifield"><label>ניקוד סופי</label><div class="v gold" id="di-score"></div></div>
-    </div>
-  </div>
-
-  <!-- Section: Answers -->
-  <div class="drw-sec">
-    <div class="drw-sec-title">תשובות מהשיחה</div>
-    <div id="drwAnswers"></div>
-  </div>
-
-  <!-- Section: Notes -->
-  <div class="drw-sec">
-    <div class="drw-sec-title">📝 הערות מהשיחה</div>
-    <textarea id="drwNotes" placeholder="כתוב כאן את המידע שאספת מהשיחה..." style="width:100%;min-height:120px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;color:var(--text);font-family:var(--body);font-size:14px;resize:vertical;outline:none;line-height:1.6;direction:rtl" oninput="this.style.borderColor='rgba(201,168,76,0.5)'"></textarea>
-    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap">
-      <button onclick="saveNotes()" style="padding:10px 24px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">💾 שמור הערות</button>
-      <span id="notesSaved" style="color:var(--green);font-size:13px;opacity:0;transition:opacity .3s"></span>
-    </div>
-    <p style="margin-top:10px;font-size:12px;color:var(--sub)">💡 סיכום שיחה יתווסף כאן אוטומטית לאחר שיחה של 4 דקות ויותר</p>
-  </div>
-
-  <!-- Section: Coaching -->
-  <div id="coachingSection" class="drw-sec" style="display:none">
-    <div class="drw-sec-title">💡 ניתוח מאמן</div>
-    <div id="coachingText" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;padding:14px;background:rgba(255,200,50,0.07);border:1px solid rgba(255,200,50,0.25);border-radius:12px;direction:rtl"></div>
-  </div>
-
-  <!-- Section: WhatsApp Conversation -->
-  <div class="drw-sec" id="convSection">
-    <div class="drw-sec-title" style="display:flex;align-items:center;gap:8px">
-      💬 שיחת WhatsApp
-      <span id="convAgentBadge" class="conv-badge" style="display:none">🔴 בשליטת סוכן</span>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <button id="convViewBtn" onclick="loadConversation()"
-        style="padding:7px 16px;background:var(--s2);color:var(--sub);border:1px solid var(--border);border-radius:10px;font-family:var(--body);font-size:13px;cursor:pointer;transition:all .2s"
-        onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--sub)'">
-        👁 צפה בשיחה
-      </button>
-      <button id="convTakeBtn" onclick="takeoverConversation()"
-        style="padding:7px 16px;background:var(--hot-bg);color:var(--hot);border:1px solid rgba(232,64,64,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        🎯 קח שליטה
-      </button>
-      <button id="convReleaseBtn" onclick="releaseConversation()"
-        style="display:none;padding:7px 16px;background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,142,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        🔓 שחרר לבוט
-      </button>
-      <button id="convTemplateBtn" onclick="toggleTemplateForm()"
-        style="padding:7px 16px;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        📨 שלח תבנית
-      </button>
-    </div>
-    <div id="convMsgsWrap" style="display:none">
-      <div class="conv-msgs" id="convMsgs"></div>
-      <div id="convInputWrap" style="display:none">
-        <div class="conv-input-wrap">
-          <textarea id="convMsgText" class="conv-textarea" rows="1" placeholder="כתוב הודעה..."
-            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAgentMessage()}"></textarea>
-          <button class="conv-send-btn" id="convSendBtn" onclick="sendAgentMessage()">שלח ▶</button>
-        </div>
-        <p style="margin-top:8px;font-size:11px;color:var(--sub)">Enter לשליחה · Shift+Enter לשורה חדשה</p>
-      </div>
-    </div>
-    <div id="convTemplateWrap" style="display:none;margin-top:12px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:14px">
-      <p style="font-size:12px;color:var(--gold);font-weight:700;margin:0 0 10px">📨 תבנית WhatsApp — פותחת חלון 24 שעות</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <input id="tmplCustomerName" type="text" placeholder="שם לקוח"
-          style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;direction:rtl;width:100%;box-sizing:border-box">
-        <input id="tmplSalesperson" type="text" placeholder="שם איש מכירות"
-          style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;direction:rtl;width:100%;box-sizing:border-box">
-        <button id="tmplSendBtn" onclick="sendTemplate()"
-          style="padding:9px 18px;background:linear-gradient(135deg,var(--gold),#b8942f);color:#000;border:none;border-radius:10px;font-family:var(--body);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s"
-          onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-          📨 שלח תבנית
-        </button>
-      </div>
-    </div>
-    <div id="convStatus" style="font-size:12px;color:var(--sub);margin-top:4px"></div>
-  </div>
-
-</div>
+<div class="amb a1"></div>
+<div class="amb a2"></div>
 
 <div class="shell">
-<header>
-  <div class="brand">
-    <div class="bmark">✂️</div>
-    <div class="btxt"><h1>אקדמיית אלעד רבי</h1><p>מרכז ניהול לידים</p></div>
-  </div>
-  <div class="hright">
-    <div class="pill pill-live" id="statusPill"><div class="pulse"></div> מחובר</div>
-    <button class="btn-ref" id="btnRef" onclick="doRefresh()">↻ רענן</button>
-  </div>
-</header>
 
-<!-- KPI -->
-<div class="kpi-row">
-  <div class="kpi kt"><div class="kpi-lbl">סה"כ לידים</div><div class="kpi-val" id="kT">—</div><div class="kpi-sub">כל הסטטוסים</div></div>
-  <div class="kpi kh"><div class="kpi-lbl">🔥 חמים</div><div class="kpi-val" id="kH">—</div><div class="kpi-sub">16+ נקודות</div></div>
-  <div class="kpi kw"><div class="kpi-lbl">🌤️ ממוצעים</div><div class="kpi-val" id="kW">—</div><div class="kpi-sub">10–16 נקודות</div></div>
-  <div class="kpi kc"><div class="kpi-lbl">❄️ קרים</div><div class="kpi-val" id="kC">—</div><div class="kpi-sub">מתחת ל-10</div></div>
-  <div class="kpi ka"><div class="kpi-lbl">⏳ בתהליך</div><div class="kpi-val" id="kA">—</div><div class="kpi-sub">שיחה פתוחה</div></div>
-</div>
-
-<!-- Alert -->
-<div class="alert" id="alertEl">
-  <div class="a-ico">🔥</div>
-  <div class="a-body"><strong>לידים חמים ממתינים לשיחת התאמה!</strong><p>צור קשר בהקדם</p></div>
-  <div class="a-chips" id="alertChips"></div>
-</div>
-
-<!-- Controls -->
-<div class="ctrl">
-  <button class="tab on"  data-f="done" onclick="setFilter(this)">✅ הושלם <span class="tcnt" id="tc-done">0</span></button>
-  <button class="tab fh"  data-f="hot"  onclick="setFilter(this)">🔥 חם <span class="tcnt" id="tc-hot">0</span></button>
-  <button class="tab fw"  data-f="warm" onclick="setFilter(this)">🌤️ ממוצע <span class="tcnt" id="tc-warm">0</span></button>
-  <button class="tab fc"  data-f="cold" onclick="setFilter(this)">❄️ קר <span class="tcnt" id="tc-cold">0</span></button>
-  <button class="tab fa"  data-f="prog" onclick="setFilter(this)">⏳ בתהליך <span class="tcnt" id="tc-prog">0</span></button>
-  <button class="tab"     data-f="disq" onclick="setFilter(this)">🚫 נפסלו <span class="tcnt" id="tc-disq">0</span></button>
-  <button class="tab" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="tc-visitors">–</span></button>
-  <div class="spacer"></div>
-  <select class="srt-sel" id="srtSel" onchange="render()">
-    <option value="date">תאריך — חדש ראשון</option>
-    <option value="sd">ניקוד — גבוה ראשון</option>
-    <option value="sa">ניקוד — נמוך ראשון</option>
-    <option value="name">שם — א׳ ב׳</option>
-  </select>
-  <div class="srch">
-    <span class="srch-i">🔍</span>
-    <input id="srchIn" type="text" placeholder="חיפוש שם / טלפון..." oninput="render()">
-  </div>
-</div>
-
-<!-- Table -->
-<div class="tbl-wrap" id="leadsTableWrap">
-  <table>
-    <thead><tr>
-      <th>שם</th><th>סיווג</th><th>ניקוד</th>
-      <th>גיל</th><th>ניסיון</th><th>זמינות</th>
-      <th>שיחה</th><th>סטטוס</th><th>סטטוס מכירה</th><th>ממתין לשיחה</th><th>הסר</th>
-    </tr></thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <div class="empty" id="emptyEl" style="display:none"><div class="empty-i">🔍</div><p>אין לידים התואמים את הסינון</p></div>
-  <div class="tbl-foot">
-    <span id="footCnt">0 תוצאות</span>
-    <div class="pages" id="pages"></div>
-  </div>
-</div>
-
-<!-- Visitors Section -->
-<div id="visitorsSection" style="display:none;animation:fU .4s ease both">
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>תאריך</th><th>פלטפורמה</th><th>מיקום</th><th>מכשיר</th><th>דפדפן</th><th>דף כניסה</th><th>זמן באתר</th><th>דפים</th>
-      </tr></thead>
-      <tbody id="visTbody"></tbody>
-    </table>
-    <div class="empty" id="visEmptyEl" style="display:none"><div class="empty-i">👁️</div><p>אין נתוני מבקרים עדיין</p></div>
-    <div class="tbl-foot">
-      <span id="visFootCnt">0 מבקרים</span>
-      <div class="pages" id="visPages"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Charts -->
-<div class="chart-row">
-  <div class="cc">
-    <div class="cc-title">התפלגות לידים</div>
-    <div class="donut-wrap">
-      <svg width="110" height="110" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r="40" fill="none" stroke="#1a1a20" stroke-width="16"/>
-        <circle id="dH" cx="55" cy="55" r="40" fill="none" stroke="#e84040" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease"/>
-        <circle id="dW" cx="55" cy="55" r="40" fill="none" stroke="#e87d20" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease;transition-delay:.15s"/>
-        <circle id="dC" cx="55" cy="55" r="40" fill="none" stroke="#3a9de8" stroke-width="16" stroke-dasharray="0 251.3" stroke-dashoffset="62.8" style="transition:stroke-dasharray 1s ease;transition-delay:.3s"/>
-        <text x="55" y="51" text-anchor="middle" fill="#ececf4" font-size="16" font-weight="700" font-family="DM Mono,monospace" id="dCtr">0</text>
-        <text x="55" y="66" text-anchor="middle" fill="#888898" font-size="9" font-family="Heebo,sans-serif">לידים</text>
-      </svg>
-      <div class="donut-leg">
-        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#e84040"></span>חמים 🔥</span><span class="leg-val" id="lH">0</span></div>
-        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#e87d20"></span>ממוצעים 🌤️</span><span class="leg-val" id="lW">0</span></div>
-        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#3a9de8"></span>קרים ❄️</span><span class="leg-val" id="lC">0</span></div>
-        <div class="leg-item"><span class="leg-lbl"><span class="leg-dot" style="background:#555"></span>נפסלו</span><span class="leg-val" id="lD">0</span></div>
+  <header>
+    <div class="brand">
+      <div class="bmark">✂</div>
+      <div class="btxt">
+        <h1>אלעד רבי | CRM לידים v2</h1>
+        <p>מערכת חימום AI · הבוט מנהל את הכל</p>
       </div>
     </div>
-  </div>
-  <div class="cc">
-    <div class="cc-title">מקורות תנועה</div>
-    <div class="bars" id="srcBars"><div style="color:var(--sub);font-size:13px;padding:16px 0">ממתין לנתוני מבקרים...</div></div>
-  </div>
-  <div class="cc">
-    <div class="cc-title">📍 מיקומים גיאוגרפיים</div>
-    <div class="bars" id="locBars"><div style="color:var(--sub);font-size:13px;padding:16px 0">ממתין לנתוני מבקרים...</div></div>
-  </div>
-</div>
+    <div class="hright">
+      <div class="pill pill-live"><div class="pulse"></div>חי</div>
+      <button class="btn-ref" id="refBtn" onclick="refreshAll()">🔄 רענן</button>
+    </div>
+  </header>
 
-<!-- After-Sale Table -->
-<div style="margin-top:36px;animation:fU .5s .25s ease both">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-    <h2 style="font-size:18px;font-weight:800;color:var(--gold)">📋 מעקב אחרי שיחה</h2>
-    <div class="ctrl" style="margin-bottom:0;gap:6px">
-      <button class="tab sale-tab on" data-sf="all" onclick="setSaleFilter(this)">הכל <span class="tcnt" id="sAll">0</span></button>
-      <button class="tab sale-tab" data-sf="thinking" onclick="setSaleFilter(this)">עדיין חושב 🤔 <span class="tcnt" id="sThink">0</span></button>
-      <button class="tab sale-tab" data-sf="purchased" onclick="setSaleFilter(this)">קנה ✅ <span class="tcnt" id="sPurch">0</span></button>
-      <button class="tab sale-tab" data-sf="no_answer" onclick="setSaleFilter(this)">לא ענה 📵 <span class="tcnt" id="sNoAns">0</span></button>
-      <button class="tab sale-tab" data-sf="not_relevant" onclick="setSaleFilter(this)">לא מעוניין ❌ <span class="tcnt" id="sNotRel">0</span></button>
-      <button class="tab sale-tab" data-sf="support_ended" onclick="setSaleFilter(this)">ליווי אישי הסתיים 🎓 <span class="tcnt" id="sSupEnd">0</span></button>
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi kn"><div class="kpi-lbl">חדשים היום</div><div class="kpi-val" id="kpi-new">0</div></div>
+    <div class="kpi ka"><div class="kpi-lbl">בשיחה</div><div class="kpi-val" id="kpi-active">0</div></div>
+    <div class="kpi ko"><div class="kpi-lbl">בהתנגדות</div><div class="kpi-val" id="kpi-obj">0</div></div>
+    <div class="kpi kr"><div class="kpi-lbl">מוכנים לסגירה</div><div class="kpi-val" id="kpi-ready">0</div></div>
+    <div class="kpi kw"><div class="kpi-lbl">סגרו החודש</div><div class="kpi-val" id="kpi-won">0</div></div>
+    <div class="kpi kp"><div class="kpi-lbl">ליווי ארוך</div><div class="kpi-val" id="kpi-nurture">0</div></div>
+    <div class="kpi krev"><div class="kpi-lbl">הכנסה החודש</div><div class="kpi-val" id="kpi-rev">—</div></div>
+  </div>
+
+  <!-- Analytics charts -->
+  <div class="analytics-row">
+    <div class="cc">
+      <div class="cc-title">מקורות תנועה (מבקרים באתר)</div>
+      <div id="srcBars"><div style="color:var(--sub);font-size:13px">טוען...</div></div>
+    </div>
+    <div class="cc">
+      <div class="cc-title">מיקומים גיאוגרפיים (מבקרים)</div>
+      <div id="geoBars"><div style="color:var(--sub);font-size:13px">טוען...</div></div>
     </div>
   </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>שם</th><th>טלפון</th><th>סיווג</th><th>ניקוד</th>
-        <th>גיל</th><th>שיחה</th><th>סטטוס מכירה</th><th>עדכון אחרון</th>
-      </tr></thead>
-      <tbody id="saleTbody"></tbody>
-    </table>
-    <div class="empty" id="saleEmptyEl" style="display:none"><div class="empty-i">📋</div><p>אין לידים בקטגוריה זו</p></div>
-    <div class="tbl-foot"><span id="saleFootCnt">0 תוצאות</span></div>
+
+  <!-- ==========================================
+       CALL LIST
+       ========================================== -->
+  <div class="call-section">
+    <div class="section-header">
+      <div class="section-title">
+        📞 מי צריך שיחה עכשיו
+        <span class="cnt-badge" id="call-count">0</span>
+      </div>
+    </div>
+    <div class="call-tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>🔥</th>
+            <th>שם</th>
+            <th>גיל</th>
+            <th class="hide-mobile">עיר</th>
+            <th class="hide-mobile">מקור</th>
+            <th>שלב</th>
+            <th>בשלות</th>
+            <th>סיבה</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="call-tbody"></tbody>
+      </table>
+    </div>
   </div>
+
+  <!-- ==========================================
+       ALL LEADS TABLE
+       ========================================== -->
+  <div class="sec-divider">כל הלידים</div>
+
+  <!-- Filters -->
+  <div class="ctrl">
+    <button class="tab on"  data-filter="all">הכל <span class="tcnt" id="cnt-all">0</span></button>
+    <button class="tab fn"  data-filter="NEW">חדש <span class="tcnt" id="cnt-NEW">0</span></button>
+    <button class="tab fa"  data-filter="ACTIVE">בשיחה <span class="tcnt" id="cnt-ACTIVE">0</span></button>
+    <button class="tab fo"  data-filter="OBJECTION">בהתנגדות <span class="tcnt" id="cnt-OBJECTION">0</span></button>
+    <button class="tab fr"  data-filter="READY">מוכן <span class="tcnt" id="cnt-READY">0</span></button>
+    <button class="tab fw"  data-filter="WON">סגר <span class="tcnt" id="cnt-WON">0</span></button>
+    <button class="tab fp"  data-filter="NURTURE">ליווי <span class="tcnt" id="cnt-NURTURE">0</span></button>
+    <button class="tab fv" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="cnt-visitors">–</span></button>
+    <div class="spacer"></div>
+    <select class="srt-sel" id="sortSel">
+      <option value="recent">אחרון פעיל</option>
+      <option value="urgency">דחיפות</option>
+      <option value="readiness">בשלות (גבוה)</option>
+      <option value="created">תאריך הצטרפות</option>
+    </select>
+    <div class="srch">
+      <span class="srch-i">🔍</span>
+      <input id="srchIn" placeholder="חפש שם/טלפון/עיר" oninput="renderTable()">
+    </div>
+  </div>
+
+  <!-- Leads Table -->
+  <div class="tbl-wrap" id="tblWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ליד</th>
+          <th>גיל</th>
+          <th class="hide-mobile">עיר</th>
+          <th class="hide-mobile">מקור</th>
+          <th>שלב</th>
+          <th>בשלות</th>
+          <th>פעולה הבאה</th>
+          <th>פעיל</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Visitors Table (hidden by default) -->
+  <div class="tbl-wrap" id="visSection" style="display:none;margin-top:0">
+    <table>
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          <th>פלטפורמה</th>
+          <th>עיר</th>
+          <th class="hide-mobile">מכשיר</th>
+          <th class="hide-mobile">דפדפן</th>
+          <th class="hide-mobile">זמן באתר</th>
+          <th class="hide-mobile">קמפיין</th>
+        </tr>
+      </thead>
+      <tbody id="visTbody"></tbody>
+    </table>
+    <div class="tbl-foot" id="visFooter" style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+      <span id="visFootCnt" style="font-size:12px;color:var(--sub)">0 מבקרים</span>
+      <div id="visPages" style="display:flex;gap:4px"></div>
+    </div>
+  </div>
+
 </div>
 
-</div><!-- /shell -->
+<!-- Drawer -->
+<div class="overlay" id="ov" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drw">
+  <div class="drw-hero" id="drwHero"></div>
+  <div id="drwBody"></div>
+</aside>
 
 <script>
-// ── Config ──────────────────────────────────────────────────
-const N8N_URL='https://alon09.app.n8n.cloud/webhook/leads-data';
-const ZOOM_LINK='https://us05web.zoom.us/j/4919492998?pwd=pTPMBsqHU5QmpxaAgaYTqjhbqX15SG.1';
-const WA_HISTORY_URL='https://alon09.app.n8n.cloud/webhook/conversation-history';
-const WA_SEND_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
-const WA_TAKEOVER_URL='https://alon09.app.n8n.cloud/webhook/takeover-conversation';
-const WA_RELEASE_URL='https://alon09.app.n8n.cloud/webhook/release-conversation';
-const WA_TEMPLATE_URL='https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
-const VISITORS_URL='https://alon09.app.n8n.cloud/webhook/visitors-data';
-const DEMO=false;
-const REFRESH=30000;
-
-// ── Demo data ────────────────────────────────────────────────
-function ago(n,u){const m={m:60000,h:3600000,d:86400000};return new Date(Date.now()-n*m[u]).toISOString()}
-
-const DEMO_LEADS=[
-  {id:1,name:'יונתן כהן',   phone:'972501234567',email:'yoni@gmail.com',  lead_type:'hot', score:19,age:16,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'completed',
-   answers:{familiarity:3,experience:1,understanding:3,hours:4,budget:4,parents:4}},
-  {id:2,name:'דניאל לוי',   phone:'972521111111',email:'daniel@gmail.com',lead_type:'hot', score:17,age:15,has_experience:true, availability:'בוקר (9-12)',   meeting_type:'זום',   status:'completed',
-   answers:{familiarity:4,experience:3,understanding:3,hours:3,budget:3,parents:3},created_at:ago(5,'h')},
-  {id:3,name:'אורי שמש',    phone:'972532222222',email:'uri@gmail.com',   lead_type:'hot', score:16,age:17,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'completed',
-   answers:{familiarity:3,experience:2,understanding:3,hours:4,budget:3,parents:4},created_at:ago(1,'d')},
-  {id:4,name:'אביב שפירא',  phone:'972543333333',email:'aviv@gmail.com',  lead_type:'warm',score:13,age:17,has_experience:false,availability:'צהריים (12-16)',meeting_type:'טלפון', status:'completed',
-   answers:{familiarity:2,experience:1,understanding:3,hours:3,budget:2,parents:3},created_at:ago(1,'d')},
-  {id:5,name:'עומר בן דוד', phone:'972554444444',email:'omer@gmail.com',  lead_type:'warm',score:11,age:14,has_experience:false,availability:'ערב (16-20)',   meeting_type:'זום',   status:'in_progress',
-   answers:{familiarity:2,experience:1},created_at:ago(30,'m')},
-  {id:6,name:'שי כהן',      phone:'972565555555',email:'shai@gmail.com',  lead_type:'warm',score:10,age:16,has_experience:true, availability:'בוקר (9-12)',   meeting_type:'טלפון', status:'completed',
-   answers:{familiarity:3,experience:3,understanding:2,hours:2,budget:2},created_at:ago(2,'d')},
-  {id:7,name:'נועם פרידמן', phone:'972576666666',email:'noam@gmail.com',  lead_type:'cold',score:4, age:13,has_experience:false,availability:'בוקר (9-12)',   meeting_type:'טלפון', status:'completed',
-   answers:{familiarity:1,experience:1,understanding:1,hours:1,budget:1,parents:2},created_at:ago(3,'d')},
-  {id:8,name:'תמר גולן',    phone:'972587777777',email:'tamar@gmail.com', lead_type:'cold',score:2, age:13,has_experience:false,availability:'צהריים (12-16)',meeting_type:'טלפון', status:'completed',
-   answers:{familiarity:1,experience:1,understanding:1,hours:1,budget:1,parents:1},created_at:ago(4,'d')},
-  {id:9,name:'ליאל מזרחי',  phone:'972598888888',email:'liel@gmail.com',  lead_type:'disqualified',score:0,age:10,has_experience:false,availability:'—',meeting_type:'—',status:'disqualified',
-   answers:{},created_at:ago(2,'d')},
-  {id:10,name:'תום גולדברג', phone:'972509999999',email:'tom@gmail.com',  lead_type:'pending',score:0,age:null,has_experience:false,availability:'—',meeting_type:'—',status:'in_progress',
-   answers:{},created_at:ago(5,'m')},
-];
-DEMO_LEADS.forEach(l=>{if(!l.created_at)l.created_at=ago(2,'h')});
-
-// ── Question definitions ─────────────────────────────────────
-const QUESTIONS=[
-  {key:'familiarity', label:'מה רמת ההיכרות שלך עם אלעד רבי?',
-   opts:['שמעתי עליו השבוע','שמעתי עליו מזמן וצפיתי בכמה סרטונים','צופה בתוכן שלו כבר תקופה ועוקב','הסתפרתי אצלו בעבר ועוקב כבר הרבה זמן'],
-   pts:[0,1,2,4], tone:['neg','mid','pos','pos']},
-  {key:'experience', label:'מה הכי מתאר את הניסיון שלך בתחום הספרות?', infoOnly:true,
-   opts:['אין לי שום ידע בכלל / רק צפיתי בתכנים','סיפרתי כמה חברים בקטנה','סיפרתי מעל 15 אנשים, יודע את הבסיס ויש לי ציוד','עברתי קורס שלם ויש לי ניסיון'],
-   pts:[null,null,null,null], tone:['neu','neu','neu','neu']},
-  {key:'understanding', label:'האם צפית בסרטון ההסברה במלואו והבנת את אופי המסלול?',
-   opts:['לא היה לי כוח לראות ואין לי מושג','ראיתי קצת ולא ממש הבנתי','ראיתי הכל ואני חושב שהבנתי בגדול'],
-   pts:[0,0.5,2], tone:['neg','mid','pos']},
-  {key:'hours', label:'כמה שעות בשבוע אתה מוכן להשקיע במסלול?',
-   opts:['3-4 שעות','6-7 שעות','8-10 שעות','כמה שצריך - אני בא לתת בראש! 💥'],
-   pts:[0,1,2,4], tone:['neg','mid','pos','pos']},
-  {key:'budget', label:'כמה כסף אתה מוכן להשקיע במסלול שמבטיח 100% תוצאות?',
-   opts:['1,500-2,000₪','4,500₪','7,000₪','10,000₪'],
-   pts:[-2,1,2,2], tone:['neg','mid','pos','pos']},
-  {key:'parents', label:'האם ההורים שלך מודעים שאתה רוצה להירשם לאקדמיה?', ageGated:true,
-   opts:['לא סיפרתי להם','זרקתי להם משהו על זה פה ושם','כן הם יודעים אבל צריכים שכנוע','הם יודעים ותומכים בי 💪'],
-   pts:[0,0,1,3], tone:['neg','neg','mid','pos']},
-];
-
-// ── State ────────────────────────────────────────────────────
-let leads=[],curF='done',curP=1;
-const PER=8;
-let visitors=[],visPage=1,visLoaded=false;
-const AVC=['#7c5cfc','#e84040','#e87d20','#3a9de8','#2ecc8e','#c9a84c','#ff6b9d'];
-
-// ── Fetch ────────────────────────────────────────────────────
-async function fetchLeads(){
-  if(DEMO){applyLeads(DEMO_LEADS);return}
-  const btn=document.getElementById('refBtn');
-  const pill=document.getElementById('statusPill');
-  try{
-    if(btn)btn.classList.add('spin');
-    const r=await fetch(N8N_URL,{method:'GET',headers:{'Accept':'application/json'}});
-    if(r.ok){
-      const raw=await r.text();
-      try{
-        const d=JSON.parse(raw);
-        const arr=Array.isArray(d)?d:(d.data?d.data:[d]);
-        if(arr.length>0){
-          applyLeads(arr);
-          if(pill)pill.textContent='מחובר ✓';
-          return;
-        }
-      }catch(e){console.error('JSON parse error:',e)}
-    }
-  }catch(e){console.warn('Fetch failed:',e.message)}
-  finally{if(btn)btn.classList.remove('spin')}
-  if(pill)pill.textContent='לא מחובר';
-  applyLeads(DEMO_LEADS);
-}
-
-// ── Support Expiry ────────────────────────────────────────────
-const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
-function checkSupportExpiry() {
-  leads.forEach(l => {
-    if (l.sale_status === 'purchased' && l.purchased_at) {
-      if (Date.now() - new Date(l.purchased_at) >= FOUR_MONTHS_MS) {
-        l.sale_status = 'support_ended';
-        // Persist to database
-        fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(l.phone)}&sale_status=support_ended`).catch(()=>{});
-        // Send farewell message once per lead via n8n
-        const key = `farewellSent_${l.phone}`;
-        if (!localStorage.getItem(key)) {
-          localStorage.setItem(key, 'true');
-          sendFarewellMessage(l.phone, l.name);
-        }
-      }
-    }
-  });
-}
-
-async function sendFarewellMessage(phone, name) {
-  try {
-    await fetch(`https://alon09.app.n8n.cloud/webhook/support-ended?phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`);
-    console.log(`Farewell sent to ${name} (${phone})`);
-  } catch(e) {
-    console.warn('Failed to send farewell message:', e);
-  }
-}
-
-// ── Console test helper ───────────────────────────────────────
-window.testSupportExpiry = function() {
-  const lead = leads.find(l => l.sale_status === 'purchased');
-  if (!lead) { console.warn('No purchased lead found. Set a lead to "קנה" first.'); return; }
-  const orig = lead.purchased_at;
-  lead.purchased_at = new Date(Date.now() - 5 * 30 * 24 * 60 * 60 * 1000).toISOString();
-  // Remove farewellSent flag so webhook fires during test
-  localStorage.removeItem(`farewellSent_${lead.phone}`);
-  checkSupportExpiry();
-  renderSaleTable();
-  console.log(`✓ Tested support expiry for "${lead.name}". Status is now: ${lead.sale_status}`);
-  // Restore original purchased_at (status stays support_ended for visual check)
-  lead.purchased_at = orig;
-};
-
-function applyLeads(d){
-  let arr=Array.isArray(d)?d:[];
-  if(!Array.isArray(d)&&d&&d.data)arr=Array.isArray(d.data)?d.data:[d.data];
-  if(arr.length>0&&arr[0].json)arr=arr.map(i=>i.json);
-  leads=arr.map(l=>{
-    if(typeof l.answers==='string'){try{l.answers=JSON.parse(l.answers)}catch(e){l.answers={}}}
-    if(!l.answers||typeof l.answers!=='object')l.answers={};
-    if(!l.created_at)l.created_at=new Date().toISOString();
-    // Restore purchased_at from localStorage if missing
-    if(l.phone && !l.purchased_at) {
-      const stored = localStorage.getItem(`purchased_at_${l.phone}`);
-      if(stored) l.purchased_at = stored;
-    }
-    return l;
-  }).filter(l => l.status !== 'opted_out');
-  checkSupportExpiry();
-  updateKPI();updateCharts();updateAlert();updateCounts();render();renderSaleTable();
-}
-
-// ── KPI ──────────────────────────────────────────────────────
-function updateKPI(){
-  const h=leads.filter(l=>l.lead_type==='hot').length;
-  const w=leads.filter(l=>l.lead_type==='warm').length;
-  const c=leads.filter(l=>l.lead_type==='cold').length;
-  const a=leads.filter(l=>l.status==='in_progress').length;
-  [['kT',leads.length],['kH',h],['kW',w],['kC',c],['kA',a]].forEach(([id,v])=>{
-    const el=document.getElementById(id);let cur=0;
-    const t=setInterval(()=>{cur=Math.min(cur+Math.max(1,Math.ceil(v/20)),v);el.textContent=cur;if(cur>=v)clearInterval(t)},30);
-  });
-}
-
-// ── Alert ────────────────────────────────────────────────────
-function updateAlert(){
-  const hd=leads.filter(l=>l.lead_type==='hot'&&l.status==='completed');
-  document.getElementById('alertEl').classList.toggle('show',hd.length>0);
-  document.getElementById('alertChips').innerHTML=hd.slice(0,4).map(l=>`<span class="chip">${l.name}</span>`).join('');
-}
-
-// ── Charts ───────────────────────────────────────────────────
-function updateCharts(){
-  const h=leads.filter(l=>l.lead_type==='hot').length;
-  const w=leads.filter(l=>l.lead_type==='warm').length;
-  const c=leads.filter(l=>l.lead_type==='cold').length;
-  const d=leads.filter(l=>l.lead_type==='disqualified').length;
-  const tot=leads.length||1,ci=251.3;
-  [['lH',h],['lW',w],['lC',c],['lD',d],['dCtr',leads.length]].forEach(([id,v])=>document.getElementById(id).textContent=v);
-  const pH=(h/tot)*ci,pW=(w/tot)*ci,pC=(c/tot)*ci;
-  document.getElementById('dH').style.strokeDasharray=`${pH} ${ci-pH}`;
-  document.getElementById('dH').style.strokeDashoffset='62.8';
-  const oW=62.8-pH;
-  document.getElementById('dW').style.strokeDasharray=`${pW} ${ci-pW}`;
-  document.getElementById('dW').style.strokeDashoffset=oW;
-  document.getElementById('dC').style.strokeDasharray=`${pC} ${ci-pC}`;
-  document.getElementById('dC').style.strokeDashoffset=oW-pW;
-}
-
-function updateSourceChart(){
-  const el=document.getElementById('srcBars');
-  if(!el)return;
-  if(!visitors.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;padding:16px 0">אין נתונים עדיין</div>';return;}
-  const SRC_COLORS={facebook:'#1877F2',instagram:'#E1306C',tiktok:'#69C9D0',google:'#4285F4',whatsapp:'#25D366',youtube:'#FF0000',organic:'#2ecc8e'};
-  const SRC_LABELS={facebook:'פייסבוק 📘',instagram:'אינסטגרם 📸',tiktok:'טיקטוק 🎵',google:'גוגל 🔍',whatsapp:'וואטסאפ 💬',youtube:'יוטיוב ▶️',organic:'אורגני 🌿'};
-  const counts={};
-  visitors.forEach(v=>{
-    const k=(v.utm_source||'').toLowerCase()||'google';
-    counts[k]=(counts[k]||0)+1;
-  });
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const mx=sorted[0]?.[1]||1;
-  el.innerHTML=sorted.map(([k,v])=>`
-    <div class="bar-r">
-      <span class="bar-lbl">${SRC_LABELS[k]||k}</span>
-      <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${SRC_COLORS[k]||'#c9a84c'};transition:width 1s ease"></div></div>
-      <span class="bar-val">${v}</span>
-    </div>`).join('');
-}
-
-// ── Counts ───────────────────────────────────────────────────
-function updateCounts(){
-  const isDisq = l => l.lead_type==='disqualified' || l.status==='disqualified';
-  document.getElementById('tc-done').textContent = leads.filter(l=>l.status==='completed' && !isDisq(l)).length;
-  document.getElementById('tc-hot').textContent  = leads.filter(l=>l.lead_type==='hot').length;
-  document.getElementById('tc-warm').textContent = leads.filter(l=>l.lead_type==='warm').length;
-  document.getElementById('tc-cold').textContent = leads.filter(l=>l.lead_type==='cold').length;
-  document.getElementById('tc-prog').textContent = leads.filter(l=>l.status==='in_progress' && !isDisq(l)).length;
-  document.getElementById('tc-disq').textContent = leads.filter(isDisq).length;
-}
-
-// ── Filter / sort ────────────────────────────────────────────
-function setFilter(btn){
-  switchToLeads();
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');curF=btn.dataset.f;curP=1;render();
-}
-function getFiltered(){
-  const q=document.getElementById('srchIn').value.toLowerCase();
-  return leads.filter(l=>{
-    if(l.sale_status && l.sale_status !== 'pending') return false;
-    const isDisq = l.lead_type==='disqualified' || l.status==='disqualified';
-    const mf=curF==='done'?(l.status==='completed' && !isDisq):
-      curF==='hot'?l.lead_type==='hot':
-      curF==='warm'?l.lead_type==='warm':
-      curF==='cold'?l.lead_type==='cold':
-      curF==='prog'?(l.status==='in_progress' && !isDisq):
-      isDisq;
-    const ms=!q||l.name.toLowerCase().includes(q)||(l.phone||'').includes(q);
-    return mf&&ms;
-  });
-}
-function getSorted(arr){
-  const s=document.getElementById('srtSel').value;
-  return[...arr].sort((a,b)=>s==='sd'?b.score-a.score:s==='sa'?a.score-b.score:s==='name'?a.name.localeCompare(b.name,'he'):new Date(b.created_at)-new Date(a.created_at));
-}
-
-// ── Phone links ──────────────────────────────────────────────
-function phoneLinks(phone) {
-  if (!phone) return '—';
-  return `<a href="https://wa.me/${phone}" target="_blank" title="WhatsApp" style="text-decoration:none;margin-left:6px;font-size:13px">💬</a><a href="tel:+${phone}" title="התקשר" style="text-decoration:none;margin-left:4px;font-size:13px">📞</a>`;
-}
-
-// ── Helpers ──────────────────────────────────────────────────
-function badge(type){
-  const m={hot:'🔥 חם',warm:'🌤️ ממוצע',cold:'❄️ קר',disqualified:'🚫 נפסל',pending:'⏳ בתהליך'};
-  const k={hot:'h',warm:'w',cold:'c',disqualified:'d',pending:'p'};
-  return`<span class="badge ${k[type]||'p'}">${m[type]||'⏳'}</span>`;
-}
-function scoreBar(sc,type){
-  const c={hot:'#e84040',warm:'#e87d20',cold:'#3a9de8',disqualified:'#555',pending:'#c9a84c'}[type]||'#c9a84c';
-  const pct=Math.min(100,(sc/22)*100);
-  return`<div class="sc-cell"><span class="sc-n" style="color:${c}">${sc}</span><div class="sc-bg"><div class="sc-fill" style="width:${pct}%;background:${c}"></div></div></div>`;
-}
-function statusEl(s){
-  return s==='completed'?'<span class="sdot done">הושלם</span>':s==='in_progress'?'<span class="sdot prog">בתהליך</span>':'<span class="sdot disq">נפסל</span>';
-}
-function fmtDate(iso){
-  const d=new Date(iso),df=Date.now()-d;
-  if(df<60000)return'עכשיו';if(df<3600000)return`${Math.floor(df/60000)} דק'`;
-  if(df<86400000)return`${Math.floor(df/3600000)} שע'`;
-  return d.toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
-}
-
-// ── Sale Status ──────────────────────────────────────────────
-const SALE_STATUSES = {
-  'pending': {label:'ממתין', color:'var(--sub)', bg:'rgba(255,255,255,0.05)'},
-  'thinking': {label:'עדיין חושב', color:'var(--warm)', bg:'var(--warm-bg)'},
-  'purchased': {label:'קנה', color:'var(--green)', bg:'var(--green-bg)'},
-  'not_relevant': {label:'לא רלוונטי', color:'var(--cold)', bg:'var(--cold-bg)'},
-  'no_answer': {label:'לא ענה', color:'var(--hot)', bg:'var(--hot-bg)'},
-  'support_ended': {label:'ליווי אישי הסתיים', color:'#7c5cfc', bg:'rgba(124,92,252,0.12)'}
-};
-
-function saleStatusSelect(lead) {
-  const current = lead.sale_status || 'pending';
-  const s = SALE_STATUSES[current] || SALE_STATUSES['pending'];
-  let opts = '';
-  for (const [key, val] of Object.entries(SALE_STATUSES)) {
-    opts += `<option value="${key}" ${key===current?'selected':''}>${val.label}</option>`;
-  }
-  return `<select class="sale-sel" style="background:${s.bg};color:${s.color};border:1px solid ${s.color}33;border-radius:8px;padding:4px 8px;font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;outline:none" onchange="updateSaleStatus('${lead.phone}',this.value,this)">${opts}</select>`;
-}
-
-async function updateSaleStatus(phone, status, el) {
-  const s = SALE_STATUSES[status] || SALE_STATUSES['pending'];
-  el.style.background = s.bg;
-  el.style.color = s.color;
-  el.style.borderColor = s.color + '33';
-  const lead = leads.find(l => l.phone === phone);
-  if (lead) {
-    lead.sale_status = status;
-    if (status === 'purchased') {
-      lead.purchased_at = new Date().toISOString();
-      localStorage.setItem(`purchased_at_${phone}`, lead.purchased_at);
-    }
-  }
-  render();
-  renderSaleTable();
-  try {
-    await fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(phone)}&sale_status=${encodeURIComponent(status)}`);
-  } catch(e) { console.warn('Failed to update sale status:', e); }
-}
-
-// ── Render table ─────────────────────────────────────────────
-function render(){
-  const fl=getSorted(getFiltered());
-  const tot=fl.length,pages=Math.max(1,Math.ceil(tot/PER));
-  if(curP>pages)curP=1;
-  const sl=fl.slice((curP-1)*PER,curP*PER);
-  const tbody=document.getElementById('tbody');
-  document.getElementById('footCnt').textContent=`${tot} תוצאות`;
-  document.getElementById('emptyEl').style.display=sl.length?'none':'block';
-  tbody.innerHTML=sl.map((l,i)=>{
-    const gIdx=(curP-1)*PER+i;
-    const c=AVC[gIdx%AVC.length];
-    const av=`<div class="av" style="background:linear-gradient(135deg,${c}44,${c}22);color:${c};width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:1px solid rgba(255,255,255,.06)">${(l.name||'?')[0]}</div>`;
-    return`<tr>
-      <td>
-        <div class="name-btn" onclick="openDrawer(${l.id})">
-          ${av}
-          <div>
-            <div class="name-txt">${l.name}</div>
-            <small class="name-phone">${l.phone}</small>
-          </div>
-          <span class="name-arrow">← פרטים</span>
-        </div>
-      </td>
-      <td>${badge(l.lead_type)}</td>
-      <td>${scoreBar(l.score,l.lead_type)}</td>
-      <td style="font-family:var(--mono);color:var(--sub)">${l.age||'—'}</td>
-      <td>${l.has_experience?'<span style="font-size:12px;color:var(--green);background:var(--green-bg);padding:3px 8px;border-radius:6px;font-weight:600">✓ כן</span>':'<span style="font-size:12px;color:var(--sub)">—</span>'}</td>
-      <td style="color:var(--sub);font-size:13px">${l.availability||'—'}</td>
-      <td style="color:var(--sub);font-size:13px">${l.meeting_type||'—'}</td>
-      <td>${statusEl(l.status)}</td>
-      <td>${saleStatusSelect(l)}</td>
-      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${l.call_ended_at ? fmtDate(l.call_ended_at) : '—'}</td>
-      <td><button onclick="removeLead(${l.id},event)" title="הסר ליד" style="background:var(--hot-bg);border:1px solid rgba(232,64,64,.25);color:var(--hot);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">✕</button></td>
-    </tr>`;
-  }).join('');
-  const el=document.getElementById('pages');
-  el.innerHTML=pages<=1?'':Array.from({length:pages},(_,i)=>
-    `<button class="pg ${i+1===curP?'on':''}" onclick="goPage(${i+1})">${i+1}</button>`).join('');
-}
-function goPage(p){curP=p;render()}
-
-// ── DRAWER ────────────────────────────────────────────────────
-function openDrawer(id){
-  const lead=leads.find(l=>l.id===id);
-  if(!lead)return;
-
-  const type=lead.lead_type;
-  const gIdx=leads.indexOf(lead);
-  const c=AVC[gIdx%AVC.length];
-
-  const hero=document.getElementById('drwHero');
-  hero.className=`drw-hero ${type}`;
-
-  document.getElementById('drwAv').style.cssText=`background:linear-gradient(135deg,${c}44,${c}22);color:${c}`;
-  document.getElementById('drwAv').textContent=(lead.name||'?')[0];
-  document.getElementById('drwName').textContent=lead.name;
-  document.getElementById('drwPhone').textContent=lead.phone;
-
-  const typeLabel={hot:'🔥 חם',warm:'🌤️ ממוצע',cold:'❄️ קר',disqualified:'🚫 נפסל',pending:'⏳ בתהליך'};
-  const typeCls={hot:'h',warm:'w',cold:'c',disqualified:'d',pending:'p'};
-  const scoreColor={hot:'var(--hot)',warm:'var(--warm)',cold:'var(--cold)',disqualified:'#555',pending:'var(--gold)'}[type]||'var(--gold)';
-  document.getElementById('drwBadges').innerHTML=`
-    <span class="badge ${typeCls[type]||'p'}">${typeLabel[type]||'—'}</span>
-    <div class="score-pill" style="border-color:${scoreColor}20">
-      <span style="color:${scoreColor}">${lead.score}</span>
-      <span class="of">/ 22 נקודות</span>
-    </div>
-    ${lead.has_experience?'<span class="badge" style="background:var(--green-bg);color:var(--green);border-color:rgba(46,204,142,.25)">✓ בעל ניסיון</span>':''}
-  `;
-
-  document.getElementById('di-name').textContent   = lead.name||'—';
-  document.getElementById('di-age').textContent     = lead.age ? `${lead.age} שנים` : '—';
-  // Phone with call and WhatsApp buttons
-  document.getElementById('di-phone').innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-family:var(--mono);font-size:12px">${lead.phone || '—'}</span>
-      <button id="callBtn-${lead.id}"
-        onclick="initiateCall(${lead.id}, '${lead.phone}')"
-        style="padding:5px 14px;background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,142,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        📞 התקשר
-      </button>
-      <a href="https://wa.me/${lead.phone}" target="_blank"
-        style="padding:5px 14px;background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:4px"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        💬 WhatsApp
-      </a>
-      <a href="${zoomWaUrl(lead.phone, lead.name)}" target="_blank"
-        style="padding:5px 14px;background:rgba(41,121,255,0.12);color:#4da6ff;border:1px solid rgba(41,121,255,0.35);border-radius:8px;font-family:var(--body);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;transition:opacity .2s"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        🎥 שלח זום
-      </a>
-      <span style="font-size:11px;color:var(--sub);cursor:pointer;text-decoration:underline" onclick="resetAgentPhone()">שנה מספר שלי</span>
-    </div>`;
-  document.getElementById('di-email').textContent   = lead.email||'—';
-  document.getElementById('di-avail').textContent   = lead.availability||'—';
-  document.getElementById('di-meeting').textContent = lead.meeting_type||'—';
-  document.getElementById('di-date').textContent    = new Date(lead.created_at).toLocaleString('he-IL');
-  document.getElementById('di-score').textContent   = `${lead.score} / 22`;
-
-  const notesVal = lead.notes || localStorage.getItem(`notes_${lead.phone}`) || '';
-  document.getElementById('drwNotes').value = notesVal;
-  document.getElementById('drwNotes').dataset.phone = lead.phone;
-
-  // Coaching section
-  const coachingSection = document.getElementById('coachingSection');
-  const coachingText = document.getElementById('coachingText');
-  const coachingMarker = '=== ניתוח מאמן ===';
-  const markerIdx = notesVal.indexOf(coachingMarker);
-  if (coachingSection && markerIdx !== -1) {
-    coachingText.textContent = notesVal.slice(markerIdx + coachingMarker.length).trim();
-    coachingSection.style.display = 'block';
-  } else if (coachingSection) {
-    coachingSection.style.display = 'none';
-  }
-  document.getElementById('notesSaved').style.opacity = '0';
-
-  let ans={};
-  try{ans=typeof lead.answers==='string'?JSON.parse(lead.answers):(lead.answers||{})}catch{}
-
-  const ageVal=lead.age||99;
-  const drwAns=document.getElementById('drwAnswers');
-  drwAns.innerHTML=QUESTIONS.filter(q=>!q.ageGated||(ageVal>=12&&ageVal<=18)).map(q=>{
-    const chosen=ans[q.key];
-    if(chosen===undefined&&Object.keys(ans).length===0){
-      return`<div class="q-block"><div class="q-label">${q.label}</div><div style="color:var(--sub);font-size:13px;padding:8px 12px;background:var(--s2);border-radius:10px;border:1px solid var(--border)">טרם נענה</div></div>`;
-    }
-    const opts=q.opts.map((opt,i)=>{
-      const isChosen=Number(chosen)===(i+1);
-      const tone=q.tone[i];
-      const pts=q.pts[i];
-      const ptsStr=q.infoOnly?'מידע בלבד':pts===null?'—':pts>=2?`+${pts}`:pts<0?`${pts}`:`+${pts}`;
-      return`<div class="q-opt ${isChosen?`chosen ${tone}`:''}">
-        <div class="q-check">${isChosen?'✓':''}</div>
-        <span>${i+1}. ${opt}</span>
-        ${!q.infoOnly?`<span class="q-pts">${ptsStr}</span>`:`<span class="q-pts" style="color:var(--cold)">מידע</span>`}
-      </div>`;
-    }).join('');
-    const infoNote=q.infoOnly?'<div style="font-size:11px;color:var(--cold);margin-bottom:8px;padding:6px 10px;background:var(--cold-bg);border-radius:7px;border:1px solid rgba(58,157,232,.2)">ℹ️ שאלת מידע בלבד — לא משפיעה על הניקוד</div>':'';
-    return`<div class="q-block">${infoNote}<div class="q-label">${q.label}</div><div class="q-opts">${opts}</div></div>`;
-  }).join('');
-
-  // Init conversation panel for this lead
-  _convReset();
-  convPhone=lead.phone;
-  convLeadName=lead.name||'';
-  if(lead.human_agent){
-    convInControl=true;
-    document.getElementById('convTakeBtn').style.display='none';
-    document.getElementById('convReleaseBtn').style.display='';
-    document.getElementById('convAgentBadge').style.display='';
-    document.getElementById('convInputWrap').style.display='block';
-    document.getElementById('convMsgsWrap').style.display='block';
-    _convStatus('בשליטה — הבוט עצר.');
-    loadConversation();
-  }
-
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-  document.body.style.overflow='hidden';
-
-}
-
-function closeDrawer(){
-  document.getElementById('overlay').classList.remove('open');
-  document.getElementById('drawer').classList.remove('open');
-  document.body.style.overflow='';
-  _convReset();
-}
-
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
-
-// ── WhatsApp Conversation Takeover ────────────────────────────
-let convPhone=null,convInterval=null,convInControl=false,convLeadName='';
-
-function _convStatus(msg){const el=document.getElementById('convStatus');if(el)el.textContent=msg;}
-
-function _fmtConvTime(isoStr){
-  if(!isoStr)return'';
-  try{return new Date(isoStr).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});}catch{return'';}
-}
-
-function _renderMessages(messages){
-  const wrap=document.getElementById('convMsgs');
-  if(!wrap)return;
-  if(!messages||messages.length===0){wrap.innerHTML='<div class="conv-empty">אין הודעות עדיין</div>';return;}
-  wrap.innerHTML=messages.map(m=>{
-    const isIn=m.direction==='in';
-    const agentClass=(!isIn&&m.is_agent)?' agent':'';
-    const label=isIn?'ליד':(m.is_agent?'סוכן':'בוט');
-    return`<div class="msg-bubble ${isIn?'msg-in':'msg-out'+agentClass}">
-      <span class="msg-label">${label}</span>
-      <span>${(m.body||'').replace(/\n/g,'<br>')}</span>
-      <span class="msg-time">${_fmtConvTime(m.sent_at)}</span>
-    </div>`;
-  }).join('');
-  wrap.scrollTop=wrap.scrollHeight;
-}
-
-async function loadConversation(){
-  if(!convPhone)return;
-  const wrap=document.getElementById('convMsgsWrap');
-  const msgs=document.getElementById('convMsgs');
-  if(!wrap||!msgs)return;
-  wrap.style.display='block';
-  msgs.innerHTML='<div class="conv-loading">טוען שיחה...</div>';
-  _convStatus('');
-  try{
-    const r=await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(convPhone)}`);
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    const data=await r.json();
-    _renderMessages(data.messages||[]);
-    if(!convInterval){convInterval=setInterval(()=>{if(convPhone)loadConversation();},15000);}
-  }catch(e){
-    msgs.innerHTML=`<div class="conv-empty">שגיאה בטעינה: ${e.message}</div>`;
-  }
-}
-
-async function takeoverConversation(){
-  if(!convPhone)return;
-  const btn=document.getElementById('convTakeBtn');
-  if(btn){btn.disabled=true;btn.textContent='...מעביר שליטה';}
-  try{
-    const r=await fetch(WA_TAKEOVER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone})});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    convInControl=true;
-    document.getElementById('convTakeBtn').style.display='none';
-    document.getElementById('convReleaseBtn').style.display='';
-    document.getElementById('convAgentBadge').style.display='';
-    document.getElementById('convInputWrap').style.display='block';
-    document.getElementById('convMsgsWrap').style.display='block';
-    _convStatus('בשליטה — הבוט עצר. כל הודעה שתשלח תגיע ישירות מהמספר של הבוט.');
-    loadConversation();
-  }catch(e){
-    _convStatus(`שגיאה: ${e.message}`);
-    if(btn){btn.disabled=false;btn.textContent='🎯 קח שליטה';}
-  }
-}
-
-async function releaseConversation(){
-  if(!convPhone)return;
-  const btn=document.getElementById('convReleaseBtn');
-  if(btn){btn.disabled=true;btn.textContent='...מחזיר לבוט';}
-  try{
-    const r=await fetch(WA_RELEASE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone})});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    convInControl=false;
-    document.getElementById('convTakeBtn').style.display='';
-    document.getElementById('convTakeBtn').disabled=false;
-    document.getElementById('convTakeBtn').textContent='🎯 קח שליטה';
-    document.getElementById('convReleaseBtn').style.display='none';
-    document.getElementById('convAgentBadge').style.display='none';
-    document.getElementById('convInputWrap').style.display='none';
-    _convStatus('הבוט חזר לשליטה על השיחה.');
-  }catch(e){
-    _convStatus(`שגיאה: ${e.message}`);
-    if(btn){btn.disabled=false;btn.textContent='🔓 שחרר לבוט';}
-  }
-}
-
-async function sendAgentMessage(){
-  if(!convPhone||!convInControl)return;
-  const ta=document.getElementById('convMsgText');
-  const btn=document.getElementById('convSendBtn');
-  const msg=(ta?ta.value:'').trim();
-  if(!msg)return;
-  if(btn)btn.disabled=true;
-  try{
-    const r=await fetch(WA_SEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone,message:msg})});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    if(ta){ta.value='';ta.style.height='auto';}
-    const wrap=document.getElementById('convMsgs');
-    if(wrap){
-      const now=new Date().toISOString();
-      const div=document.createElement('div');
-      div.className='msg-bubble msg-out agent';
-      div.innerHTML=`<span class="msg-label">סוכן</span><span>${msg.replace(/\n/g,'<br>')}</span><span class="msg-time">${_fmtConvTime(now)}</span>`;
-      wrap.appendChild(div);
-      wrap.scrollTop=wrap.scrollHeight;
-    }
-    _convStatus('');
-  }catch(e){
-    _convStatus(`שגיאה בשליחה: ${e.message}`);
-  }finally{
-    if(btn)btn.disabled=false;
-  }
-}
-
-function _convReset(){
-  convPhone=null;convInControl=false;
-  if(convInterval){clearInterval(convInterval);convInterval=null;}
-  const el=id=>document.getElementById(id);
-  if(el('convMsgsWrap'))el('convMsgsWrap').style.display='none';
-  if(el('convInputWrap'))el('convInputWrap').style.display='none';
-  if(el('convTakeBtn')){el('convTakeBtn').style.display='';el('convTakeBtn').disabled=false;el('convTakeBtn').textContent='🎯 קח שליטה';}
-  if(el('convReleaseBtn'))el('convReleaseBtn').style.display='none';
-  if(el('convAgentBadge'))el('convAgentBadge').style.display='none';
-  if(el('convStatus'))el('convStatus').textContent='';
-  if(el('convTemplateWrap'))el('convTemplateWrap').style.display='none';
-  if(el('tmplCustomerName'))el('tmplCustomerName').value='';
-  if(el('tmplSalesperson'))el('tmplSalesperson').value='';
-  convLeadName='';
-}
-
-function toggleTemplateForm(){
-  const wrap=document.getElementById('convTemplateWrap');
-  if(!wrap)return;
-  const open=wrap.style.display==='none';
-  wrap.style.display=open?'block':'none';
-  if(open){
-    const nameInput=document.getElementById('tmplCustomerName');
-    if(nameInput&&!nameInput.value&&convLeadName)nameInput.value=convLeadName;
-  }
-}
-
-async function sendTemplate(){
-  if(!convPhone)return;
-  const customerName=(document.getElementById('tmplCustomerName')?.value||'').trim();
-  const salesperson=(document.getElementById('tmplSalesperson')?.value||'').trim();
-  if(!customerName||!salesperson){_convStatus('נא למלא שם לקוח ושם איש מכירות.');return;}
-  const btn=document.getElementById('tmplSendBtn');
-  if(btn){btn.disabled=true;btn.textContent='...שולח';}
-  try{
-    const r=await fetch(WA_TEMPLATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:convPhone,customerName,salesperson})});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    _convStatus('✅ תבנית נשלחה! הלקוח יקבל הודעה ברגעים הקרובים.');
-    document.getElementById('convTemplateWrap').style.display='none';
-  }catch(e){
-    _convStatus(`שגיאה בשליחת תבנית: ${e.message}`);
-  }finally{
-    if(btn){btn.disabled=false;btn.textContent='📨 שלח תבנית';}
-  }
-}
-
-// ── Call Initiation ───────────────────────────────────────────
-async function initiateCall(leadId, leadPhone) {
-  // Get or prompt for agent phone
-  let agentPhone = localStorage.getItem('agentPhone') || '';
-  if (!agentPhone) {
-    agentPhone = prompt('הכנס את מספר הטלפון שלך (כולל קוד מדינה, למשל: 972501234567 או +972501234567):');
-    if (!agentPhone) return;
-    agentPhone = agentPhone.replace(/[\s+\-()]/g, '');
-    localStorage.setItem('agentPhone', agentPhone);
-  }
-
-  const btn = document.getElementById('callBtn-' + leadId);
-  if (btn) {
-    btn.textContent = '⏳ מחבר...';
-    btn.disabled = true;
-    btn.style.opacity = '0.7';
-  }
-
-  try {
-    const res = await fetch('https://alon09.app.n8n.cloud/webhook/initiate-call', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        leadId: String(leadId),
-        leadPhone: String(leadPhone),
-        agentPhone: agentPhone
-      })
-    });
-
-    if (!res.ok) throw new Error('שגיאת שרת: ' + res.status);
-
-    if (btn) {
-      btn.textContent = '📞 שיחה מתחברת...';
-      btn.style.background = 'rgba(46,204,142,0.25)';
-      btn.style.color = 'var(--green)';
-      btn.style.borderColor = 'rgba(46,204,142,0.5)';
-      btn.style.opacity = '1';
-    }
-
-    // Reset after 60 seconds
-    setTimeout(() => {
-      if (btn) {
-        btn.textContent = '📞 התקשר';
-        btn.disabled = false;
-        btn.style.background = 'var(--green-bg)';
-        btn.style.color = 'var(--green)';
-        btn.style.borderColor = 'rgba(46,204,142,0.35)';
-        btn.style.opacity = '1';
-      }
-    }, 60000);
-
-  } catch (e) {
-    if (btn) {
-      btn.textContent = '❌ שגיאה - נסה שוב';
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btn.style.background = 'var(--hot-bg)';
-      btn.style.color = 'var(--hot)';
-    }
-    console.error('Call error:', e);
-    setTimeout(() => {
-      if (btn) {
-        btn.textContent = '📞 התקשר';
-        btn.style.background = 'var(--green-bg)';
-        btn.style.color = 'var(--green)';
-        btn.style.borderColor = 'rgba(46,204,142,0.35)';
-      }
-    }, 4000);
-  }
-}
-
-function zoomWaUrl(phone, name) {
-  const msg = `שלום ${name}! 👋\nמצרף לך את הלינק לשיחת הזום שלנו:\n${ZOOM_LINK}\n\nמחכה לדבר איתך! 😊`;
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-}
-
-function resetAgentPhone() {
-  localStorage.removeItem('agentPhone');
-  alert('מספר הטלפון שלך אופס. בשיחה הבאה תתבקש להכניס אותו מחדש.');
-}
-
-// ── WhatsApp Conversation Panel ───────────────────────────────
-// ─────────────────────────────────────────────────────────────
-
-// ── Refresh ──────────────────────────────────────────────────
-async function doRefresh(){
-  const btn=document.getElementById('btnRef');
-  btn.classList.add('spin');btn.disabled=true;
-  await fetchLeads();
-  setTimeout(()=>{btn.classList.remove('spin');btn.disabled=false},600);
-}
-
-// ── Init ─────────────────────────────────────────────────────
-fetchLeads();
-fetchVisitors();
-setInterval(fetchLeads, 24 * 60 * 60 * 1000); // check once a day
-
-// ── Sale Table ───────────────────────────────────────────────
-let curSaleFilter = 'all';
-
-function setSaleFilter(btn) {
-  document.querySelectorAll('.sale-tab').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  curSaleFilter = btn.dataset.sf;
-  renderSaleTable();
-}
-
-function renderSaleTable() {
-  const saleLeads = leads.filter(l => l.sale_status && l.sale_status !== 'pending');
-  const el = id => document.getElementById(id);
-  if(el('sAll')) el('sAll').textContent = saleLeads.length;
-  if(el('sThink')) el('sThink').textContent = saleLeads.filter(l=>l.sale_status==='thinking').length;
-  if(el('sPurch')) el('sPurch').textContent = saleLeads.filter(l=>l.sale_status==='purchased').length;
-  if(el('sNoAns')) el('sNoAns').textContent = saleLeads.filter(l=>l.sale_status==='no_answer').length;
-  if(el('sNotRel')) el('sNotRel').textContent = saleLeads.filter(l=>l.sale_status==='not_relevant').length;
-  if(el('sSupEnd')) el('sSupEnd').textContent = saleLeads.filter(l=>l.sale_status==='support_ended').length;
-  const filtered = curSaleFilter === 'all' ? saleLeads : saleLeads.filter(l => l.sale_status === curSaleFilter);
-  const tbody = document.getElementById('saleTbody');
-  const emptyEl = document.getElementById('saleEmptyEl');
-  if(document.getElementById('saleFootCnt')) document.getElementById('saleFootCnt').textContent = `${filtered.length} תוצאות`;
-  if (!tbody) return;
-  if (emptyEl) emptyEl.style.display = filtered.length ? 'none' : 'block';
-  tbody.innerHTML = filtered.map(l => {
-    const s = SALE_STATUSES[l.sale_status] || SALE_STATUSES['pending'];
-    return `<tr>
-      <td><span style="font-weight:600;cursor:pointer;color:var(--gold);text-decoration:underline" onclick="openDrawer(${l.id})">${l.name || '—'}</span></td>
-      <td style="font-family:var(--mono);color:var(--sub);font-size:13px">${l.phone || '—'}</td>
-      <td>${badge(l.lead_type)}</td>
-      <td>${scoreBar(l.score,l.lead_type)}</td>
-      <td style="font-family:var(--mono);color:var(--sub)">${l.age||'—'}</td>
-      <td style="color:var(--sub);font-size:13px">${l.meeting_type||'—'}</td>
-      <td>${saleStatusSelect(l)}</td>
-      <td style="color:var(--sub);font-size:12px;font-family:var(--mono)">${fmtDate(l.updated_at||l.created_at)}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Remove Lead ───────────────────────────────────────────────
-function removeLead(id, e) {
-  e.stopPropagation();
-  const lead = leads.find(l => l.id === id);
-  if (!lead) return;
-  if (!confirm(`להסיר את ${lead.name} מהרשימה?`)) return;
-  leads = leads.filter(l => l.id !== id);
-  updateKPI(); updateCharts(); updateAlert(); updateCounts(); render(); renderSaleTable();
-}
-
-// ── Visitors ─────────────────────────────────────────────────
-function platformLabel(src) {
-  const map = {facebook:'פייסבוק',instagram:'אינסטגרם',google:'גוגל',tiktok:'טיקטוק',whatsapp:'וואטסאפ',organic:'אורגני',youtube:'יוטיוב'};
-  return map[(src||'').toLowerCase()] || src || 'ישיר';
-}
-function fmtSeconds(s) {
-  if (!s || s < 1) return '–';
-  if (s < 60) return s + 'ש׳';
-  const m = Math.floor(s/60), sec = s%60;
-  return m + 'ד׳' + (sec ? ' ' + sec + 'ש׳' : '');
-}
-function deviceIcon(d) {
-  return d === 'mobile' ? '📱' : d === 'tablet' ? '💻' : '🖥️';
-}
-
+// ============================================================
+// Configuration
+// ============================================================
+const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
+const LEAD_ACTION_URL  = 'https://alon09.app.n8n.cloud/webhook/lead-action';
+const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
+
+let allLeads = [];
+let visitors = [];
+let currentFilter = 'all';
+let currentLeadPhone = null;
+let visPage = 1;
+const VIS_PER = 30;
+
+// ============================================================
+// Visitors fetch + charts
+// ============================================================
 async function fetchVisitors() {
   try {
     const r = await fetch(VISITORS_URL);
-    visitors = await r.json();
-    if (!Array.isArray(visitors)) visitors = [];
+    const data = await r.json();
+    visitors = Array.isArray(data) ? data : [];
   } catch(e) { visitors = []; }
-  visLoaded = true;
-  document.getElementById('tc-visitors').textContent = visitors.length;
-  renderVisitors();
-  updateSourceChart();
-  updateLocationChart();
+  document.getElementById('cnt-visitors').textContent = visitors.length;
+  renderSourceChart();
+  renderGeoChart();
+  if (document.getElementById('visSection').style.display !== 'none') {
+    renderVisitorsTable();
+  }
 }
 
-function updateLocationChart(){
-  const el=document.getElementById('locBars');
-  if(!el)return;
-  if(!visitors.length){el.innerHTML='<div style="color:var(--sub);font-size:13px;padding:16px 0">אין נתונים עדיין</div>';return;}
-  // Group by city; fall back to country for visitors without city
-  const counts={};
-  visitors.forEach(v=>{
-    let k = (v.city||'').trim();
-    if(!k){
-      k = (v.country||'').trim() || 'לא ידוע';
-    } else if (v.country && v.country !== 'ישראל') {
-      k = k + ', ' + v.country;
-    }
-    counts[k]=(counts[k]||0)+1;
+function renderSourceChart() {
+  const el = document.getElementById('srcBars');
+  if (!el) return;
+  if (!visitors.length) {
+    el.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0">אין נתוני מבקרים עדיין</div>';
+    return;
+  }
+  const SRC_COLORS = { facebook:'#1877F2', instagram:'#E1306C', tiktok:'#69C9D0', google:'#4285F4', organic:'#2ecc8e', youtube:'#FF0000' };
+  const SRC_LABELS = { facebook:'פייסבוק 📘', instagram:'אינסטגרם 📷', tiktok:'טיקטוק 🎵', google:'גוגל 🔍', organic:'אורגני 🌿', youtube:'יוטיוב ▶️' };
+  const counts = {};
+  visitors.forEach(v => {
+    const k = (v.utm_source || '').toLowerCase().trim() || 'ישיר';
+    counts[k] = (counts[k] || 0) + 1;
   });
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const mx=sorted[0]?.[1]||1;
-  const colors=['#c9a84c','#e84040','#3a9de8','#2ecc8e','#e87d20','#7c5cfc','#ff6b9d','#5c5c5c'];
-  el.innerHTML=sorted.map(([k,v],i)=>`
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7);
+  const mx = sorted[0]?.[1] || 1;
+  el.innerHTML = sorted.map(([k, v]) => `
     <div class="bar-r">
-      <span class="bar-lbl">📍 ${k}</span>
-      <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${colors[i]||'#c9a84c'};transition:width 1s ease"></div></div>
+      <span class="bar-lbl">${SRC_LABELS[k] || k}</span>
+      <div class="bar-track"><div class="bar-seg" style="width:${(v/mx)*100}%;background:${SRC_COLORS[k] || '#c9a84c'}"></div></div>
       <span class="bar-val">${v}</span>
     </div>`).join('');
 }
 
-function renderVisitors() {
+function renderGeoChart() {
+  const el = document.getElementById('geoBars');
+  if (!el) return;
+  if (!visitors.length) {
+    el.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:8px 0">אין נתוני מבקרים עדיין</div>';
+    return;
+  }
+  const COLORS = ['#c9a84c','#e84040','#3a9de8','#2ecc8e','#e87d20','#a06cd5','#69C9D0','#E1306C'];
+  const counts = {};
+  visitors.forEach(v => {
+    const city = (v.city || v.country || 'לא ידוע').trim();
+    counts[city] = (counts[city] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const mx = sorted[0]?.[1] || 1;
+  el.innerHTML = sorted.map(([city, cnt], i) => `
+    <div class="bar-r">
+      <span class="bar-lbl">${escapeHtml(city)} 📍</span>
+      <div class="bar-track"><div class="bar-seg" style="width:${(cnt/mx)*100}%;background:${COLORS[i % COLORS.length]}"></div></div>
+      <span class="bar-val">${cnt}</span>
+    </div>`).join('');
+}
+
+function renderVisitorsTable() {
   const tbody = document.getElementById('visTbody');
-  const emptyEl = document.getElementById('visEmptyEl');
-  const footCnt = document.getElementById('visFootCnt');
-  const pagesEl = document.getElementById('visPages');
   if (!tbody) return;
   const total = visitors.length;
-  const totalPages = Math.max(1, Math.ceil(total / PER));
+  const totalPages = Math.max(1, Math.ceil(total / VIS_PER));
   if (visPage > totalPages) visPage = 1;
-  const slice = visitors.slice((visPage-1)*PER, visPage*PER);
-  if (footCnt) footCnt.textContent = `${total} מבקרים`;
-  if (emptyEl) emptyEl.style.display = total ? 'none' : 'block';
-  tbody.innerHTML = slice.map(v => {
-    const pages = Array.isArray(v.pages_visited) ? v.pages_visited : (v.pages_visited ? JSON.parse(v.pages_visited) : [v.landing_page]);
-    const pagesStr = pages.length > 1 ? `<span title="${pages.join(' → ')}" style="cursor:help">${pages.length} דפים</span>` : (pages[0] || '–');
-    return `<tr>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--sub)">${fmtDate(v.created_at)}</td>
-      <td><span style="font-weight:600;color:var(--gold)">${platformLabel(v.utm_source)}</span>${v.utm_campaign ? `<br><span style="font-size:11px;color:var(--sub)">${v.utm_campaign}</span>` : ''}</td>
-      <td style="font-size:13px;color:var(--text)">${v.city ? `📍 ${v.city}` : '–'}${v.country && v.country !== 'ישראל' ? `<br><span style="font-size:11px;color:var(--sub)">${v.country}</span>` : ''}</td>
-      <td style="font-size:16px">${deviceIcon(v.device_type)}<span style="font-size:11px;color:var(--sub);margin-right:4px">${v.device_type||'–'}</span></td>
-      <td style="color:var(--sub);font-size:13px">${v.browser||'–'}</td>
-      <td style="font-family:var(--mono);font-size:12px;color:var(--sub);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${v.landing_page||''}">${v.landing_page||'–'}</td>
-      <td style="font-family:var(--mono);color:var(--text)">${fmtSeconds(v.time_on_site)}</td>
-      <td style="font-size:13px;color:var(--sub)">${pagesStr}</td>
-    </tr>`;
-  }).join('');
+  const slice = visitors.slice((visPage - 1) * VIS_PER, visPage * VIS_PER);
+
+  document.getElementById('visFootCnt').textContent = `${total} מבקרים`;
+
+  const SRC_LABELS = { facebook:'פייסבוק 📘', instagram:'אינסטגרם 📷', tiktok:'טיקטוק 🎵', google:'גוגל 🔍', organic:'אורגני 🌿', youtube:'יוטיוב ▶️' };
+  const deviceIcon = d => d === 'mobile' ? '📱' : d === 'tablet' ? '💻' : '🖥️';
+  const fmtSec = s => { if (!s || s < 1) return '–'; if (s < 60) return s + "ש'"; return Math.floor(s/60) + "ד' " + (s%60 || '') };
+
+  tbody.innerHTML = slice.map(v => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--sub)">${formatRelative(v.created_at)}</td>
+      <td style="font-weight:600;color:var(--gold)">${SRC_LABELS[(v.utm_source||'').toLowerCase()] || v.utm_source || 'ישיר'}</td>
+      <td style="color:var(--sub);font-size:12px">${escapeHtml(v.city || v.country || '—')}</td>
+      <td class="hide-mobile" style="font-size:14px">${deviceIcon(v.device_type)}<span style="font-size:11px;color:var(--sub);margin-right:4px">${v.device_type||'–'}</span></td>
+      <td class="hide-mobile" style="color:var(--sub);font-size:13px">${v.browser||'–'}</td>
+      <td class="hide-mobile" style="font-family:var(--mono);font-size:12px">${fmtSec(v.time_on_site)}</td>
+      <td class="hide-mobile" style="color:var(--sub);font-size:12px">${v.utm_campaign ? escapeHtml(v.utm_campaign) : '—'}</td>
+    </tr>`).join('');
+
   // Pagination
-  if (pagesEl) {
-    let html = '';
-    if (visPage > 1) html += `<button class="page-btn" onclick="visPage--;renderVisitors()">‹</button>`;
-    for (let i = 1; i <= totalPages; i++) {
-      if (totalPages <= 7 || i===1 || i===totalPages || Math.abs(i-visPage)<=1) {
-        html += `<button class="page-btn${i===visPage?' on':''}" onclick="visPage=${i};renderVisitors()">${i}</button>`;
-      } else if (Math.abs(i-visPage)===2) html += `<span style="color:var(--sub);padding:0 4px">…</span>`;
-    }
-    if (visPage < totalPages) html += `<button class="page-btn" onclick="visPage++;renderVisitors()">›</button>`;
-    pagesEl.innerHTML = html;
+  const pagesEl = document.getElementById('visPages');
+  let html = '';
+  if (visPage > 1) html += `<button class="btn-ref" onclick="visPage--;renderVisitorsTable()" style="padding:4px 8px">‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - visPage) <= 1) {
+      html += `<button class="btn-ref${i === visPage ? '' : ''}" onclick="visPage=${i};renderVisitorsTable()" style="padding:4px 8px;${i===visPage?'border-color:var(--gold);color:var(--gold)':''}">${i}</button>`;
+    } else if (Math.abs(i - visPage) === 2) html += `<span style="color:var(--sub);padding:0 2px">…</span>`;
   }
+  if (visPage < totalPages) html += `<button class="btn-ref" onclick="visPage++;renderVisitorsTable()" style="padding:4px 8px">›</button>`;
+  pagesEl.innerHTML = html;
 }
 
 function switchToVisitors() {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
   document.getElementById('tabVisitors').classList.add('on');
-  document.getElementById('leadsTableWrap').style.display = 'none';
-  document.getElementById('visitorsSection').style.display = 'block';
-  fetchVisitors();
+  document.getElementById('tblWrap').style.display = 'none';
+  document.getElementById('visSection').style.display = '';
+  if (!visitors.length) fetchVisitors();
+  else renderVisitorsTable();
 }
 
 function switchToLeads() {
   document.getElementById('tabVisitors').classList.remove('on');
-  document.getElementById('leadsTableWrap').style.display = '';
-  document.getElementById('visitorsSection').style.display = 'none';
+  document.getElementById('tblWrap').style.display = '';
+  document.getElementById('visSection').style.display = 'none';
 }
 
-// ── Notes ────────────────────────────────────────────────────
-async function saveNotes() {
-  const textarea = document.getElementById('drwNotes');
-  const phone = textarea.dataset.phone;
-  const notes = textarea.value;
-  const savedEl = document.getElementById('notesSaved');
-
-  const lead = leads.find(l => l.phone === phone);
-  if (lead) lead.notes = notes;
-  localStorage.setItem(`notes_${phone}`, notes);
-
-  savedEl.textContent = '✓ נשמר בהצלחה';
-  savedEl.style.color = 'var(--green)';
-  savedEl.style.opacity = '1';
-  textarea.style.borderColor = 'rgba(46,204,142,0.5)';
-  setTimeout(() => { savedEl.style.opacity = '0'; textarea.style.borderColor = 'var(--border)'; }, 2000);
-
-  fetch(`${N8N_URL.replace('leads-data','update-sale-status')}?phone=${encodeURIComponent(phone)}&notes=${encodeURIComponent(notes)}`).catch(() => {});
+// ============================================================
+// Source helpers
+// ============================================================
+function sourceInfo(s) {
+  if (!s) return { icon: '—', label: '', cls: '' };
+  const lower = s.toLowerCase();
+  if (lower.includes('tiktok'))    return { icon: '🎵', label: 'TikTok',    cls: 'tiktok' };
+  if (lower.includes('instagram') || lower.includes('ig')) return { icon: '📷', label: 'Instagram', cls: 'instagram' };
+  if (lower.includes('facebook') || lower.includes('fb'))  return { icon: '📘', label: 'Facebook',  cls: 'facebook' };
+  if (lower.includes('google'))    return { icon: '🔍', label: 'Google',    cls: 'google' };
+  if (lower.includes('organic') || lower.includes('אורגני')) return { icon: '🌿', label: 'אורגני', cls: 'organic' };
+  return { icon: '🔗', label: s, cls: '' };
 }
 
+function sourceBadge(s) {
+  const { icon, label, cls } = sourceInfo(s);
+  if (!label) return '<span style="color:var(--sub)">—</span>';
+  return `<span class="src-badge ${cls}">${icon} ${label}</span>`;
+}
+
+// ============================================================
+// Urgency scoring
+// ============================================================
+function urgencyScore(l) {
+  let score = 0;
+  const now = Date.now();
+  const hoursSince = (now - new Date(l.updated_at || 0).getTime()) / 3600000;
+
+  if (l.stage === 'READY')      score += 80;
+  if (l.stage === 'OBJECTION')  score += 40;
+  if (l.stage === 'ACTIVE')     score += 10;
+
+  score += (l.readiness_score || 0) * 5;
+
+  if (l.next_check_at && new Date(l.next_check_at) < new Date()) {
+    const overdueH = (now - new Date(l.next_check_at).getTime()) / 3600000;
+    score += Math.min(50, overdueH * 2);
+  }
+
+  if (hoursSince > 24 && l.stage !== 'NURTURE' && l.stage !== 'WON' && l.stage !== 'DEAD' && l.stage !== 'NEW') {
+    score += Math.min(30, hoursSince * 0.5);
+  }
+  return score;
+}
+
+function urgencyIcon(score) {
+  if (score >= 120) return '<span class="urg-fire">🔥🔥</span>';
+  if (score >= 80)  return '<span class="urg-fire">🔥</span>';
+  if (score >= 50)  return '<span class="urg-warn">⚠️</span>';
+  return '<span class="urg-norm">•</span>';
+}
+
+function urgencyReason(l) {
+  const now = Date.now();
+  const hoursSince = Math.floor((now - new Date(l.updated_at || 0).getTime()) / 3600000);
+
+  if (l.stage === 'READY') {
+    if ((l.readiness_score || 0) >= 8) return { text: 'מוכן לסגירה — דחוף', cls: 'urg-reason-hot' };
+    return { text: 'אלעד צריך להתקשר', cls: 'urg-reason-warn' };
+  }
+  if (l.stage === 'OBJECTION') {
+    if (l.next_check_at && new Date(l.next_check_at) < new Date()) {
+      const h = Math.floor((now - new Date(l.next_check_at).getTime()) / 3600000);
+      return { text: `מעקב איחר ${h} ש'`, cls: 'urg-reason-hot' };
+    }
+    if (hoursSince > 48) return { text: `שקט ${hoursSince} ש' עם התנגדות`, cls: 'urg-reason-warn' };
+    return { text: 'יש התנגדות', cls: 'urg-reason-norm' };
+  }
+  if (l.stage === 'ACTIVE') {
+    if (l.next_check_at && new Date(l.next_check_at) < new Date()) {
+      const h = Math.floor((now - new Date(l.next_check_at).getTime()) / 3600000);
+      return { text: `תזכורת איחרה ${h} ש'`, cls: 'urg-reason-warn' };
+    }
+    if (hoursSince > 48) return { text: `שקט ${hoursSince} ש'`, cls: 'urg-reason-norm' };
+  }
+  return { text: '—', cls: 'urg-reason-norm' };
+}
+
+// ============================================================
+// Fetch + Render
+// ============================================================
+async function fetchLeads() {
+  const refBtn = document.getElementById('refBtn');
+  refBtn.classList.add('spin');
+  try {
+    const r = await fetch(LEADS_DATA_URL);
+    const data = await r.json();
+    allLeads = Array.isArray(data) ? data : (data.leads || []);
+    renderKPIs();
+    renderTabs();
+    renderCallList();
+    renderTable();
+  } catch (e) {
+    console.error('fetch failed', e);
+  } finally {
+    refBtn.classList.remove('spin');
+  }
+}
+
+function renderKPIs() {
+  const today = new Date().toISOString().split('T')[0];
+  const thisMonth = new Date().toISOString().substring(0, 7);
+
+  document.getElementById('kpi-new').textContent =
+    allLeads.filter(l => (l.created_at || '').startsWith(today)).length;
+  document.getElementById('kpi-active').textContent =
+    allLeads.filter(l => l.stage === 'ACTIVE').length;
+  document.getElementById('kpi-obj').textContent =
+    allLeads.filter(l => l.stage === 'OBJECTION').length;
+  document.getElementById('kpi-ready').textContent =
+    allLeads.filter(l => l.stage === 'READY').length;
+  const wonThis = allLeads.filter(l => l.stage === 'WON' && (l.updated_at || '').startsWith(thisMonth));
+  document.getElementById('kpi-won').textContent = wonThis.length;
+  document.getElementById('kpi-nurture').textContent =
+    allLeads.filter(l => l.stage === 'NURTURE').length;
+
+  // Revenue estimate: count paid leads this month
+  const revLeads = allLeads.filter(l => l.stage === 'WON' && l.sale_status === 'paid' && (l.updated_at || '').startsWith(thisMonth));
+  const rev = revLeads.reduce((s, l) => s + (l.has_equipment === false ? 2800 : 3400), 0);
+  document.getElementById('kpi-rev').textContent = rev > 0 ? rev.toLocaleString('he-IL') + ' ₪' : '—';
+}
+
+function renderTabs() {
+  document.getElementById('cnt-all').textContent = allLeads.length;
+  ['NEW','ACTIVE','OBJECTION','READY','WON','NURTURE'].forEach(s => {
+    document.getElementById('cnt-' + s).textContent = allLeads.filter(l => l.stage === s).length;
+  });
+}
+
+// ============================================================
+// Call list render
+// ============================================================
+function renderCallList() {
+  const urgentStages = ['READY', 'OBJECTION', 'ACTIVE'];
+  let list = allLeads.filter(l => urgentStages.includes(l.stage));
+  list.sort((a, b) => urgencyScore(b) - urgencyScore(a));
+
+  // Only show leads that actually need action (score > 20)
+  list = list.filter(l => urgencyScore(l) > 20);
+
+  document.getElementById('call-count').textContent = list.length;
+
+  const tbody = document.getElementById('call-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="call-empty">אין לידים דחופים כרגע ✓</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => {
+    const score = urgencyScore(l);
+    const reason = urgencyReason(l);
+    const readColor = (l.readiness_score || 0) >= 8 ? 'var(--hot)' : (l.readiness_score || 0) >= 5 ? 'var(--gold)' : 'var(--cold)';
+    const waLink = `https://wa.me/${l.phone}`;
+    return `<tr onclick="openDrawer('${l.phone}')">
+      <td>${urgencyIcon(score)}</td>
+      <td>
+        <div class="name-cell">
+          <div>
+            <div class="name-txt">${escapeHtml(l.name || '(ללא שם)')}</div>
+            <div class="name-phone">${l.phone || '-'}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--sub);font-family:var(--mono);font-size:12px">${l.age || '—'}</td>
+      <td class="hide-mobile city-cell">${escapeHtml(l.city || l.state || '—')}</td>
+      <td class="hide-mobile">${sourceBadge(l.source)}</td>
+      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td>
+        <div class="rd-cell">
+          <span class="rd-n">${l.readiness_score || 0}</span>
+          <div class="rd-bg"><div class="rd-fill" style="width:${(l.readiness_score||0)*10}%;background:${readColor}"></div></div>
+        </div>
+      </td>
+      <td><span class="${reason.cls}">${reason.text}</span></td>
+      <td onclick="event.stopPropagation()">
+        <a class="wa-btn" href="${waLink}" target="_blank">📲 WhatsApp</a>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// Main table render
+// ============================================================
+function renderTable() {
+  const q = (document.getElementById('srchIn').value || '').toLowerCase().trim();
+  const sort = document.getElementById('sortSel').value;
+  const tbody = document.getElementById('tbody');
+
+  let list = allLeads.slice();
+
+  if (currentFilter !== 'all') {
+    list = list.filter(l => l.stage === currentFilter);
+  }
+
+  if (q) {
+    list = list.filter(l =>
+      (l.name || '').toLowerCase().includes(q) ||
+      (l.phone || '').includes(q) ||
+      (l.city || l.state || '').toLowerCase().includes(q) ||
+      (l.source || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (sort === 'recent') {
+    list.sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+  } else if (sort === 'urgency') {
+    list.sort((a, b) => urgencyScore(b) - urgencyScore(a));
+  } else if (sort === 'readiness') {
+    list.sort((a, b) => (b.readiness_score || 0) - (a.readiness_score || 0));
+  } else if (sort === 'created') {
+    list.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+  }
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-i">✨</div><p>אין לידים שמתאימים</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => {
+    const initials = (l.name || '?').charAt(0).toUpperCase();
+    const readColor = (l.readiness_score||0) >= 8 ? 'var(--hot)' : (l.readiness_score||0) >= 5 ? 'var(--gold)' : 'var(--cold)';
+    const nextAction = formatNextAction(l);
+
+    return `<tr onclick="openDrawer('${l.phone}')">
+      <td>
+        <div class="name-cell">
+          <div class="drw-av" style="width:32px;height:32px;font-size:14px">${initials}</div>
+          <div>
+            <div class="name-txt">${escapeHtml(l.name || '(ללא שם)')}</div>
+            <div class="name-phone">${l.phone || '-'}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--sub);font-family:var(--mono);font-size:12px">${l.age || '—'}</td>
+      <td class="hide-mobile city-cell">${escapeHtml(l.city || l.state || '—')}</td>
+      <td class="hide-mobile">${sourceBadge(l.source)}</td>
+      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td>
+        <div class="rd-cell">
+          <span class="rd-n">${l.readiness_score || 0}</span>
+          <div class="rd-bg"><div class="rd-fill" style="width:${(l.readiness_score||0)*10}%;background:${readColor}"></div></div>
+        </div>
+      </td>
+      <td><span class="${nextAction.cls}">${nextAction.text}</span></td>
+      <td style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function stageLabel(s) {
+  return { NEW:'חדש', ACTIVE:'בשיחה', OBJECTION:'בהתנגדות', READY:'מוכן', WON:'סגר', NURTURE:'ליווי', DEAD:'מת' }[s] || s || '?';
+}
+
+function formatNextAction(l) {
+  if (!l.next_check_at) {
+    if (l.stage === 'NURTURE' && l.re_engage_at) return { text: 'חזרה ב-' + formatDate(l.re_engage_at), cls: 'next-cell' };
+    if (l.stage === 'READY') return { text: 'אלעד צריך להתקשר', cls: 'next-cell due' };
+    if (l.stage === 'WON' || l.stage === 'DEAD') return { text: '—', cls: 'next-cell' };
+    return { text: 'ממתין לתגובה', cls: 'next-cell' };
+  }
+  const now = Date.now();
+  const due = new Date(l.next_check_at).getTime();
+  if (due < now) return { text: 'איחור: ' + formatRelative(l.next_check_at), cls: 'next-cell overdue' };
+  return { text: 'בעוד ' + formatTimeUntil(l.next_check_at), cls: 'next-cell due' };
+}
+
+function formatRelative(ts) {
+  if (!ts) return '—';
+  const diff = Date.now() - new Date(ts).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'לפני שניות';
+  if (mins < 60) return `לפני ${mins} דק'`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `לפני ${hrs} שע'`;
+  return `לפני ${Math.floor(hrs / 24)} ימים`;
+}
+
+function formatTimeUntil(ts) {
+  const diff = new Date(ts).getTime() - Date.now();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins} דק'`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} שע'`;
+  return `${Math.floor(hrs / 24)} ימים`;
+}
+
+function formatDate(ts) {
+  if (!ts) return '—';
+  return new Date(ts).toLocaleDateString('he-IL');
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================================================
+// Filters
+// ============================================================
+document.querySelectorAll('.tab:not(#tabVisitors)').forEach(t => {
+  t.addEventListener('click', () => {
+    switchToLeads();
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    currentFilter = t.dataset.filter || 'all';
+    renderTable();
+  });
+});
+
+document.getElementById('sortSel').addEventListener('change', renderTable);
+
+// ============================================================
+// Drawer
+// ============================================================
+function openDrawer(phone) {
+  const lead = allLeads.find(l => l.phone === phone);
+  if (!lead) return;
+  currentLeadPhone = phone;
+
+  const initials = (lead.name || '?').charAt(0).toUpperCase();
+  const waLink = `https://wa.me/${lead.phone}`;
+  const { icon: srcIcon, label: srcLabel } = sourceInfo(lead.source);
+
+  document.getElementById('drwHero').innerHTML = `
+    <div class="drw-top">
+      <div class="drw-av">${initials}</div>
+      <div class="drw-info">
+        <h2>${escapeHtml(lead.name || '(ללא שם)')}</h2>
+        <p>${lead.phone || '-'} · ${escapeHtml(lead.city || lead.state || '—')}</p>
+      </div>
+      <a class="wa-btn" href="${waLink}" target="_blank" style="margin-left:8px" onclick="event.stopPropagation()">📲 פתח WhatsApp</a>
+      <button class="drw-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drw-meta" style="margin-top:14px;flex-wrap:wrap;gap:8px">
+      <span class="stage-badge stage-${lead.stage || 'NEW'}">${stageLabel(lead.stage)}</span>
+      <span class="stage-badge stage-NEW">בשלות ${lead.readiness_score || 0}/10</span>
+      ${lead.age ? `<span class="stage-badge stage-NEW">גיל ${lead.age}</span>` : ''}
+      ${srcLabel ? `<span class="stage-badge stage-NEW">${srcIcon} ${srcLabel}</span>` : ''}
+      ${lead.video_watched ? '<span class="stage-badge stage-WON">✓ ראה סרטון</span>' : ''}
+      ${lead.warmup_page_clicked ? '<span class="stage-badge stage-READY">✓ עבר דף חימום</span>' : ''}
+    </div>
+  `;
+
+  let assets = [], objections = [], timeline = [];
+  try { assets = typeof lead.assets_sent === 'string' ? JSON.parse(lead.assets_sent) : (lead.assets_sent || []); } catch(e) {}
+  try { objections = typeof lead.objections_raised === 'string' ? JSON.parse(lead.objections_raised) : (lead.objections_raised || []); } catch(e) {}
+  try { timeline = typeof lead.bot_timeline === 'string' ? JSON.parse(lead.bot_timeline) : (lead.bot_timeline || []); } catch(e) {}
+
+  const assetLabels = { warmup_page:'דף חימום', syllabus:'סילבוס', taste_video:'סרטון טעימה', payment_link_2800:'קישור סליקה 2,800', payment_link_3400:'קישור סליקה 3,400' };
+  const objLabels   = { PRICE:'מחיר', PARENTS:'הורים', TIME:'חשיבה', UNCERTAIN:'אי ודאות', AGE:'גיל', OTHER:'אחר' };
+
+  const tier = lead.has_equipment === false ? '3,400 ₪ (ללא ציוד)' :
+               lead.has_equipment === true  ? '2,800 ₪ (יש ציוד)' : 'TBD';
+
+  document.getElementById('drwBody').innerHTML = `
+    <div class="drw-sec">
+      <div class="drw-sec-title">פרופיל</div>
+      <div class="info-grid">
+        <div class="ifield"><label>גיל</label><div class="v">${lead.age || '—'}</div></div>
+        <div class="ifield"><label>עיר</label><div class="v">${escapeHtml(lead.city || lead.state || '—')}</div></div>
+        <div class="ifield"><label>מקור</label><div class="v">${srcIcon ? srcIcon + ' ' + srcLabel : '—'}</div></div>
+        <div class="ifield"><label>יש ציוד</label><div class="v">${lead.has_equipment === true ? 'כן' : lead.has_equipment === false ? 'לא' : '—'}</div></div>
+        <div class="ifield"><label>מסלול</label><div class="v mn">${tier}</div></div>
+        <div class="ifield"><label>הצטרף ב-</label><div class="v mn">${formatDate(lead.created_at)}</div></div>
+        ${lead.email ? `<div class="ifield"><label>אימייל</label><div class="v mn" style="font-size:11px">${escapeHtml(lead.email)}</div></div>` : ''}
+        ${lead.preferred_call ? `<div class="ifield"><label>זמן מועדף</label><div class="v">${escapeHtml(typeof lead.preferred_call === 'string' ? lead.preferred_call : JSON.stringify(lead.preferred_call))}</div></div>` : ''}
+      </div>
+    </div>
+
+    <div class="drw-sec">
+      <div class="drw-sec-title">נכסים שנשלחו (${assets.length})</div>
+      <div class="assets-list">
+        ${assets.length === 0 ? '<p style="color:var(--sub);font-size:12px">אף נכס לא נשלח עדיין</p>' :
+          assets.map(a => `<div class="asset-tag"><span class="a-name">${assetLabels[a.asset] || a.asset}</span><span class="a-when">${formatDate(a.sent_at)}</span></div>`).join('')}
+      </div>
+    </div>
+
+    ${objections.length ? `
+    <div class="drw-sec">
+      <div class="drw-sec-title">התנגדויות</div>
+      <div class="objs">${objections.map(o => `<span class="obj-chip">${objLabels[o] || o}</span>`).join('')}</div>
+    </div>` : ''}
+
+    <div class="drw-sec">
+      <div class="drw-sec-title">ציר זמן</div>
+      <div class="timeline">
+        ${timeline.length === 0 ? '<p style="color:var(--sub);font-size:12px">אין אירועים</p>' :
+          timeline.slice().reverse().map(t => {
+            const cls = ['send_warmup_page','send_syllabus','send_taste_video'].includes(t.action) ? 'asset' :
+                       t.action === 'escalate' ? 'escalate' :
+                       t.stage_to ? 'stage' : 'out';
+            return `<div class="tl-item">
+              <div class="tl-dot ${cls}"></div>
+              <div class="tl-ts">${formatDate(t.ts)} · ${new Date(t.ts).toLocaleTimeString('he-IL')}</div>
+              <div class="tl-action">${actionLabel(t.action)}</div>
+              ${t.note ? `<div class="tl-note">${escapeHtml(t.note)}</div>` : ''}
+            </div>`;
+          }).join('')}
+      </div>
+    </div>
+
+    <div class="drw-sec">
+      <div class="drw-sec-title">פעולות ידניות</div>
+      <div class="act-grid">
+        <button class="act-btn green"  onclick="leadAction('mark_ready')">סמן כמוכן לסגירה</button>
+        <button class="act-btn gold"   onclick="leadAction('takeover')">השתלט על השיחה</button>
+        <button class="act-btn"        onclick="leadAction('release')">החזר לבוט</button>
+        <button class="act-btn"        onclick="leadAction('to_nurture')">העבר ל-NURTURE</button>
+        <button class="act-btn hot"    onclick="leadAction('mark_dead')">סמן כסירוב</button>
+        <button class="act-btn"        onclick="manualMessage()">שלח הודעה ידנית</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('ov').classList.add('open');
+  document.getElementById('drw').classList.add('open');
+}
+
+function actionLabel(a) {
+  return {
+    send_message: 'שליחת הודעה',
+    send_warmup_page: 'נשלח דף חימום',
+    send_syllabus: 'נשלח סילבוס',
+    send_taste_video: 'נשלח סרטון טעימה',
+    send_payment_link: 'נשלח קישור סליקה',
+    close_lead: 'מעבר לסגירה',
+    escalate: 'הועבר לאלעד',
+    nurture_long: 'הועבר ל-NURTURE',
+    dead: 'סומן כסירוב',
+    followup_sent: 'נשלח פולואף',
+    video_reminder: 'תזכורת סרטון',
+    reengage_sent: 'נשלחה הודעת חזרה',
+    send_template: 'נשלחה הודעת ברוכים הבאים',
+  }[a] || a;
+}
+
+function closeDrawer() {
+  document.getElementById('ov').classList.remove('open');
+  document.getElementById('drw').classList.remove('open');
+  currentLeadPhone = null;
+}
+
+// ============================================================
+// Lead Actions
+// ============================================================
+async function leadAction(action) {
+  if (!currentLeadPhone) return;
+  if (!confirm('לבצע את הפעולה?')) return;
+  try {
+    await fetch(LEAD_ACTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone, action })
+    });
+    closeDrawer();
+    fetchLeads();
+  } catch (e) { alert('שגיאה בביצוע הפעולה'); }
+}
+
+async function manualMessage() {
+  if (!currentLeadPhone) return;
+  const msg = prompt('הקלד הודעה לשלוח:');
+  if (!msg) return;
+  try {
+    await fetch(LEAD_ACTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone, action: 'manual_message', message: msg })
+    });
+    fetchLeads();
+  } catch (e) { alert('שגיאה בשליחה'); }
+}
+
+// ============================================================
+// Auto-refresh + init
+// ============================================================
+function refreshAll() { fetchLeads(); fetchVisitors(); }
+fetchLeads();
+fetchVisitors();
+setInterval(refreshAll, 30000);
 </script>
 </body>
 </html>
