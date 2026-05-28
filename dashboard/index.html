@@ -998,7 +998,7 @@ async function manualMessage() {
 function refreshAll() { fetchLeads(); fetchVisitors(); }
 fetchLeads();
 fetchVisitors();
-setInterval(refreshAll, 30000);
+setInterval(refreshAll, 24 * 60 * 60 * 1000);
 </script>
 </body>
 </html>
