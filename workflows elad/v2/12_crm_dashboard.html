@@ -394,6 +394,7 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
 const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
 const LEAD_ACTION_URL  = 'https://alon09.app.n8n.cloud/webhook/lead-action';
 const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
+const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 
 let allLeads = [];
 let visitors = [];
@@ -930,6 +931,9 @@ function openDrawer(phone) {
         <button class="act-btn hot"    onclick="leadAction('mark_dead')">סמן כסירוב</button>
         <button class="act-btn"        onclick="manualMessage()">שלח הודעה ידנית</button>
       </div>
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+        <button class="act-btn hot" style="width:100%;opacity:.7" onclick="deleteLead()">🗑 מחק ליד לצמיתות</button>
+      </div>
     </div>
   `;
 
@@ -959,6 +963,22 @@ function closeDrawer() {
   document.getElementById('ov').classList.remove('open');
   document.getElementById('drw').classList.remove('open');
   currentLeadPhone = null;
+}
+
+async function deleteLead() {
+  if (!currentLeadPhone) return;
+  const lead = allLeads.find(l => l.phone === currentLeadPhone);
+  const name = lead ? lead.name || currentLeadPhone : currentLeadPhone;
+  if (!confirm(`מחיקה לצמיתות של ${name}?\nפעולה זו אינה הפיכה.`)) return;
+  try {
+    await fetch(DELETE_LEAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone })
+    });
+    closeDrawer();
+    await fetchLeads();
+  } catch(e) { alert('שגיאה במחיקה'); }
 }
 
 // ============================================================
