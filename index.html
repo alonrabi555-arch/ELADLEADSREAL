@@ -356,6 +356,23 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
     </table>
   </div>
 
+  <!-- Support ended table -->
+  <div class="sec-divider">נגמר ליווי <span class="tcnt" id="supportEndedCnt">0</span></div>
+  <div class="tbl-wrap" id="supportEndedWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ליד</th>
+          <th>טלפון</th>
+          <th>שלב</th>
+          <th class="hide-mobile">עודכן</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="supportEndedTbody"></tbody>
+    </table>
+  </div>
+
   <!-- Visitors Table (hidden by default) -->
   <div class="tbl-wrap" id="visSection" style="display:none;margin-top:0">
     <table>
@@ -392,7 +409,10 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
 // Configuration
 // ============================================================
 const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
-const LEAD_ACTION_URL  = 'https://alon09.app.n8n.cloud/webhook/lead-action';
+const WA_HISTORY_URL   = 'https://alon09.app.n8n.cloud/webhook/conversation-history';
+const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
+const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
+const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
 const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 
@@ -612,6 +632,7 @@ async function fetchLeads() {
     renderTabs();
     renderCallList();
     renderTable();
+    renderSupportEndedTable();
   } catch (e) {
     console.error('fetch failed', e);
   } finally {
@@ -709,7 +730,7 @@ function renderTable() {
   const sort = document.getElementById('sortSel').value;
   const tbody = document.getElementById('tbody');
 
-  let list = allLeads.slice();
+  let list = allLeads.filter(l => !isSupportEnded(l));
 
   if (currentFilter !== 'all') {
     list = list.filter(l => l.stage === currentFilter);
@@ -766,6 +787,46 @@ function renderTable() {
       </td>
       <td><span class="${nextAction.cls}">${nextAction.text}</span></td>
       <td style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function isSupportEnded(l) {
+  const values = [l.sale_status, l.stage, l.status].map(v => String(v || '').toLowerCase());
+  return values.includes('support_ended') || values.includes('support-ended') || values.includes('ended_support');
+}
+
+function renderSupportEndedTable() {
+  const tbody = document.getElementById('supportEndedTbody');
+  const cnt = document.getElementById('supportEndedCnt');
+  if (!tbody) return;
+
+  const list = allLeads
+    .filter(isSupportEnded)
+    .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+
+  if (cnt) cnt.textContent = list.length;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-i">✓</div><p>אין לקוחות שסיימו ליווי</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => {
+    const waLink = `https://wa.me/${l.phone}`;
+    return `<tr onclick="openDrawer('${l.phone}')">
+      <td>
+        <div class="name-cell">
+          <div>
+            <div class="name-txt">${escapeHtml(l.name || '(ללא שם)')}</div>
+            <div class="name-phone">${l.phone || '-'}</div>
+          </div>
+        </div>
+      </td>
+      <td class="name-phone">${l.phone || '-'}</td>
+      <td><span class="stage-badge stage-NURTURE">נגמר ליווי</span></td>
+      <td class="hide-mobile" style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
+      <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
     </tr>`;
   }).join('');
 }
@@ -924,13 +985,15 @@ function openDrawer(phone) {
     <div class="drw-sec">
       <div class="drw-sec-title">פעולות ידניות</div>
       <div class="act-grid">
-        <button class="act-btn green"  onclick="leadAction('mark_ready')">סמן כמוכן לסגירה</button>
-        <button class="act-btn gold"   onclick="leadAction('takeover')">השתלט על השיחה</button>
-        <button class="act-btn"        onclick="leadAction('release')">החזר לבוט</button>
-        <button class="act-btn"        onclick="leadAction('to_nurture')">העבר ל-NURTURE</button>
-        <button class="act-btn hot"    onclick="leadAction('mark_dead')">סמן כסירוב</button>
+        <button class="act-btn green"  disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כמוכן לסגירה</button>
+        <button class="act-btn gold"   onclick="takeoverConversation()">השתלט על השיחה</button>
+        <button class="act-btn"        onclick="releaseConversation()">החזר לבוט</button>
+        <button class="act-btn"        disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">העבר ל-NURTURE</button>
+        <button class="act-btn hot"    disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כסירוב</button>
+        <button class="act-btn"        onclick="loadConversationHistory()">טען שיחה</button>
         <button class="act-btn"        onclick="manualMessage()">שלח הודעה ידנית</button>
       </div>
+      <div id="conversationBox" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto;margin-top:12px;color:var(--sub);font-size:12px"></div>
       <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
         <button class="act-btn hot" style="width:100%;opacity:.7" onclick="deleteLead()">🗑 מחק ליד לצמיתות</button>
       </div>
@@ -984,18 +1047,30 @@ async function deleteLead() {
 // ============================================================
 // Lead Actions
 // ============================================================
-async function leadAction(action) {
+async function takeoverConversation() {
   if (!currentLeadPhone) return;
-  if (!confirm('לבצע את הפעולה?')) return;
+  if (!confirm('להשתלט על השיחה?')) return;
   try {
-    await fetch(LEAD_ACTION_URL, {
+    await fetch(WA_TAKEOVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone, action })
+      body: JSON.stringify({ phone: currentLeadPhone })
     });
-    closeDrawer();
     fetchLeads();
-  } catch (e) { alert('שגיאה בביצוע הפעולה'); }
+  } catch (e) { alert('שגיאה בהשתלטות על השיחה'); }
+}
+
+async function releaseConversation() {
+  if (!currentLeadPhone) return;
+  if (!confirm('להחזיר את השיחה לבוט?')) return;
+  try {
+    await fetch(WA_RELEASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone })
+    });
+    fetchLeads();
+  } catch (e) { alert('שגיאה בהחזרת השיחה לבוט'); }
 }
 
 async function manualMessage() {
@@ -1003,22 +1078,51 @@ async function manualMessage() {
   const msg = prompt('הקלד הודעה לשלוח:');
   if (!msg) return;
   try {
-    await fetch(LEAD_ACTION_URL, {
+    await fetch(WA_SEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone, action: 'manual_message', message: msg })
+      body: JSON.stringify({ phone: currentLeadPhone, message: msg })
     });
     fetchLeads();
   } catch (e) { alert('שגיאה בשליחה'); }
 }
 
+async function loadConversationHistory() {
+  if (!currentLeadPhone) return;
+  const box = document.getElementById('conversationBox');
+  if (!box) return;
+  box.innerHTML = '<div>טוען שיחה...</div>';
+  try {
+    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(currentLeadPhone)}`);
+    const data = await r.json();
+    const payload = Array.isArray(data) ? (data[0] || {}) : data;
+    const messages = Array.isArray(payload.messages) ? payload.messages : [];
+    if (!messages.length) {
+      box.innerHTML = '<div>אין הודעות להצגה.</div>';
+      return;
+    }
+    box.innerHTML = messages.map(m => {
+      const isIn = m.direction === 'in';
+      const bg = isIn ? 'rgba(37,211,102,.12)' : 'var(--s3)';
+      const border = isIn ? 'rgba(37,211,102,.25)' : 'var(--border)';
+      const align = isIn ? 'flex-end' : 'flex-start';
+      const label = isIn ? 'לקוח' : 'אלעד / בוט';
+      const when = m.sent_at ? new Date(m.sent_at).toLocaleString('he-IL') : '';
+      return `<div style="align-self:${align};max-width:86%;background:${bg};border:1px solid ${border};border-radius:12px;padding:8px 10px;color:var(--text)">
+        <div style="font-size:10px;color:var(--sub);margin-bottom:4px">${label} · ${when}</div>
+        <div>${escapeHtml(m.body || '')}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<div>שגיאה בטעינת השיחה.</div>';
+  }
+}
+
 // ============================================================
-// Auto-refresh + init
+// Init (no auto-refresh - user clicks 🔄 רענן for fresh data)
+// Auto-polling removed entirely to preserve n8n execution quota.
 // ============================================================
 function refreshAll() { fetchLeads(); fetchVisitors(); }
-fetchLeads();
-fetchVisitors();
-setInterval(refreshAll, 24 * 60 * 60 * 1000);
 </script>
 </body>
 </html>
