@@ -1123,6 +1123,8 @@ async function loadConversationHistory() {
 // Auto-polling removed entirely to preserve n8n execution quota.
 // ============================================================
 function refreshAll() { fetchLeads(); fetchVisitors(); }
+fetchLeads();
+fetchVisitors();
 </script>
 </body>
 </html>
