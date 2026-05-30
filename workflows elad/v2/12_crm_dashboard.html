@@ -929,7 +929,7 @@ function openDrawer(phone) {
   try { objections = typeof lead.objections_raised === 'string' ? JSON.parse(lead.objections_raised) : (lead.objections_raised || []); } catch(e) {}
   try { timeline = typeof lead.bot_timeline === 'string' ? JSON.parse(lead.bot_timeline) : (lead.bot_timeline || []); } catch(e) {}
 
-  const assetLabels = { warmup_page:'דף חימום', syllabus:'סילבוס', taste_video:'סרטון טעימה', payment_link_2800:'קישור סליקה 2,800', payment_link_3400:'קישור סליקה 3,400' };
+  const assetLabels = { warmup_page:'דף חימום', syllabus:'סילבוס', taste_video:'סרטון טעימה', testimonial_video:'סרטון המלצה', payment_link_2800:'קישור סליקה 2,800', payment_link_3400:'קישור סליקה 3,400' };
   const objLabels   = { PRICE:'מחיר', PARENTS:'הורים', TIME:'חשיבה', UNCERTAIN:'אי ודאות', AGE:'גיל', OTHER:'אחר' };
 
   const tier = lead.has_equipment === false ? '3,400 ₪ (ללא ציוד)' :
@@ -969,7 +969,7 @@ function openDrawer(phone) {
       <div class="timeline">
         ${timeline.length === 0 ? '<p style="color:var(--sub);font-size:12px">אין אירועים</p>' :
           timeline.slice().reverse().map(t => {
-            const cls = ['send_warmup_page','send_syllabus','send_taste_video'].includes(t.action) ? 'asset' :
+            const cls = ['send_warmup_page','send_syllabus','send_taste_video','send_testimonial_video'].includes(t.action) ? 'asset' :
                        t.action === 'escalate' ? 'escalate' :
                        t.stage_to ? 'stage' : 'out';
             return `<div class="tl-item">
@@ -1010,6 +1010,7 @@ function actionLabel(a) {
     send_warmup_page: 'נשלח דף חימום',
     send_syllabus: 'נשלח סילבוס',
     send_taste_video: 'נשלח סרטון טעימה',
+    send_testimonial_video: 'נשלח סרטון המלצה',
     send_payment_link: 'נשלח קישור סליקה',
     close_lead: 'מעבר לסגירה',
     escalate: 'הועבר לאלעד',
