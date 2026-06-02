@@ -536,7 +536,7 @@ const VIS_PER = 30;
 // ============================================================
 async function fetchVisitors() {
   try {
-    const r = await fetch(VISITORS_URL);
+    const r = await fetch(`${VISITORS_URL}?_=${Date.now()}`);
     const data = await r.json();
     visitors = Array.isArray(data) ? data : [];
   } catch(e) { visitors = []; }
@@ -1404,6 +1404,7 @@ async function sendQuickAsset(type) {
 function refreshAll() { fetchLeads(); fetchVisitors(); }
 fetchLeads();
 fetchVisitors();
+setInterval(fetchVisitors, 30000);
 </script>
 </body>
 </html>
