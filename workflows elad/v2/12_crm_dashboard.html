@@ -478,6 +478,8 @@ body.chat-open{overflow:hidden}
   <form class="chat-compose" onsubmit="sendChatMessage(event)">
     <div class="chat-quick-actions" aria-label="Quick send actions">
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoLink')">צפייה בסרטון באתר</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoQuestion')">שאלת סרטון באתר</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
@@ -505,6 +507,14 @@ const QUICK_ASSETS = {
   warmup: {
     label: 'דף סגירה',
     message: 'דף סופי:\nhttps://www.eladrabi.co.il/academy/'
+  },
+  siteVideoLink: {
+    label: 'צפייה בסרטון באתר',
+    message: 'קישור חזרה לצפייה בסרטון באתר:\nhttps://www.eladrabi.co.il/start/'
+  },
+  siteVideoQuestion: {
+    label: 'שאלת סרטון באתר',
+    message: 'מעולה.\n"לפני שאני ממשיך, ראית את הסרטון של אלעד באתר במלואו?"'
   },
   syllabus: {
     label: 'סילבוס',
