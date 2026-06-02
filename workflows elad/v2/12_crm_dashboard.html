@@ -1286,19 +1286,19 @@ function renderFullChat(messages) {
 
 async function takeoverConversation() {
   if (!currentLeadPhone) return;
+  const phone = currentLeadPhone;
+  openFullChat(phone);
   try {
     setChatStatus('לוקח שליטה...');
     await fetch(WA_TAKEOVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone })
+      body: JSON.stringify({ phone })
     });
     await fetchLeads();
-    openFullChat(currentLeadPhone);
     setChatStatus('השיחה אצלך');
   } catch (e) {
-    setChatStatus('');
-    alert('שגיאה בהשתלטות על השיחה');
+    setChatStatus('הצ׳אט פתוח, אבל סימון השליטה נכשל', true);
   }
 }
 

@@ -222,6 +222,51 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
 /* Visitors tab + section */
 .tab.fv.on{background:rgba(105,201,208,.1);border-color:rgba(105,201,208,.4);color:#69c9d0}
 
+/* Full screen WhatsApp-style chat */
+body.chat-open{overflow:hidden}
+.chat-screen{position:fixed;inset:0;z-index:220;background:#0b141a;display:none;color:#e9edef}
+.chat-screen.open{display:grid;grid-template-rows:64px 1fr auto}
+.chat-top{height:64px;background:#202c33;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;padding:0 18px;direction:rtl}
+.chat-back{width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:#d1d7db;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.chat-back:hover{background:rgba(255,255,255,.08)}
+.chat-avatar{width:42px;height:42px;border-radius:50%;background:#00a884;color:#062b20;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex:0 0 auto}
+.chat-person{flex:1;min-width:0}
+.chat-person h2{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0}
+.chat-person p{font-size:12px;color:#aebac1;font-family:var(--mono);margin-top:1px;direction:ltr;text-align:right}
+.chat-actions{display:flex;gap:8px;align-items:center}
+.chat-mini-btn{height:34px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(255,255,255,.06);color:#d1d7db;font-family:var(--body);font-size:12px;font-weight:700;padding:0 11px;cursor:pointer}
+.chat-mini-btn:hover{background:rgba(255,255,255,.1)}
+.chat-mini-btn.release{color:#ffcf6b;border-color:rgba(255,207,107,.28)}
+.chat-area{position:relative;overflow:hidden;background:#0b141a}
+.chat-area::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20px 20px,rgba(255,255,255,.045) 1px,transparent 1.5px),radial-gradient(circle at 76px 74px,rgba(255,255,255,.035) 1px,transparent 1.5px);background-size:96px 96px;opacity:.45;pointer-events:none}
+.chat-messages{position:relative;height:100%;overflow:auto;padding:22px 8vw 18px;display:flex;flex-direction:column;gap:7px;scroll-behavior:smooth}
+.chat-day{align-self:center;background:#182229;color:#8696a0;border-radius:8px;padding:5px 10px;font-size:11px;margin:6px 0}
+.chat-bubble{max-width:min(680px,76%);border-radius:8px;padding:7px 9px 5px;line-height:1.45;font-size:15px;box-shadow:0 1px 0 rgba(0,0,0,.18);white-space:pre-wrap;word-break:break-word}
+.chat-bubble.in{align-self:flex-start;background:#202c33;color:#e9edef;border-top-left-radius:2px}
+.chat-bubble.out{align-self:flex-end;background:#005c4b;color:#e9edef;border-top-right-radius:2px}
+.chat-bubble .meta{display:block;text-align:left;color:rgba(233,237,239,.62);font-size:10px;line-height:1;margin-top:4px;direction:ltr}
+.chat-empty,.chat-loading,.chat-error{align-self:center;margin:auto;background:rgba(32,44,51,.86);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#aebac1;padding:12px 16px;font-size:13px}
+.chat-compose{background:#202c33;border-top:1px solid rgba(255,255,255,.08);padding:10px 16px 12px;display:grid;grid-template-columns:1fr 46px;gap:10px;align-items:end;direction:rtl}
+.chat-input-wrap{background:#2a3942;border:1px solid transparent;border-radius:22px;min-height:44px;display:flex;align-items:center;padding:0 14px}
+.chat-input-wrap:focus-within{border-color:rgba(0,168,132,.45)}
+#chatInput{width:100%;max-height:130px;resize:none;border:0;outline:none;background:transparent;color:#e9edef;font-family:var(--body);font-size:15px;line-height:1.45;padding:10px 0;direction:rtl}
+#chatInput::placeholder{color:#8696a0}
+.chat-send{width:46px;height:46px;border:0;border-radius:50%;background:#00a884;color:#062b20;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900}
+.chat-send:disabled{opacity:.45;cursor:not-allowed}
+.chat-status{position:absolute;right:18px;bottom:72px;background:rgba(17,27,33,.92);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#d1d7db;font-size:12px;padding:8px 11px;display:none}
+.chat-status.show{display:block}
+
+@media (max-width:768px){
+  .chat-screen.open{grid-template-rows:58px 1fr auto}
+  .chat-top{height:58px;padding:0 10px}
+  .chat-actions{gap:5px}
+  .chat-mini-btn{padding:0 8px;font-size:11px}
+  .chat-messages{padding:16px 10px 14px}
+  .chat-bubble{max-width:86%;font-size:14px}
+  .chat-compose{padding:8px 9px;grid-template-columns:1fr 44px}
+  .chat-send{width:44px;height:44px}
+}
+
 @media (max-width:768px){
   .analytics-row{grid-template-columns:1fr}
   .a1,.a2{display:none}
@@ -356,6 +401,23 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
     </table>
   </div>
 
+  <!-- Support ended table -->
+  <div class="sec-divider">נגמר ליווי <span class="tcnt" id="supportEndedCnt">0</span></div>
+  <div class="tbl-wrap" id="supportEndedWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ליד</th>
+          <th>טלפון</th>
+          <th>שלב</th>
+          <th class="hide-mobile">עודכן</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="supportEndedTbody"></tbody>
+    </table>
+  </div>
+
   <!-- Visitors Table (hidden by default) -->
   <div class="tbl-wrap" id="visSection" style="display:none;margin-top:0">
     <table>
@@ -387,13 +449,43 @@ tr:hover td{background:rgba(255,255,255,.015);cursor:pointer}
   <div id="drwBody"></div>
 </aside>
 
+<!-- Full screen chat -->
+<section class="chat-screen" id="chatScreen" aria-hidden="true">
+  <header class="chat-top">
+    <button class="chat-back" onclick="closeFullChat()" aria-label="Back">‹</button>
+    <div class="chat-avatar" id="chatAvatar">?</div>
+    <div class="chat-person">
+      <h2 id="chatName">Lead</h2>
+      <p id="chatPhone">-</p>
+    </div>
+    <div class="chat-actions">
+      <button class="chat-mini-btn" onclick="loadConversationHistory(true)">Refresh</button>
+      <button class="chat-mini-btn release" onclick="releaseConversation()">Release</button>
+    </div>
+  </header>
+  <main class="chat-area">
+    <div class="chat-messages" id="fullConversationBox"></div>
+    <div class="chat-status" id="chatStatus"></div>
+  </main>
+  <form class="chat-compose" onsubmit="sendChatMessage(event)">
+    <div class="chat-input-wrap">
+      <textarea id="chatInput" rows="1" placeholder="כתוב הודעה..." oninput="resizeChatInput()" onkeydown="handleChatKey(event)"></textarea>
+    </div>
+    <button class="chat-send" id="chatSendBtn" type="submit" aria-label="Send">▶</button>
+  </form>
+</section>
+
 <script>
 // ============================================================
 // Configuration
 // ============================================================
 const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
-const LEAD_ACTION_URL  = 'https://alon09.app.n8n.cloud/webhook/lead-action';
+const WA_HISTORY_URL   = 'https://alon09.app.n8n.cloud/webhook/conversation-history';
+const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
+const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
+const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
 const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
+const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 
 let allLeads = [];
 let visitors = [];
@@ -611,6 +703,7 @@ async function fetchLeads() {
     renderTabs();
     renderCallList();
     renderTable();
+    renderSupportEndedTable();
   } catch (e) {
     console.error('fetch failed', e);
   } finally {
@@ -708,7 +801,7 @@ function renderTable() {
   const sort = document.getElementById('sortSel').value;
   const tbody = document.getElementById('tbody');
 
-  let list = allLeads.slice();
+  let list = allLeads.filter(l => !isSupportEnded(l));
 
   if (currentFilter !== 'all') {
     list = list.filter(l => l.stage === currentFilter);
@@ -765,6 +858,46 @@ function renderTable() {
       </td>
       <td><span class="${nextAction.cls}">${nextAction.text}</span></td>
       <td style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function isSupportEnded(l) {
+  const values = [l.sale_status, l.stage, l.status].map(v => String(v || '').toLowerCase());
+  return values.includes('support_ended') || values.includes('support-ended') || values.includes('ended_support');
+}
+
+function renderSupportEndedTable() {
+  const tbody = document.getElementById('supportEndedTbody');
+  const cnt = document.getElementById('supportEndedCnt');
+  if (!tbody) return;
+
+  const list = allLeads
+    .filter(isSupportEnded)
+    .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+
+  if (cnt) cnt.textContent = list.length;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-i">✓</div><p>אין לקוחות שסיימו ליווי</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => {
+    const waLink = `https://wa.me/${l.phone}`;
+    return `<tr onclick="openDrawer('${l.phone}')">
+      <td>
+        <div class="name-cell">
+          <div>
+            <div class="name-txt">${escapeHtml(l.name || '(ללא שם)')}</div>
+            <div class="name-phone">${l.phone || '-'}</div>
+          </div>
+        </div>
+      </td>
+      <td class="name-phone">${l.phone || '-'}</td>
+      <td><span class="stage-badge stage-NURTURE">נגמר ליווי</span></td>
+      <td class="hide-mobile" style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
+      <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
     </tr>`;
   }).join('');
 }
@@ -867,7 +1000,7 @@ function openDrawer(phone) {
   try { objections = typeof lead.objections_raised === 'string' ? JSON.parse(lead.objections_raised) : (lead.objections_raised || []); } catch(e) {}
   try { timeline = typeof lead.bot_timeline === 'string' ? JSON.parse(lead.bot_timeline) : (lead.bot_timeline || []); } catch(e) {}
 
-  const assetLabels = { warmup_page:'דף חימום', syllabus:'סילבוס', taste_video:'סרטון טעימה', payment_link_2800:'קישור סליקה 2,800', payment_link_3400:'קישור סליקה 3,400' };
+  const assetLabels = { warmup_page:'דף חימום', syllabus:'סילבוס', taste_video:'סרטון טעימה', testimonial_video:'סרטון המלצה', payment_link_2800:'קישור סליקה 2,800', payment_link_3400:'קישור סליקה 3,400' };
   const objLabels   = { PRICE:'מחיר', PARENTS:'הורים', TIME:'חשיבה', UNCERTAIN:'אי ודאות', AGE:'גיל', OTHER:'אחר' };
 
   const tier = lead.has_equipment === false ? '3,400 ₪ (ללא ציוד)' :
@@ -907,7 +1040,7 @@ function openDrawer(phone) {
       <div class="timeline">
         ${timeline.length === 0 ? '<p style="color:var(--sub);font-size:12px">אין אירועים</p>' :
           timeline.slice().reverse().map(t => {
-            const cls = ['send_warmup_page','send_syllabus','send_taste_video'].includes(t.action) ? 'asset' :
+            const cls = ['send_warmup_page','send_syllabus','send_taste_video','send_testimonial_video'].includes(t.action) ? 'asset' :
                        t.action === 'escalate' ? 'escalate' :
                        t.stage_to ? 'stage' : 'out';
             return `<div class="tl-item">
@@ -923,12 +1056,17 @@ function openDrawer(phone) {
     <div class="drw-sec">
       <div class="drw-sec-title">פעולות ידניות</div>
       <div class="act-grid">
-        <button class="act-btn green"  onclick="leadAction('mark_ready')">סמן כמוכן לסגירה</button>
-        <button class="act-btn gold"   onclick="leadAction('takeover')">השתלט על השיחה</button>
-        <button class="act-btn"        onclick="leadAction('release')">החזר לבוט</button>
-        <button class="act-btn"        onclick="leadAction('to_nurture')">העבר ל-NURTURE</button>
-        <button class="act-btn hot"    onclick="leadAction('mark_dead')">סמן כסירוב</button>
+        <button class="act-btn green"  disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כמוכן לסגירה</button>
+        <button class="act-btn gold"   onclick="takeoverConversation()">השתלט על השיחה</button>
+        <button class="act-btn"        onclick="releaseConversation()">החזר לבוט</button>
+        <button class="act-btn"        disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">העבר ל-NURTURE</button>
+        <button class="act-btn hot"    disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כסירוב</button>
+        <button class="act-btn"        onclick="loadConversationHistory()">טען שיחה</button>
         <button class="act-btn"        onclick="manualMessage()">שלח הודעה ידנית</button>
+      </div>
+      <div id="conversationBox" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto;margin-top:12px;color:var(--sub);font-size:12px"></div>
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+        <button class="act-btn hot" style="width:100%;opacity:.7" onclick="deleteLead()">🗑 מחק ליד לצמיתות</button>
       </div>
     </div>
   `;
@@ -943,6 +1081,7 @@ function actionLabel(a) {
     send_warmup_page: 'נשלח דף חימום',
     send_syllabus: 'נשלח סילבוס',
     send_taste_video: 'נשלח סרטון טעימה',
+    send_testimonial_video: 'נשלח סרטון המלצה',
     send_payment_link: 'נשלח קישור סליקה',
     close_lead: 'מעבר לסגירה',
     escalate: 'הועבר לאלעד',
@@ -961,21 +1100,49 @@ function closeDrawer() {
   currentLeadPhone = null;
 }
 
+async function deleteLead() {
+  if (!currentLeadPhone) return;
+  const lead = allLeads.find(l => l.phone === currentLeadPhone);
+  const name = lead ? lead.name || currentLeadPhone : currentLeadPhone;
+  if (!confirm(`מחיקה לצמיתות של ${name}?\nפעולה זו אינה הפיכה.`)) return;
+  try {
+    await fetch(DELETE_LEAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone })
+    });
+    closeDrawer();
+    await fetchLeads();
+  } catch(e) { alert('שגיאה במחיקה'); }
+}
+
 // ============================================================
 // Lead Actions
 // ============================================================
-async function leadAction(action) {
+async function takeoverConversation() {
   if (!currentLeadPhone) return;
-  if (!confirm('לבצע את הפעולה?')) return;
+  if (!confirm('להשתלט על השיחה?')) return;
   try {
-    await fetch(LEAD_ACTION_URL, {
+    await fetch(WA_TAKEOVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone, action })
+      body: JSON.stringify({ phone: currentLeadPhone })
     });
-    closeDrawer();
     fetchLeads();
-  } catch (e) { alert('שגיאה בביצוע הפעולה'); }
+  } catch (e) { alert('שגיאה בהשתלטות על השיחה'); }
+}
+
+async function releaseConversation() {
+  if (!currentLeadPhone) return;
+  if (!confirm('להחזיר את השיחה לבוט?')) return;
+  try {
+    await fetch(WA_RELEASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone })
+    });
+    fetchLeads();
+  } catch (e) { alert('שגיאה בהחזרת השיחה לבוט'); }
 }
 
 async function manualMessage() {
@@ -983,22 +1150,268 @@ async function manualMessage() {
   const msg = prompt('הקלד הודעה לשלוח:');
   if (!msg) return;
   try {
-    await fetch(LEAD_ACTION_URL, {
+    await fetch(WA_SEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone, action: 'manual_message', message: msg })
+      body: JSON.stringify({ phone: currentLeadPhone, message: msg })
     });
     fetchLeads();
   } catch (e) { alert('שגיאה בשליחה'); }
 }
 
+async function loadConversationHistory() {
+  if (!currentLeadPhone) return;
+  const box = document.getElementById('conversationBox');
+  if (!box) return;
+  box.innerHTML = '<div>טוען שיחה...</div>';
+  try {
+    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(currentLeadPhone)}`);
+    const data = await r.json();
+    const payload = Array.isArray(data) ? (data[0] || {}) : data;
+    const messages = Array.isArray(payload.messages) ? payload.messages : [];
+    if (!messages.length) {
+      box.innerHTML = '<div>אין הודעות להצגה.</div>';
+      return;
+    }
+    box.innerHTML = messages.map(m => {
+      const isIn = m.direction === 'in';
+      const bg = isIn ? 'rgba(37,211,102,.12)' : 'var(--s3)';
+      const border = isIn ? 'rgba(37,211,102,.25)' : 'var(--border)';
+      const align = isIn ? 'flex-end' : 'flex-start';
+      const label = isIn ? 'לקוח' : 'אלעד / בוט';
+      const when = m.sent_at ? new Date(m.sent_at).toLocaleString('he-IL') : '';
+      return `<div style="align-self:${align};max-width:86%;background:${bg};border:1px solid ${border};border-radius:12px;padding:8px 10px;color:var(--text)">
+        <div style="font-size:10px;color:var(--sub);margin-bottom:4px">${label} · ${when}</div>
+        <div>${escapeHtml(m.body || '')}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = '<div>שגיאה בטעינת השיחה.</div>';
+  }
+}
+
 // ============================================================
-// Auto-refresh + init
+// Init (no auto-refresh - user clicks 🔄 רענן for fresh data)
+// Auto-polling removed entirely to preserve n8n execution quota.
 // ============================================================
+// ============================================================
+// Full screen WhatsApp-style chat overrides
+// ============================================================
+let fullChatPhone = null;
+let fullChatLead = null;
+let fullChatMessages = [];
+let fullChatRefreshTimer = null;
+
+function getLeadByPhone(phone) {
+  return allLeads.find(l => String(l.phone || '') === String(phone || '')) || null;
+}
+
+function setChatStatus(text, sticky = false) {
+  const el = document.getElementById('chatStatus');
+  if (!el) return;
+  el.textContent = text || '';
+  el.classList.toggle('show', Boolean(text));
+  if (text && !sticky) {
+    clearTimeout(setChatStatus._timer);
+    setChatStatus._timer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+}
+
+function openFullChat(phone) {
+  const lead = getLeadByPhone(phone);
+  if (!lead) return;
+  fullChatPhone = phone;
+  currentLeadPhone = phone;
+  fullChatLead = lead;
+
+  const initials = (lead.name || '?').charAt(0).toUpperCase();
+  document.getElementById('chatAvatar').textContent = initials;
+  document.getElementById('chatName').textContent = lead.name || 'Lead';
+  document.getElementById('chatPhone').textContent = `+${lead.phone || ''}`;
+  document.getElementById('chatScreen').classList.add('open');
+  document.getElementById('chatScreen').setAttribute('aria-hidden', 'false');
+  document.body.classList.add('chat-open');
+  closeDrawer();
+
+  loadConversationHistory(true);
+  setTimeout(() => document.getElementById('chatInput')?.focus(), 80);
+
+  clearInterval(fullChatRefreshTimer);
+  fullChatRefreshTimer = setInterval(() => {
+    if (fullChatPhone) loadConversationHistory(true, { silent: true });
+  }, 15000);
+}
+
+function closeFullChat() {
+  document.getElementById('chatScreen').classList.remove('open');
+  document.getElementById('chatScreen').setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('chat-open');
+  fullChatPhone = null;
+  fullChatLead = null;
+  clearInterval(fullChatRefreshTimer);
+}
+
+function renderFullChat(messages) {
+  const box = document.getElementById('fullConversationBox');
+  if (!box) return;
+  fullChatMessages = messages || [];
+
+  if (!fullChatMessages.length) {
+    box.innerHTML = '<div class="chat-empty">אין הודעות להצגה עדיין</div>';
+    return;
+  }
+
+  let lastDay = '';
+  const html = [];
+  for (const m of fullChatMessages) {
+    const ts = m.sent_at || m.created_at || m.dateCreated || '';
+    const date = ts ? new Date(ts) : null;
+    const day = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('he-IL') : '';
+    if (day && day !== lastDay) {
+      html.push(`<div class="chat-day">${day}</div>`);
+      lastDay = day;
+    }
+
+    const direction = String(m.direction || '').toLowerCase();
+    const isIncoming = direction === 'in' || direction === 'incoming' || direction === 'received';
+    const cls = isIncoming ? 'in' : 'out';
+    const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+    const body = escapeHtml(m.body || m.message || m.text || '');
+    html.push(`<div class="chat-bubble ${cls}">${body}<span class="meta">${time}</span></div>`);
+  }
+
+  box.innerHTML = html.join('');
+  requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
+}
+
+async function takeoverConversation() {
+  if (!currentLeadPhone) return;
+  const phone = currentLeadPhone;
+  openFullChat(phone);
+  try {
+    setChatStatus('לוקח שליטה...');
+    await fetch(WA_TAKEOVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    await fetchLeads();
+    setChatStatus('השיחה אצלך');
+  } catch (e) {
+    setChatStatus('הצ׳אט פתוח, אבל סימון השליטה נכשל', true);
+  }
+}
+
+async function releaseConversation() {
+  const phone = fullChatPhone || currentLeadPhone;
+  if (!phone) return;
+  if (!confirm('להחזיר את השיחה לבוט?')) return;
+  try {
+    await fetch(WA_RELEASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    setChatStatus('הוחזר לבוט');
+    await fetchLeads();
+  } catch (e) {
+    alert('שגיאה בהחזרת השיחה לבוט');
+  }
+}
+
+async function manualMessage() {
+  if (!currentLeadPhone) return;
+  openFullChat(currentLeadPhone);
+}
+
+async function loadConversationHistory(full = false, options = {}) {
+  const phone = full ? fullChatPhone : currentLeadPhone;
+  if (!phone) return;
+  const box = full ? document.getElementById('fullConversationBox') : document.getElementById('conversationBox');
+  if (!box) return;
+  if (!options.silent) {
+    box.innerHTML = full ? '<div class="chat-loading">טוען שיחה...</div>' : '<div>טוען שיחה...</div>';
+  }
+  try {
+    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(phone)}`);
+    const data = await r.json();
+    const payload = Array.isArray(data) ? (data[0] || {}) : data;
+    const messages = Array.isArray(payload.messages) ? payload.messages : [];
+
+    if (full) {
+      renderFullChat(messages);
+      return;
+    }
+
+    if (!messages.length) {
+      box.innerHTML = '<div>אין הודעות להצגה.</div>';
+      return;
+    }
+    box.innerHTML = messages.map(m => {
+      const isIn = m.direction === 'in';
+      const bg = isIn ? 'rgba(37,211,102,.12)' : 'var(--s3)';
+      const border = isIn ? 'rgba(37,211,102,.25)' : 'var(--border)';
+      const align = isIn ? 'flex-end' : 'flex-start';
+      const label = isIn ? 'לקוח' : 'אלעד / בוט';
+      const when = m.sent_at ? new Date(m.sent_at).toLocaleString('he-IL') : '';
+      return `<div style="align-self:${align};max-width:86%;background:${bg};border:1px solid ${border};border-radius:12px;padding:8px 10px;color:var(--text)">
+        <div style="font-size:10px;color:var(--sub);margin-bottom:4px">${label} · ${when}</div>
+        <div>${escapeHtml(m.body || '')}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    box.innerHTML = full ? '<div class="chat-error">שגיאה בטעינת השיחה</div>' : '<div>שגיאה בטעינת השיחה.</div>';
+  }
+}
+
+function resizeChatInput() {
+  const input = document.getElementById('chatInput');
+  if (!input) return;
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 130) + 'px';
+}
+
+function handleChatKey(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    sendChatMessage(event);
+  }
+}
+
+async function sendChatMessage(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('chatSendBtn');
+  const msg = (input?.value || '').trim();
+  if (!fullChatPhone || !msg) return;
+
+  btn.disabled = true;
+  setChatStatus('שולח...');
+  try {
+    await fetch(WA_SEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: fullChatPhone, message: msg })
+    });
+
+    const now = new Date().toISOString();
+    renderFullChat([...fullChatMessages, { direction: 'out', body: msg, sent_at: now }]);
+    input.value = '';
+    resizeChatInput();
+    setChatStatus('נשלח');
+    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads()]);
+  } catch (e) {
+    alert('שגיאה בשליחה');
+    setChatStatus('');
+  } finally {
+    btn.disabled = false;
+    input?.focus();
+  }
+}
+
 function refreshAll() { fetchLeads(); fetchVisitors(); }
 fetchLeads();
 fetchVisitors();
-setInterval(refreshAll, 24 * 60 * 60 * 1000);
 </script>
 </body>
 </html>
