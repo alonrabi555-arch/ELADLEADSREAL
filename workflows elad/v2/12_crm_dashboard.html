@@ -477,7 +477,7 @@ body.chat-open{overflow:hidden}
   </main>
   <form class="chat-compose" onsubmit="sendChatMessage(event)">
     <div class="chat-quick-actions" aria-label="Quick send actions">
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף חימום</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
@@ -503,8 +503,8 @@ const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 const QUICK_ASSETS = {
   warmup: {
-    label: 'דף חימום',
-    message: 'זה דף ההסבר של האקדמיה, יש שם את כל הפרטים בצורה מסודרת:\nhttps://www.eladrabi.co.il/academy/'
+    label: 'דף סגירה',
+    message: 'דף סופי:\nhttps://www.eladrabi.co.il/academy/'
   },
   syllabus: {
     label: 'סילבוס',
@@ -512,7 +512,7 @@ const QUICK_ASSETS = {
   },
   clientVideo: {
     label: 'סרטון לקוח',
-    message: 'זה סרטון לקוח שחשוב לראות לפני שמתקדמים:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
+    message: 'סרטון לקוח:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
   },
   tasteVideo: {
     label: 'סרטון טעימה',
