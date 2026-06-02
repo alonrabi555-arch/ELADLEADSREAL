@@ -479,7 +479,8 @@ body.chat-open{overflow:hidden}
     <div class="chat-quick-actions" aria-label="Quick send actions">
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף חימום</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('video')">סרטון</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">איש קשר</button>
     </div>
     <div class="chat-input-wrap">
@@ -509,13 +510,17 @@ const QUICK_ASSETS = {
     label: 'סילבוס',
     message: 'זה הסילבוס של הקורס:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/course-syllabus.pdf'
   },
-  video: {
-    label: 'סרטון',
-    message: 'זה הסרטון שחשוב לראות לפני שמתקדמים:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
+  clientVideo: {
+    label: 'סרטון לקוח',
+    message: 'זה סרטון לקוח שחשוב לראות לפני שמתקדמים:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
+  },
+  tasteVideo: {
+    label: 'סרטון טעימה',
+    message: 'זה סרטון הטעימה של האקדמיה:\nhttps://www.eladrabi.co.il/lesson/'
   },
   contact: {
     label: 'איש קשר',
-    message: 'פרטי קשר של אלעד רבי - האקדמיה לספרות:\nוואטסאפ: +972559398343\nאתר: https://www.eladrabi.co.il/'
+    message: 'פרטי קשר של אלעד רבי - האקדמיה לספרות:\nוואטסאפ: +972 55-685-7417\nאתר: https://www.eladrabi.co.il/'
   }
 };
 
