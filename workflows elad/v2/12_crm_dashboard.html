@@ -483,7 +483,8 @@ body.chat-open{overflow:hidden}
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">איש קשר</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">טלפון מתניה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('idoContact')">טלפון עידו</button>
     </div>
     <div class="chat-input-wrap">
       <textarea id="chatInput" rows="1" placeholder="כתוב הודעה..." oninput="resizeChatInput()" onkeydown="handleChatKey(event)"></textarea>
@@ -529,8 +530,12 @@ const QUICK_ASSETS = {
     message: 'זה סרטון הטעימה של האקדמיה:\nhttps://www.eladrabi.co.il/lesson/'
   },
   contact: {
-    label: 'איש קשר',
+    label: 'טלפון מתניה',
     message: 'פרטי קשר עם מתניה, תלמיד שעבר את המסלול:\nוואטסאפ: +972 55-685-7417'
+  },
+  idoContact: {
+    label: 'טלפון עידו',
+    message: 'טלפון עידו:\n+972 53-480-1897'
   }
 };
 
@@ -1343,7 +1348,7 @@ function resizeChatInput() {
 }
 
 function handleChatKey(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
+  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
     event.preventDefault();
     sendChatMessage(event);
   }
