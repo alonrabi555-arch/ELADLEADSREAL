@@ -1119,84 +1119,6 @@ async function deleteLead() {
 // ============================================================
 // Lead Actions
 // ============================================================
-async function takeoverConversation() {
-  if (!currentLeadPhone) return;
-  if (!confirm('להשתלט על השיחה?')) return;
-  try {
-    await fetch(WA_TAKEOVER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone })
-    });
-    fetchLeads();
-  } catch (e) { alert('שגיאה בהשתלטות על השיחה'); }
-}
-
-async function releaseConversation() {
-  if (!currentLeadPhone) return;
-  if (!confirm('להחזיר את השיחה לבוט?')) return;
-  try {
-    await fetch(WA_RELEASE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone })
-    });
-    fetchLeads();
-  } catch (e) { alert('שגיאה בהחזרת השיחה לבוט'); }
-}
-
-async function manualMessage() {
-  if (!currentLeadPhone) return;
-  const msg = prompt('הקלד הודעה לשלוח:');
-  if (!msg) return;
-  try {
-    await fetch(WA_SEND_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: currentLeadPhone, message: msg })
-    });
-    fetchLeads();
-  } catch (e) { alert('שגיאה בשליחה'); }
-}
-
-async function loadConversationHistory() {
-  if (!currentLeadPhone) return;
-  const box = document.getElementById('conversationBox');
-  if (!box) return;
-  box.innerHTML = '<div>טוען שיחה...</div>';
-  try {
-    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(currentLeadPhone)}`);
-    const data = await r.json();
-    const payload = Array.isArray(data) ? (data[0] || {}) : data;
-    const messages = Array.isArray(payload.messages) ? payload.messages : [];
-    if (!messages.length) {
-      box.innerHTML = '<div>אין הודעות להצגה.</div>';
-      return;
-    }
-    box.innerHTML = messages.map(m => {
-      const isIn = m.direction === 'in';
-      const bg = isIn ? 'rgba(37,211,102,.12)' : 'var(--s3)';
-      const border = isIn ? 'rgba(37,211,102,.25)' : 'var(--border)';
-      const align = isIn ? 'flex-end' : 'flex-start';
-      const label = isIn ? 'לקוח' : 'אלעד / בוט';
-      const when = m.sent_at ? new Date(m.sent_at).toLocaleString('he-IL') : '';
-      return `<div style="align-self:${align};max-width:86%;background:${bg};border:1px solid ${border};border-radius:12px;padding:8px 10px;color:var(--text)">
-        <div style="font-size:10px;color:var(--sub);margin-bottom:4px">${label} · ${when}</div>
-        <div>${escapeHtml(m.body || '')}</div>
-      </div>`;
-    }).join('');
-  } catch (e) {
-    box.innerHTML = '<div>שגיאה בטעינת השיחה.</div>';
-  }
-}
-
-// ============================================================
-// Init (no auto-refresh - user clicks 🔄 רענן for fresh data)
-// Auto-polling removed entirely to preserve n8n execution quota.
-// ============================================================
-// ============================================================
-// Full screen WhatsApp-style chat overrides
-// ============================================================
 let fullChatPhone = null;
 let fullChatLead = null;
 let fullChatMessages = [];
@@ -1231,7 +1153,9 @@ function openFullChat(phone) {
   document.getElementById('chatScreen').classList.add('open');
   document.getElementById('chatScreen').setAttribute('aria-hidden', 'false');
   document.body.classList.add('chat-open');
-  closeDrawer();
+  document.getElementById('ov').classList.remove('open');
+  document.getElementById('drw').classList.remove('open');
+  currentLeadPhone = phone;
 
   loadConversationHistory(true);
   setTimeout(() => document.getElementById('chatInput')?.focus(), 80);
