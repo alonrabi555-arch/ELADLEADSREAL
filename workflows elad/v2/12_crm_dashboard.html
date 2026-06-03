@@ -760,7 +760,7 @@ function isNoFirstReply(l) {
 }
 
 function isWithHumanAgent(l) {
-  return boolVal(l.human_agent);
+  return boolVal(l.human_agent) && !isNoFirstReply(l);
 }
 
 function isMinorLead(l) {
