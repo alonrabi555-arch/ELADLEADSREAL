@@ -312,11 +312,11 @@ body.chat-open{overflow:hidden}
   <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi kn"><div class="kpi-lbl">חדשים היום</div><div class="kpi-val" id="kpi-new">0</div></div>
-    <div class="kpi ka"><div class="kpi-lbl">בשיחה</div><div class="kpi-val" id="kpi-active">0</div></div>
-    <div class="kpi ko"><div class="kpi-lbl">בהתנגדות</div><div class="kpi-val" id="kpi-obj">0</div></div>
-    <div class="kpi kr"><div class="kpi-lbl">מוכנים לסגירה</div><div class="kpi-val" id="kpi-ready">0</div></div>
+    <div class="kpi ka"><div class="kpi-lbl">לא ענו לפתיחה</div><div class="kpi-val" id="kpi-active">0</div></div>
+    <div class="kpi ko"><div class="kpi-lbl">עם נציג</div><div class="kpi-val" id="kpi-obj">0</div></div>
+    <div class="kpi kr"><div class="kpi-lbl">צריך שיחה</div><div class="kpi-val" id="kpi-ready">0</div></div>
     <div class="kpi kw"><div class="kpi-lbl">סגרו החודש</div><div class="kpi-val" id="kpi-won">0</div></div>
-    <div class="kpi kp"><div class="kpi-lbl">ליווי ארוך</div><div class="kpi-val" id="kpi-nurture">0</div></div>
+    <div class="kpi kp"><div class="kpi-lbl">קטינים</div><div class="kpi-val" id="kpi-nurture">0</div></div>
     <div class="kpi krev"><div class="kpi-lbl">הכנסה החודש</div><div class="kpi-val" id="kpi-rev">—</div></div>
   </div>
 
@@ -371,11 +371,10 @@ body.chat-open{overflow:hidden}
   <div class="ctrl">
     <button class="tab on"  data-filter="all">הכל <span class="tcnt" id="cnt-all">0</span></button>
     <button class="tab fn"  data-filter="NEW">חדש <span class="tcnt" id="cnt-NEW">0</span></button>
-    <button class="tab fa"  data-filter="ACTIVE">בשיחה <span class="tcnt" id="cnt-ACTIVE">0</span></button>
-    <button class="tab fo"  data-filter="OBJECTION">בהתנגדות <span class="tcnt" id="cnt-OBJECTION">0</span></button>
-    <button class="tab fr"  data-filter="READY">מוכן <span class="tcnt" id="cnt-READY">0</span></button>
-    <button class="tab fw"  data-filter="WON">סגר <span class="tcnt" id="cnt-WON">0</span></button>
-    <button class="tab fp"  data-filter="NURTURE">ליווי <span class="tcnt" id="cnt-NURTURE">0</span></button>
+    <button class="tab fa"  data-filter="NO_FIRST_REPLY">לא ענו <span class="tcnt" id="cnt-NO_FIRST_REPLY">0</span></button>
+    <button class="tab fo"  data-filter="HUMAN_AGENT">עם נציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
+    <button class="tab fr"  data-filter="READY_TO_CALL">צריך שיחה <span class="tcnt" id="cnt-READY_TO_CALL">0</span></button>
+    <button class="tab fp"  data-filter="MINORS">קטינים <span class="tcnt" id="cnt-MINORS">0</span></button>
     <button class="tab fv" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="cnt-visitors">–</span></button>
     <div class="spacer"></div>
     <select class="srt-sel" id="sortSel">
@@ -410,7 +409,7 @@ body.chat-open{overflow:hidden}
   </div>
 
   <!-- Support ended table -->
-  <div class="sec-divider">נגמר ליווי <span class="tcnt" id="supportEndedCnt">0</span></div>
+  <div class="sec-divider">סגרו / נגמר ליווי <span class="tcnt" id="supportEndedCnt">0</span></div>
   <div class="tbl-wrap" id="supportEndedWrap">
     <table>
       <thead>
@@ -691,6 +690,7 @@ function urgencyScore(l) {
   const now = Date.now();
   const hoursSince = (now - new Date(l.updated_at || 0).getTime()) / 3600000;
 
+  if (isReadyForCall(l))        score += 90;
   if (l.stage === 'READY')      score += 80;
   if (l.stage === 'OBJECTION')  score += 40;
   if (l.stage === 'ACTIVE')     score += 10;
@@ -741,6 +741,43 @@ function urgencyReason(l) {
   return { text: '—', cls: 'urg-reason-norm' };
 }
 
+function boolVal(v) {
+  return v === true || String(v || '').toLowerCase() === 'true';
+}
+
+function isReadyForCall(l) {
+  return boolVal(l.warmup_page_clicked) || l.stage === 'READY';
+}
+
+function isNoFirstReply(l) {
+  const state = String(l.state || '').toUpperCase();
+  return state === 'WAIT_CONFIRM' && !isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l);
+}
+
+function isWithHumanAgent(l) {
+  return boolVal(l.human_agent);
+}
+
+function isMinorLead(l) {
+  const age = Number(l.age);
+  return (Number.isFinite(age) && age > 0 && age < 18) || l.stage === 'NURTURE';
+}
+
+function isClosedLead(l) {
+  const values = [l.sale_status, l.stage, l.status, l.lead_type].map(v => String(v || '').toLowerCase());
+  return values.includes('won') || values.includes('paid') || values.includes('closed');
+}
+
+function leadMatchesFilter(l, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'NEW') return l.stage === 'NEW';
+  if (filter === 'NO_FIRST_REPLY') return isNoFirstReply(l);
+  if (filter === 'HUMAN_AGENT') return isWithHumanAgent(l);
+  if (filter === 'READY_TO_CALL') return isReadyForCall(l);
+  if (filter === 'MINORS') return isMinorLead(l);
+  return l.stage === filter;
+}
+
 // ============================================================
 // Fetch + Render
 // ============================================================
@@ -770,51 +807,52 @@ function renderKPIs() {
   document.getElementById('kpi-new').textContent =
     allLeads.filter(l => (l.created_at || '').startsWith(today)).length;
   document.getElementById('kpi-active').textContent =
-    allLeads.filter(l => l.stage === 'ACTIVE').length;
+    allLeads.filter(isNoFirstReply).length;
   document.getElementById('kpi-obj').textContent =
-    allLeads.filter(l => l.stage === 'OBJECTION').length;
+    allLeads.filter(isWithHumanAgent).length;
   document.getElementById('kpi-ready').textContent =
-    allLeads.filter(l => l.stage === 'READY').length;
-  const wonThis = allLeads.filter(l => l.stage === 'WON' && (l.updated_at || '').startsWith(thisMonth));
+    allLeads.filter(isReadyForCall).length;
+  const wonThis = allLeads.filter(l => isClosedLead(l) && (l.updated_at || '').startsWith(thisMonth));
   document.getElementById('kpi-won').textContent = wonThis.length;
   document.getElementById('kpi-nurture').textContent =
-    allLeads.filter(l => l.stage === 'NURTURE').length;
+    allLeads.filter(isMinorLead).length;
 
   // Revenue estimate: count paid leads this month
-  const revLeads = allLeads.filter(l => l.stage === 'WON' && l.sale_status === 'paid' && (l.updated_at || '').startsWith(thisMonth));
+  const revLeads = allLeads.filter(l => isClosedLead(l) && l.sale_status === 'paid' && (l.updated_at || '').startsWith(thisMonth));
   const rev = revLeads.reduce((s, l) => s + (l.has_equipment === false ? 2800 : 3400), 0);
   document.getElementById('kpi-rev').textContent = rev > 0 ? rev.toLocaleString('he-IL') + ' ₪' : '—';
 }
 
 function renderTabs() {
-  document.getElementById('cnt-all').textContent = allLeads.length;
-  ['NEW','ACTIVE','OBJECTION','READY','WON','NURTURE'].forEach(s => {
-    document.getElementById('cnt-' + s).textContent = allLeads.filter(l => l.stage === s).length;
-  });
+  const activeLeads = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l));
+  document.getElementById('cnt-all').textContent = activeLeads.length;
+  document.getElementById('cnt-NEW').textContent = activeLeads.filter(l => l.stage === 'NEW').length;
+  document.getElementById('cnt-NO_FIRST_REPLY').textContent = activeLeads.filter(isNoFirstReply).length;
+  document.getElementById('cnt-HUMAN_AGENT').textContent = activeLeads.filter(isWithHumanAgent).length;
+  document.getElementById('cnt-READY_TO_CALL').textContent = activeLeads.filter(isReadyForCall).length;
+  document.getElementById('cnt-MINORS').textContent = activeLeads.filter(isMinorLead).length;
 }
 
 // ============================================================
 // Call list render
 // ============================================================
 function renderCallList() {
-  const urgentStages = ['READY', 'OBJECTION', 'ACTIVE'];
-  let list = allLeads.filter(l => urgentStages.includes(l.stage));
+  let list = allLeads.filter(l => isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l));
   list.sort((a, b) => urgencyScore(b) - urgencyScore(a));
-
-  // Only show leads that actually need action (score > 20)
-  list = list.filter(l => urgencyScore(l) > 20);
 
   document.getElementById('call-count').textContent = list.length;
 
   const tbody = document.getElementById('call-tbody');
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="call-empty">אין לידים דחופים כרגע ✓</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="call-empty">אין כרגע לידים שלחצו אחרי דף סגירה ✓</div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = list.map(l => {
     const score = urgencyScore(l);
-    const reason = urgencyReason(l);
+    const reason = isReadyForCall(l)
+      ? { text: 'לחץ אחרי דף סגירה', cls: 'urg-reason-hot' }
+      : urgencyReason(l);
     const readColor = (l.readiness_score || 0) >= 8 ? 'var(--hot)' : (l.readiness_score || 0) >= 5 ? 'var(--gold)' : 'var(--cold)';
     const waLink = `https://wa.me/${l.phone}`;
     return `<tr onclick="openDrawer('${l.phone}')">
@@ -853,10 +891,10 @@ function renderTable() {
   const sort = document.getElementById('sortSel').value;
   const tbody = document.getElementById('tbody');
 
-  let list = allLeads.filter(l => !isSupportEnded(l));
+  let list = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l));
 
   if (currentFilter !== 'all') {
-    list = list.filter(l => l.stage === currentFilter);
+    list = list.filter(l => leadMatchesFilter(l, currentFilter));
   }
 
   if (q) {
@@ -925,18 +963,20 @@ function renderSupportEndedTable() {
   if (!tbody) return;
 
   const list = allLeads
-    .filter(isSupportEnded)
+    .filter(l => isSupportEnded(l) || isClosedLead(l))
     .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
 
   if (cnt) cnt.textContent = list.length;
 
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-i">✓</div><p>אין לקוחות שסיימו ליווי</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="empty-i">✓</div><p>אין עדיין לידים שסגרו או סיימו ליווי</p></div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = list.map(l => {
     const waLink = `https://wa.me/${l.phone}`;
+    const archiveLabel = isClosedLead(l) ? 'סגר' : 'נגמר ליווי';
+    const archiveClass = isClosedLead(l) ? 'stage-WON' : 'stage-NURTURE';
     return `<tr onclick="openDrawer('${l.phone}')">
       <td>
         <div class="name-cell">
@@ -947,7 +987,7 @@ function renderSupportEndedTable() {
         </div>
       </td>
       <td class="name-phone">${l.phone || '-'}</td>
-      <td><span class="stage-badge stage-NURTURE">נגמר ליווי</span></td>
+      <td><span class="stage-badge ${archiveClass}">${archiveLabel}</span></td>
       <td class="hide-mobile" style="color:var(--sub);font-size:12px">${formatRelative(l.updated_at)}</td>
       <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
     </tr>`;
@@ -955,7 +995,7 @@ function renderSupportEndedTable() {
 }
 
 function stageLabel(s) {
-  return { NEW:'חדש', ACTIVE:'בשיחה', OBJECTION:'בהתנגדות', READY:'מוכן', WON:'סגר', NURTURE:'ליווי', DEAD:'מת' }[s] || s || '?';
+  return { NEW:'חדש', ACTIVE:'פעיל', OBJECTION:'צריך בדיקה', READY:'צריך שיחה', WON:'סגר', NURTURE:'קטינים', DEAD:'מת' }[s] || s || '?';
 }
 
 function formatNextAction(l) {
