@@ -479,6 +479,7 @@ body.chat-open{overflow:hidden}
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoLink')">צפייה בסרטון באתר</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoQuestion')">שאלת סרטון באתר</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('minorException')">הודעת חריג</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
@@ -515,6 +516,10 @@ const QUICK_ASSETS = {
   siteVideoQuestion: {
     label: 'שאלת סרטון באתר',
     message: 'מעולה.\n"לפני שאני ממשיך, ראית את הסרטון של אלעד באתר במלואו?"'
+  },
+  minorException: {
+    label: 'הודעת חריג',
+    message: 'אני שמח שאתה מתעניין כבר עכשיו\nהאקדמיה בדרך כלל נפתחת מגיל 13 ומעלה, אבל בגיל 12 יש לפעמים חריגים אם רואים שיש רצינות ותמיכה מהבית.\n\nכדי להבין אם אפשר לבדוק אותך כחריג, תענה לי רגע בכנות על שתי שאלות קצרות:\n\n1. ההורים שלך יודעים שאתה רוצה להיכנס לתחום הספרות, והם תומכים בזה?\n2. אתה חושב שתצליח להתמיד בקורס ולתרגל בבית כמו שצריך?'
   },
   syllabus: {
     label: 'סילבוס',
@@ -760,7 +765,13 @@ function isWithHumanAgent(l) {
 
 function isMinorLead(l) {
   const age = Number(l.age);
-  return (Number.isFinite(age) && age > 0 && age < 18) || l.stage === 'NURTURE';
+  if (!Number.isFinite(age) || age <= 0 || age >= 13) return false;
+  const approvedException = age === 12 && (
+    boolVal(l.video_watched) ||
+    boolVal(l.warmup_page_clicked) ||
+    ['ACTIVE', 'READY', 'WON'].includes(String(l.stage || '').toUpperCase())
+  );
+  return !approvedException;
 }
 
 function isClosedLead(l) {
