@@ -477,8 +477,6 @@ body.chat-open{overflow:hidden}
   <form class="chat-compose" onsubmit="sendChatMessage(event)">
     <div class="chat-quick-actions" aria-label="Quick send actions">
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoLink')">צפייה בסרטון באתר</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('siteVideoQuestion')">שאלת סרטון באתר</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('minorException')">הודעת חריג</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
@@ -509,14 +507,6 @@ const QUICK_ASSETS = {
     label: 'דף סגירה',
     message: 'דף סופי:\nhttps://www.eladrabi.co.il/academy/'
   },
-  siteVideoLink: {
-    label: 'צפייה בסרטון באתר',
-    message: 'קישור חזרה לצפייה בסרטון באתר:\nhttps://www.eladrabi.co.il/start/'
-  },
-  siteVideoQuestion: {
-    label: 'שאלת סרטון באתר',
-    message: 'מעולה.\n"לפני שאני ממשיך, ראית את הסרטון של אלעד באתר במלואו?"'
-  },
   minorException: {
     label: 'הודעת חריג',
     message: 'אני שמח שאתה מתעניין כבר עכשיו\nהאקדמיה בדרך כלל נפתחת מגיל 13 ומעלה, אבל בגיל 12 יש לפעמים חריגים אם רואים שיש רצינות ותמיכה מהבית.\n\nכדי להבין אם אפשר לבדוק אותך כחריג, תענה לי רגע בכנות על שתי שאלות קצרות:\n\n1. ההורים שלך יודעים שאתה רוצה להיכנס לתחום הספרות, והם תומכים בזה?\n2. אתה חושב שתצליח להתמיד בקורס ולתרגל בבית כמו שצריך?'
@@ -527,19 +517,19 @@ const QUICK_ASSETS = {
   },
   clientVideo: {
     label: 'סרטון לקוח',
-    message: 'סרטון לקוח:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
+    message: 'סרטון המלצת תלמיד:\nhttps://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/customer-testimonial.mp4'
   },
   tasteVideo: {
     label: 'סרטון טעימה',
-    message: 'זה סרטון הטעימה של האקדמיה:\nhttps://www.eladrabi.co.il/lesson/'
+    message: 'תהנה(:\nאלעד מסביר פה על כל השלבים להתפתחות בעסק.\nhttps://www.eladrabi.co.il/lesson/'
   },
   contact: {
     label: 'טלפון מתניה',
-    message: 'פרטי קשר עם מתניה, תלמיד שעבר את המסלול:\nוואטסאפ: +972 55-685-7417'
+    message: 'ווצאפ מתניה\n+972 55-685-7417'
   },
   idoContact: {
     label: 'טלפון עידו',
-    message: 'טלפון עידו:\n+972 53-480-1897'
+    message: 'ווצאפ עידו\n+972 53-480-1897'
   }
 };
 
@@ -1399,7 +1389,7 @@ function resizeChatInput() {
 }
 
 function handleChatKey(event) {
-  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+  if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault();
     sendChatMessage(event);
   }
