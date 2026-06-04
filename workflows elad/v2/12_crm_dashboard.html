@@ -370,7 +370,6 @@ body.chat-open{overflow:hidden}
   <!-- Filters -->
   <div class="ctrl">
     <button class="tab on"  data-filter="all">הכל <span class="tcnt" id="cnt-all">0</span></button>
-    <button class="tab fn"  data-filter="NEW">חדש <span class="tcnt" id="cnt-NEW">0</span></button>
     <button class="tab fa"  data-filter="NO_FIRST_REPLY">לא ענו <span class="tcnt" id="cnt-NO_FIRST_REPLY">0</span></button>
     <button class="tab fo"  data-filter="HUMAN_AGENT">עם נציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
     <button class="tab fr"  data-filter="READY_TO_CALL">צריך שיחה <span class="tcnt" id="cnt-READY_TO_CALL">0</span></button>
@@ -827,7 +826,6 @@ function renderKPIs() {
 function renderTabs() {
   const activeLeads = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l));
   document.getElementById('cnt-all').textContent = activeLeads.length;
-  document.getElementById('cnt-NEW').textContent = activeLeads.filter(l => l.stage === 'NEW').length;
   document.getElementById('cnt-NO_FIRST_REPLY').textContent = activeLeads.filter(isNoFirstReply).length;
   document.getElementById('cnt-HUMAN_AGENT').textContent = activeLeads.filter(isWithHumanAgent).length;
   document.getElementById('cnt-READY_TO_CALL').textContent = activeLeads.filter(isReadyForCall).length;
