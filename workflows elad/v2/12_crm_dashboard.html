@@ -1493,7 +1493,19 @@ function resizeChatInput() {
 }
 
 function handleChatKey(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
+  if (event.key !== 'Enter') return;
+
+  if (event.ctrlKey || event.metaKey) {
+    event.preventDefault();
+    sendChatMessage(event);
+    return;
+  }
+
+  const isMobileInput =
+    window.matchMedia?.('(pointer: coarse)').matches ||
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (!event.shiftKey && !isMobileInput) {
     event.preventDefault();
     sendChatMessage(event);
   }
