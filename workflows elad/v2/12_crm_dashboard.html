@@ -640,11 +640,7 @@ let visitorRefreshTimer = null;
 // Visitors fetch + charts
 // ============================================================
 async function fetchVisitors() {
-  try {
-    const r = await fetch(`${VISITORS_URL}?_=${Date.now()}`);
-    const data = await r.json();
-    visitors = Array.isArray(data) ? data : [];
-  } catch(e) { visitors = []; }
+  visitors = [];
   document.getElementById('cnt-visitors').textContent = visitors.length;
   renderSourceChart();
   renderGeoChart();
@@ -743,7 +739,10 @@ function switchToVisitors() {
   document.getElementById('tabVisitors').classList.add('on');
   document.getElementById('tblWrap').style.display = 'none';
   document.getElementById('visSection').style.display = '';
-  startVisitorsRefresh();
+  stopVisitorsRefresh();
+  renderSourceChart();
+  renderGeoChart();
+  renderVisitorsTable();
 }
 
 function switchToLeads() {
@@ -760,11 +759,9 @@ function isVisitorsVisible() {
 
 function startVisitorsRefresh() {
   stopVisitorsRefresh();
-  fetchVisitors();
-  visitorRefreshTimer = setInterval(() => {
-    if (isVisitorsVisible()) fetchVisitors();
-    else stopVisitorsRefresh();
-  }, 5 * 60 * 1000);
+  renderSourceChart();
+  renderGeoChart();
+  renderVisitorsTable();
 }
 
 function stopVisitorsRefresh() {
@@ -1707,7 +1704,6 @@ async function sendQuickAsset(type) {
 
 function refreshAll() {
   fetchLeads();
-  if (isVisitorsVisible()) fetchVisitors();
 }
 document.addEventListener('click', event => {
   const wrap = event.target?.closest?.('.approved-menu-wrap');
