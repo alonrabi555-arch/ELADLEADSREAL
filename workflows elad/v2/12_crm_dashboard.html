@@ -1706,7 +1706,7 @@ async function sendQuickAsset(type) {
 
 function refreshAll() {
   fetchLeads();
-  if (isVisitorsVisible()) fetchVisitors();
+  fetchVisitors();
 }
 document.addEventListener('click', event => {
   const wrap = event.target?.closest?.('.approved-menu-wrap');
@@ -1714,6 +1714,7 @@ document.addEventListener('click', event => {
 });
 renderApprovedTemplatesMenu();
 fetchLeads();
+fetchVisitors();
 </script>
 </body>
 </html>
