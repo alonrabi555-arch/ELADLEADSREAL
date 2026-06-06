@@ -86,6 +86,20 @@ function elad_crm_visitors_clean_text($value, $max = 255) {
     return substr($value, 0, $max);
 }
 
+function elad_crm_visitors_clean_datetime($value, $fallback) {
+    $value = sanitize_text_field((string) $value);
+    if (!$value) {
+        return $fallback;
+    }
+
+    $timestamp = strtotime($value);
+    if (!$timestamp) {
+        return $fallback;
+    }
+
+    return gmdate('Y-m-d H:i:s', $timestamp);
+}
+
 function elad_crm_visitors_store(WP_REST_Request $request) {
     global $wpdb;
 
@@ -106,6 +120,8 @@ function elad_crm_visitors_store(WP_REST_Request $request) {
     $pages = array_values(array_slice(array_map('esc_url_raw', $pages), 0, 20));
 
     $now = current_time('mysql', true);
+    $created_at = elad_crm_visitors_clean_datetime($body['created_at'] ?? '', $now);
+    $updated_at = elad_crm_visitors_clean_datetime($body['updated_at'] ?? '', $created_at);
     $data = array(
         'session_id' => $session_id,
         'landing_page' => esc_url_raw($body['landing_page'] ?? ''),
@@ -122,7 +138,7 @@ function elad_crm_visitors_store(WP_REST_Request $request) {
         'city' => '',
         'region' => '',
         'country' => '',
-        'updated_at' => $now,
+        'updated_at' => $updated_at,
     );
 
     $table = elad_crm_visitors_table_name();
@@ -131,7 +147,7 @@ function elad_crm_visitors_store(WP_REST_Request $request) {
     if ($existing_id) {
         $wpdb->update($table, $data, array('id' => (int) $existing_id));
     } else {
-        $data['created_at'] = $now;
+        $data['created_at'] = $created_at;
         $wpdb->insert($table, $data);
     }
 
