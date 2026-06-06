@@ -634,6 +634,7 @@ let currentFilter = 'all';
 let currentLeadPhone = null;
 let visPage = 1;
 const VIS_PER = 30;
+let visitorRefreshTimer = null;
 
 // ============================================================
 // Visitors fetch + charts
@@ -742,14 +743,34 @@ function switchToVisitors() {
   document.getElementById('tabVisitors').classList.add('on');
   document.getElementById('tblWrap').style.display = 'none';
   document.getElementById('visSection').style.display = '';
-  if (!visitors.length) fetchVisitors();
-  else renderVisitorsTable();
+  startVisitorsRefresh();
 }
 
 function switchToLeads() {
   document.getElementById('tabVisitors').classList.remove('on');
   document.getElementById('tblWrap').style.display = '';
   document.getElementById('visSection').style.display = 'none';
+  stopVisitorsRefresh();
+}
+
+function isVisitorsVisible() {
+  const section = document.getElementById('visSection');
+  return Boolean(section) && section.style.display !== 'none';
+}
+
+function startVisitorsRefresh() {
+  stopVisitorsRefresh();
+  fetchVisitors();
+  visitorRefreshTimer = setInterval(() => {
+    if (isVisitorsVisible()) fetchVisitors();
+    else stopVisitorsRefresh();
+  }, 5 * 60 * 1000);
+}
+
+function stopVisitorsRefresh() {
+  if (!visitorRefreshTimer) return;
+  clearInterval(visitorRefreshTimer);
+  visitorRefreshTimer = null;
 }
 
 // ============================================================
@@ -1684,15 +1705,16 @@ async function sendQuickAsset(type) {
   }
 }
 
-function refreshAll() { fetchLeads(); fetchVisitors(); }
+function refreshAll() {
+  fetchLeads();
+  if (isVisitorsVisible()) fetchVisitors();
+}
 document.addEventListener('click', event => {
   const wrap = event.target?.closest?.('.approved-menu-wrap');
   if (!wrap) document.getElementById('approvedTemplatesMenu')?.classList.remove('open');
 });
 renderApprovedTemplatesMenu();
 fetchLeads();
-fetchVisitors();
-setInterval(fetchVisitors, 30000);
 </script>
 </body>
 </html>
