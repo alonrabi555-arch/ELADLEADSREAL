@@ -1388,6 +1388,7 @@ let fullChatPhone = null;
 let fullChatLead = null;
 let fullChatMessages = [];
 let fullChatRefreshTimer = null;
+let takeoverRequestPending = false;
 
 function getLeadByPhone(phone) {
   return allLeads.find(l => String(l.phone || '') === String(phone || '')) || null;
@@ -1426,9 +1427,7 @@ function openFullChat(phone) {
   setTimeout(() => document.getElementById('chatInput')?.focus(), 80);
 
   clearInterval(fullChatRefreshTimer);
-  fullChatRefreshTimer = setInterval(() => {
-    if (fullChatPhone) loadConversationHistory(true, { silent: true });
-  }, 15000);
+  fullChatRefreshTimer = null;
 }
 
 function closeFullChat() {
@@ -1495,8 +1494,9 @@ function renderFullChat(messages) {
 }
 
 async function takeoverConversation() {
-  if (!currentLeadPhone) return;
+  if (!currentLeadPhone || takeoverRequestPending) return;
   const phone = currentLeadPhone;
+  takeoverRequestPending = true;
   openFullChat(phone);
   try {
     setChatStatus('לוקח שליטה...');
@@ -1509,6 +1509,8 @@ async function takeoverConversation() {
     setChatStatus('השיחה אצלך');
   } catch (e) {
     setChatStatus('הצ׳אט פתוח, אבל סימון השליטה נכשל', true);
+  } finally {
+    takeoverRequestPending = false;
   }
 }
 
