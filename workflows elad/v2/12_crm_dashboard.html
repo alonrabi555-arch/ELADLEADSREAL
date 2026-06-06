@@ -251,6 +251,13 @@ body.chat-open{overflow:hidden}
 .chat-quick-btn{height:34px;white-space:nowrap;border:1px solid rgba(255,255,255,.11);border-radius:8px;background:#16232b;color:#d1d7db;font-family:var(--body);font-size:12px;font-weight:800;padding:0 12px;cursor:pointer}
 .chat-quick-btn:hover{background:#1d3039;border-color:rgba(0,168,132,.42);color:#e9edef}
 .chat-quick-btn:disabled{opacity:.45;cursor:not-allowed}
+.approved-menu-wrap{position:relative;display:inline-flex}
+.approved-menu{position:absolute;right:0;bottom:40px;z-index:30;display:none;min-width:260px;max-width:min(340px,calc(100vw - 24px));max-height:280px;overflow:auto;background:#111b21;border:1px solid rgba(255,255,255,.12);border-radius:8px;box-shadow:0 14px 38px rgba(0,0,0,.42);padding:6px;direction:rtl}
+.approved-menu.open{display:block}
+.approved-template-btn{width:100%;border:0;border-bottom:1px solid rgba(255,255,255,.07);background:transparent;color:#e9edef;text-align:right;font-family:var(--body);font-size:12px;font-weight:800;padding:10px 9px;cursor:pointer}
+.approved-template-btn:last-child{border-bottom:0}
+.approved-template-btn:hover{background:#1d3039;color:#fff}
+.approved-template-btn:disabled{opacity:.45;cursor:not-allowed}
 .chat-input-wrap{background:#2a3942;border:1px solid transparent;border-radius:22px;min-height:44px;display:flex;align-items:center;padding:0 14px}
 .chat-input-wrap{grid-area:input}
 .chat-input-wrap:focus-within{border-color:rgba(0,168,132,.45)}
@@ -521,13 +528,10 @@ body.chat-open{overflow:hidden}
   </main>
   <form class="chat-compose" onsubmit="sendChatMessage(event)">
     <div class="chat-quick-actions" aria-label="Quick send actions">
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('minorException')">הודעת חריג</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">טלפון מתניה</button>
-      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('idoContact')">טלפון עידו</button>
+      <div class="approved-menu-wrap">
+        <button class="chat-quick-btn" id="approvedTemplatesToggle" type="button" onclick="toggleApprovedTemplates()">הודעות מאושרות</button>
+        <div class="approved-menu" id="approvedTemplatesMenu" aria-label="Approved WhatsApp templates"></div>
+      </div>
     </div>
     <div class="chat-input-wrap">
       <textarea id="chatInput" rows="1" placeholder="כתוב הודעה..." oninput="resizeChatInput()" onkeydown="handleChatKey(event)"></textarea>
@@ -543,6 +547,7 @@ body.chat-open{overflow:hidden}
 const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
 const WA_HISTORY_URL   = 'https://alon09.app.n8n.cloud/webhook/conversation-history';
 const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
+const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
 const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
 const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
@@ -575,6 +580,44 @@ const QUICK_ASSETS = {
   idoContact: {
     label: 'טלפון עידו',
     message: 'ווצאפ עידו\n+972 53-480-1897'
+  }
+};
+
+const APPROVED_TEMPLATES = {
+  experience: {
+    label: 'הודעה ניסיון בספרות',
+    contentSid: 'HXc11cefa30092135dc4bc43b937f6b4b1',
+    preview: name => `היי ${name} ,יש לך ניסיון כלשהו בתחום?`
+  },
+  afterTasteVideo: {
+    label: 'אחרי סרטון הטעימה',
+    contentSid: 'HX55eb8059e220c18d4bd28ed98f1ffa64',
+    preview: name => `היי ${name}, יצא לך לראות את סרטון הטעימה ששלחתי?`
+  },
+  afterSyllabus: {
+    label: 'אחרי הסילבוס',
+    contentSid: 'HX73bb0f36b5cb15cea2bae84fa2f958e2',
+    preview: name => `היי ${name}, יצא לך לעבור על הסילבוס ששלחתי?`
+  },
+  afterIdo: {
+    label: 'אחרי ווצאפ עידו',
+    contentSid: 'HX518ef53b40697528ff50cb800f9e95cb',
+    preview: name => `היי ${name}, יצא לך לשלוח לעידו הודעה?`
+  },
+  afterStudentRecommendation: {
+    label: 'אחרי סרטון המלצה תלמיד',
+    contentSid: 'HX87e756bef956ec24fe7ef157daac5af9',
+    preview: name => `היי ${name}, יצא לך לראות את סרטון ההמלצה ששלחתי?`
+  },
+  afterMatanya: {
+    label: 'אחרי ווצאפ מתניה',
+    contentSid: 'HX0b5ec1da8f82fb276624c4aa5355b2ca',
+    preview: name => `היי ${name}, יצא לך לשלוח למתניה הודעה?`
+  },
+  afterClosingPage: {
+    label: 'אחרי דף סגירה',
+    contentSid: 'HXc1ea8b7395447466f9cde85eb1fefea9',
+    preview: name => `היי ${name}, יצא לך לעבור על האתר ששלחתי?`
   }
 };
 
@@ -1369,7 +1412,28 @@ function closeFullChat() {
   document.body.classList.remove('chat-open');
   fullChatPhone = null;
   fullChatLead = null;
+  document.getElementById('approvedTemplatesMenu')?.classList.remove('open');
   clearInterval(fullChatRefreshTimer);
+}
+
+function getFullChatLeadName() {
+  const lead = fullChatLead || getLeadByPhone(fullChatPhone);
+  return (lead?.name || '').trim();
+}
+
+function renderApprovedTemplatesMenu() {
+  const menu = document.getElementById('approvedTemplatesMenu');
+  if (!menu) return;
+  menu.innerHTML = Object.entries(APPROVED_TEMPLATES).map(([key, template]) => (
+    `<button class="approved-template-btn" type="button" onclick="sendApprovedTemplate('${key}')">${escapeHtml(template.label)}</button>`
+  )).join('');
+}
+
+function toggleApprovedTemplates() {
+  const menu = document.getElementById('approvedTemplatesMenu');
+  if (!menu) return;
+  if (!menu.innerHTML.trim()) renderApprovedTemplatesMenu();
+  menu.classList.toggle('open');
 }
 
 function renderFullChat(messages) {
@@ -1542,6 +1606,46 @@ async function sendChatMessage(event) {
   }
 }
 
+async function sendApprovedTemplate(type) {
+  const template = APPROVED_TEMPLATES[type];
+  if (!template || !fullChatPhone) return;
+
+  const leadName = getFullChatLeadName();
+  const renderedPreview = template.preview(leadName || '');
+  const btn = document.getElementById('chatSendBtn');
+  const quickButtons = Array.from(document.querySelectorAll('.chat-quick-btn,.approved-template-btn'));
+  btn.disabled = true;
+  quickButtons.forEach(b => { b.disabled = true; });
+  document.getElementById('approvedTemplatesMenu')?.classList.remove('open');
+  setChatStatus(`שולח ${template.label}...`);
+
+  try {
+    const res = await fetch(WA_TEMPLATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: fullChatPhone,
+        contentSid: template.contentSid,
+        contentVariables: { 1: leadName },
+        templateLabel: template.label
+      })
+    });
+    if (!res.ok) throw new Error(`Template send failed: ${res.status}`);
+
+    const now = new Date().toISOString();
+    renderFullChat([...fullChatMessages, { direction: 'out', body: renderedPreview, sent_at: now }]);
+    setChatStatus(`${template.label} נשלח`);
+    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads()]);
+  } catch (e) {
+    alert('שגיאה בשליחת תבנית מאושרת');
+    setChatStatus('');
+  } finally {
+    btn.disabled = false;
+    quickButtons.forEach(b => { b.disabled = false; });
+    document.getElementById('chatInput')?.focus();
+  }
+}
+
 async function sendQuickAsset(type) {
   const asset = QUICK_ASSETS[type];
   if (!asset || !fullChatPhone) return;
@@ -1574,6 +1678,11 @@ async function sendQuickAsset(type) {
 }
 
 function refreshAll() { fetchLeads(); fetchVisitors(); }
+document.addEventListener('click', event => {
+  const wrap = event.target?.closest?.('.approved-menu-wrap');
+  if (!wrap) document.getElementById('approvedTemplatesMenu')?.classList.remove('open');
+});
+renderApprovedTemplatesMenu();
 fetchLeads();
 fetchVisitors();
 setInterval(fetchVisitors, 30000);
