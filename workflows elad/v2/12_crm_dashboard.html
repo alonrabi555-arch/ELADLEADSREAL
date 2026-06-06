@@ -252,7 +252,7 @@ body.chat-open{overflow:hidden}
 .chat-quick-btn:hover{background:#1d3039;border-color:rgba(0,168,132,.42);color:#e9edef}
 .chat-quick-btn:disabled{opacity:.45;cursor:not-allowed}
 .approved-menu-wrap{position:relative;display:inline-flex}
-.approved-menu{position:absolute;right:0;bottom:40px;z-index:30;display:none;min-width:260px;max-width:min(340px,calc(100vw - 24px));max-height:280px;overflow:auto;background:#111b21;border:1px solid rgba(255,255,255,.12);border-radius:8px;box-shadow:0 14px 38px rgba(0,0,0,.42);padding:6px;direction:rtl}
+.approved-menu{position:fixed;right:16px;bottom:78px;z-index:3000;display:none;min-width:260px;max-width:min(340px,calc(100vw - 24px));max-height:280px;overflow:auto;background:#111b21;border:1px solid rgba(255,255,255,.12);border-radius:8px;box-shadow:0 14px 38px rgba(0,0,0,.42);padding:6px;direction:rtl}
 .approved-menu.open{display:block}
 .approved-template-btn{width:100%;border:0;border-bottom:1px solid rgba(255,255,255,.07);background:transparent;color:#e9edef;text-align:right;font-family:var(--body);font-size:12px;font-weight:800;padding:10px 9px;cursor:pointer}
 .approved-template-btn:last-child{border-bottom:0}
@@ -528,6 +528,13 @@ body.chat-open{overflow:hidden}
   </main>
   <form class="chat-compose" onsubmit="sendChatMessage(event)">
     <div class="chat-quick-actions" aria-label="Quick send actions">
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('warmup')">דף סגירה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('minorException')">הודעת חריג</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('syllabus')">סילבוס</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('clientVideo')">סרטון לקוח</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('tasteVideo')">סרטון טעימה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">טלפון מתניה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('idoContact')">טלפון עידו</button>
       <div class="approved-menu-wrap">
         <button class="chat-quick-btn" id="approvedTemplatesToggle" type="button" onclick="toggleApprovedTemplates()">הודעות מאושרות</button>
         <div class="approved-menu" id="approvedTemplatesMenu" aria-label="Approved WhatsApp templates"></div>
