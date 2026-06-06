@@ -557,7 +557,7 @@ const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-mes
 const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
 const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
-const VISITORS_URL     = 'https://alon09.app.n8n.cloud/webhook/visitors-data';
+const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitors';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 const QUICK_ASSETS = {
   warmup: {
@@ -640,7 +640,11 @@ let visitorRefreshTimer = null;
 // Visitors fetch + charts
 // ============================================================
 async function fetchVisitors() {
-  visitors = [];
+  try {
+    const r = await fetch(`${VISITORS_URL}?_=${Date.now()}`);
+    const data = await r.json();
+    visitors = Array.isArray(data) ? data : [];
+  } catch(e) { visitors = []; }
   document.getElementById('cnt-visitors').textContent = visitors.length;
   renderSourceChart();
   renderGeoChart();
@@ -740,9 +744,7 @@ function switchToVisitors() {
   document.getElementById('tblWrap').style.display = 'none';
   document.getElementById('visSection').style.display = '';
   stopVisitorsRefresh();
-  renderSourceChart();
-  renderGeoChart();
-  renderVisitorsTable();
+  fetchVisitors();
 }
 
 function switchToLeads() {
@@ -759,9 +761,7 @@ function isVisitorsVisible() {
 
 function startVisitorsRefresh() {
   stopVisitorsRefresh();
-  renderSourceChart();
-  renderGeoChart();
-  renderVisitorsTable();
+  fetchVisitors();
 }
 
 function stopVisitorsRefresh() {
@@ -1704,6 +1704,7 @@ async function sendQuickAsset(type) {
 
 function refreshAll() {
   fetchLeads();
+  if (isVisitorsVisible()) fetchVisitors();
 }
 document.addEventListener('click', event => {
   const wrap = event.target?.closest?.('.approved-menu-wrap');
