@@ -642,6 +642,7 @@ let allLeads = [];
 let visitors = [];
 let currentFilter = 'all';
 let currentLeadPhone = null;
+let crmDeepLinkHandled = false;
 let visPage = 1;
 const VIS_PER = 30;
 let visitorRefreshTimer = null;
@@ -954,6 +955,7 @@ async function fetchLeads() {
     renderStaleFollowupTables();
     renderTable();
     renderSupportEndedTable();
+    handleCrmDeepLink();
   } catch (e) {
     console.error('fetch failed', e);
   } finally {
@@ -1485,7 +1487,27 @@ let fullChatRefreshTimer = null;
 let takeoverRequestPending = false;
 
 function getLeadByPhone(phone) {
-  return allLeads.find(l => String(l.phone || '') === String(phone || '')) || null;
+  const target = normalizePhone(phone);
+  return allLeads.find(l => normalizePhone(l.phone) === target) || null;
+}
+
+function normalizePhone(phone) {
+  return String(phone || '').replace(/\D/g, '');
+}
+
+function getCrmDeepLinkPhone() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('phone') || params.get('lead') || params.get('wa') || '';
+}
+
+function handleCrmDeepLink() {
+  if (crmDeepLinkHandled) return;
+  const phone = normalizePhone(getCrmDeepLinkPhone());
+  if (!phone) return;
+  const lead = getLeadByPhone(phone);
+  if (!lead) return;
+  crmDeepLinkHandled = true;
+  openFullChat(lead.phone);
 }
 
 function setChatStatus(text, sticky = false) {

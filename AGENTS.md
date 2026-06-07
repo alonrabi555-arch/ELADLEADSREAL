@@ -298,6 +298,14 @@ These are approved by Meta/Twilio and should appear in CRM under one button/menu
 
 Slack app URLs are not webhook URLs. Use webhook/config in n8n, not `app.slack.com/client/...` links.
 
+Slack CRM links should deep-link to the lead chat:
+
+```text
+https://alonrabi555-arch.github.io/ELADLEADSREAL/workflows%20elad/v2/12_crm_dashboard.html?phone=972...&chat=1
+```
+
+The CRM reads `phone`, `lead`, or `wa` query params and opens the full chat automatically after leads load.
+
 ## WordPress Visitor Tracking
 
 - n8n visitor polling should stay off to avoid executions/credits.
