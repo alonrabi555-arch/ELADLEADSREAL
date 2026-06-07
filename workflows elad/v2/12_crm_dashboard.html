@@ -322,8 +322,8 @@ body.chat-open{overflow:hidden}
   <!-- KPIs -->
   <div class="kpi-row">
     <div class="kpi kn"><div class="kpi-lbl">חדשים היום</div><div class="kpi-val" id="kpi-new">0</div></div>
-    <div class="kpi ka"><div class="kpi-lbl">לא ענו לפתיחה</div><div class="kpi-val" id="kpi-active">0</div></div>
-    <div class="kpi ko"><div class="kpi-lbl">עם נציג</div><div class="kpi-val" id="kpi-obj">0</div></div>
+    <div class="kpi ka"><div class="kpi-lbl">לא ענו להודעה</div><div class="kpi-val" id="kpi-active">0</div></div>
+    <div class="kpi ko"><div class="kpi-lbl">מחכה לנציג</div><div class="kpi-val" id="kpi-obj">0</div></div>
     <div class="kpi kr"><div class="kpi-lbl">צריך שיחה</div><div class="kpi-val" id="kpi-ready">0</div></div>
     <div class="kpi kw"><div class="kpi-lbl">סגרו החודש</div><div class="kpi-val" id="kpi-won">0</div></div>
     <div class="kpi kp"><div class="kpi-lbl">קטינים</div><div class="kpi-val" id="kpi-nurture">0</div></div>
@@ -427,7 +427,7 @@ body.chat-open{overflow:hidden}
   <div class="ctrl">
     <button class="tab on"  data-filter="all">הכל <span class="tcnt" id="cnt-all">0</span></button>
     <button class="tab fa"  data-filter="NO_FIRST_REPLY">לא ענו <span class="tcnt" id="cnt-NO_FIRST_REPLY">0</span></button>
-    <button class="tab fo"  data-filter="HUMAN_AGENT">עם נציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
+    <button class="tab fo"  data-filter="HUMAN_AGENT">מחכה לנציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
     <button class="tab fr"  data-filter="READY_TO_CALL">צריך שיחה <span class="tcnt" id="cnt-READY_TO_CALL">0</span></button>
     <button class="tab fp"  data-filter="MINORS">קטינים <span class="tcnt" id="cnt-MINORS">0</span></button>
     <button class="tab"     data-filter="NOT_RELEVANT">לא רלוונטי <span class="tcnt" id="cnt-NOT_RELEVANT">0</span></button>
@@ -867,25 +867,54 @@ function isReadyForCall(l) {
   return boolVal(l.warmup_page_clicked) || l.stage === 'READY';
 }
 
-function isNoFirstReply(l) {
+function lastMessageDirection(l) {
+  const dir = String(l.last_message_direction || '').toLowerCase().trim();
+  if (['in', 'incoming', 'lead', 'customer'].includes(dir)) return 'in';
+  if (['out', 'outgoing', 'agent', 'bot'].includes(dir)) return 'out';
+  return '';
+}
+
+function isInitialNoReply(l) {
   const state = String(l.state || '').toUpperCase();
   return (state === 'WAIT_CONFIRM' || state === 'ASK_MINOR_EXCEPTION') && !isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l) && !isNotRelevant(l);
 }
 
+function isMinorTimeoutLead(l) {
+  const age = Number(l.age);
+  if (!Number.isFinite(age) || age <= 0 || age >= 13) return false;
+  const values = [l.state, l.stage, l.status, l.lead_type].map(v => String(v || '').toLowerCase());
+  return values.includes('disqualified') || values.includes('nurture');
+}
+
+function isNoFirstReply(l) {
+  if (isReadyForCall(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
+  if (isMinorTimeoutLead(l)) return false;
+  const dir = lastMessageDirection(l);
+  if (dir === 'out') return true;
+  if (dir === 'in') return false;
+  return isInitialNoReply(l);
+}
+
 function isWithHumanAgent(l) {
-  return boolVal(l.human_agent) && !isNoFirstReply(l) && !isNotRelevant(l);
+  if (isReadyForCall(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
+  const dir = lastMessageDirection(l);
+  if (dir === 'in') return true;
+  if (dir === 'out') return false;
+  return boolVal(l.human_agent) && !isNoFirstReply(l);
 }
 
 function isMinorLead(l) {
   const age = Number(l.age);
   if (!Number.isFinite(age) || age <= 0 || age >= 13) return false;
-  if (isNoFirstReply(l) || isNotRelevant(l)) return false;
+  if (isNotRelevant(l)) return false;
   const approvedException = age === 12 && (
     boolVal(l.video_watched) ||
     boolVal(l.warmup_page_clicked) ||
     ['ACTIVE', 'READY', 'WON'].includes(String(l.stage || '').toUpperCase())
   );
-  return !approvedException;
+  if (approvedException) return false;
+  if (age < 12) return true;
+  return isMinorTimeoutLead(l);
 }
 
 function isNotRelevant(l) {
@@ -1017,7 +1046,7 @@ function renderCallList() {
 }
 
 function leadActivityAt(l) {
-  return l.last_inbound_at || l.last_message_at || l.updated_at || l.created_at || null;
+  return l.last_message_at || l.last_outbound_at || l.last_inbound_at || l.updated_at || l.created_at || null;
 }
 
 function daysSinceLeadActivity(l) {
@@ -1028,8 +1057,8 @@ function daysSinceLeadActivity(l) {
 }
 
 function isStaleFollowupLead(l, minDays, maxDays = Infinity) {
-  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isNoFirstReply(l) || isReadyForCall(l)) return false;
-  if (!isWithHumanAgent(l)) return false;
+  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isNotRelevant(l)) return false;
+  if (!isNoFirstReply(l)) return false;
   const days = daysSinceLeadActivity(l);
   return days >= minDays && days < maxDays;
 }
