@@ -430,6 +430,7 @@ body.chat-open{overflow:hidden}
     <button class="tab fo"  data-filter="HUMAN_AGENT">עם נציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
     <button class="tab fr"  data-filter="READY_TO_CALL">צריך שיחה <span class="tcnt" id="cnt-READY_TO_CALL">0</span></button>
     <button class="tab fp"  data-filter="MINORS">קטינים <span class="tcnt" id="cnt-MINORS">0</span></button>
+    <button class="tab"     data-filter="NOT_RELEVANT">לא רלוונטי <span class="tcnt" id="cnt-NOT_RELEVANT">0</span></button>
     <button class="tab fv" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="cnt-visitors">–</span></button>
     <div class="spacer"></div>
     <select class="srt-sel" id="sortSel">
@@ -561,6 +562,7 @@ const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-mes
 const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
 const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
+const MARK_NOT_RELEVANT_URL = 'https://alon09.app.n8n.cloud/webhook/mark-not-relevant';
 const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitors';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 const QUICK_ASSETS = {
@@ -867,22 +869,28 @@ function isReadyForCall(l) {
 
 function isNoFirstReply(l) {
   const state = String(l.state || '').toUpperCase();
-  return state === 'WAIT_CONFIRM' && !isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l);
+  return (state === 'WAIT_CONFIRM' || state === 'ASK_MINOR_EXCEPTION') && !isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l) && !isNotRelevant(l);
 }
 
 function isWithHumanAgent(l) {
-  return boolVal(l.human_agent) && !isNoFirstReply(l);
+  return boolVal(l.human_agent) && !isNoFirstReply(l) && !isNotRelevant(l);
 }
 
 function isMinorLead(l) {
   const age = Number(l.age);
   if (!Number.isFinite(age) || age <= 0 || age >= 13) return false;
+  if (isNoFirstReply(l) || isNotRelevant(l)) return false;
   const approvedException = age === 12 && (
     boolVal(l.video_watched) ||
     boolVal(l.warmup_page_clicked) ||
     ['ACTIVE', 'READY', 'WON'].includes(String(l.stage || '').toUpperCase())
   );
   return !approvedException;
+}
+
+function isNotRelevant(l) {
+  const values = [l.sale_status, l.stage, l.status, l.lead_type].map(v => String(v || '').toLowerCase());
+  return values.includes('not_relevant') || values.includes('not-relevant') || values.includes('irrelevant') || values.includes('dead');
 }
 
 function isClosedLead(l) {
@@ -897,6 +905,7 @@ function leadMatchesFilter(l, filter) {
   if (filter === 'HUMAN_AGENT') return isWithHumanAgent(l);
   if (filter === 'READY_TO_CALL') return isReadyForCall(l);
   if (filter === 'MINORS') return isMinorLead(l);
+  if (filter === 'NOT_RELEVANT') return isNotRelevant(l);
   return l.stage === filter;
 }
 
@@ -947,12 +956,14 @@ function renderKPIs() {
 }
 
 function renderTabs() {
-  const activeLeads = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l));
+  const activeLeads = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l) && !isNotRelevant(l));
+  const notRelevantLeads = allLeads.filter(isNotRelevant);
   document.getElementById('cnt-all').textContent = activeLeads.length;
   document.getElementById('cnt-NO_FIRST_REPLY').textContent = activeLeads.filter(isNoFirstReply).length;
   document.getElementById('cnt-HUMAN_AGENT').textContent = activeLeads.filter(isWithHumanAgent).length;
   document.getElementById('cnt-READY_TO_CALL').textContent = activeLeads.filter(isReadyForCall).length;
   document.getElementById('cnt-MINORS').textContent = activeLeads.filter(isMinorLead).length;
+  document.getElementById('cnt-NOT_RELEVANT').textContent = notRelevantLeads.length;
 }
 
 // ============================================================
@@ -1072,7 +1083,9 @@ function renderTable() {
   const sort = document.getElementById('sortSel').value;
   const tbody = document.getElementById('tbody');
 
-  let list = allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l));
+  let list = currentFilter === 'NOT_RELEVANT'
+    ? allLeads.filter(isNotRelevant)
+    : allLeads.filter(l => !isSupportEnded(l) && !isClosedLead(l) && !isNotRelevant(l));
 
   if (currentFilter !== 'all') {
     list = list.filter(l => leadMatchesFilter(l, currentFilter));
@@ -1176,7 +1189,7 @@ function renderSupportEndedTable() {
 }
 
 function stageLabel(s) {
-  return { NEW:'חדש', ACTIVE:'פעיל', OBJECTION:'צריך בדיקה', READY:'צריך שיחה', WON:'סגר', NURTURE:'קטינים', DEAD:'מת' }[s] || s || '?';
+  return { NEW:'חדש', ACTIVE:'פעיל', OBJECTION:'צריך בדיקה', READY:'צריך שיחה', WON:'סגר', NURTURE:'קטינים', DEAD:'לא רלוונטי' }[s] || s || '?';
 }
 
 function formatNextAction(l) {
@@ -1359,7 +1372,7 @@ function openDrawer(phone) {
         <button class="act-btn gold"   onclick="takeoverConversation()">השתלט על השיחה</button>
         <button class="act-btn"        onclick="releaseConversation()">החזר לבוט</button>
         <button class="act-btn"        disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">העבר ל-NURTURE</button>
-        <button class="act-btn hot"    disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כסירוב</button>
+        <button class="act-btn hot"    onclick="markNotRelevant()">סמן לא רלוונטי</button>
         <button class="act-btn"        onclick="loadConversationHistory()">טען שיחה</button>
         <button class="act-btn"        onclick="manualMessage()">שלח הודעה ידנית</button>
       </div>
@@ -1413,6 +1426,24 @@ async function deleteLead() {
     closeDrawer();
     await fetchLeads();
   } catch(e) { alert('שגיאה במחיקה'); }
+}
+
+async function markNotRelevant() {
+  if (!currentLeadPhone) return;
+  const lead = allLeads.find(l => l.phone === currentLeadPhone);
+  const name = lead ? lead.name || currentLeadPhone : currentLeadPhone;
+  if (!confirm(`לסמן את ${name} כלא רלוונטי?`)) return;
+  try {
+    await fetch(MARK_NOT_RELEVANT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentLeadPhone })
+    });
+    closeDrawer();
+    await fetchLeads();
+  } catch(e) {
+    alert('שגיאה בסימון לא רלוונטי');
+  }
 }
 
 // ============================================================
