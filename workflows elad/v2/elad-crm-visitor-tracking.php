@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Elad CRM Visitor Tracking
  * Description: Stores website visitor sessions in WordPress and exposes them to the Elad CRM without using n8n.
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ELAD_CRM_VISITORS_VERSION', '1.0.0');
+define('ELAD_CRM_VISITORS_VERSION', '1.0.1');
 
 function elad_crm_visitors_table_name() {
     global $wpdb;
@@ -100,6 +100,50 @@ function elad_crm_visitors_clean_datetime($value, $fallback) {
     return gmdate('Y-m-d H:i:s', $timestamp);
 }
 
+function elad_crm_visitors_public_ip($ip) {
+    $ip = trim((string) $ip);
+    if (!$ip) {
+        return '';
+    }
+
+    $flags = FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+    return filter_var($ip, FILTER_VALIDATE_IP, $flags) ? $ip : '';
+}
+
+function elad_crm_visitors_geo_lookup($ip) {
+    $ip = elad_crm_visitors_public_ip($ip);
+    if (!$ip) {
+        return array('city' => '', 'region' => '', 'country' => '');
+    }
+
+    $cache_key = 'elad_crm_geo_' . md5($ip);
+    $cached = get_transient($cache_key);
+    if (is_array($cached)) {
+        return $cached;
+    }
+
+    $url = 'https://ipwho.is/' . rawurlencode($ip) . '?fields=success,country,region,city';
+    $response = wp_remote_get($url, array(
+        'timeout' => 3,
+        'redirection' => 1,
+    ));
+
+    $geo = array('city' => '', 'region' => '', 'country' => '');
+    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (is_array($body) && !empty($body['success'])) {
+            $geo = array(
+                'city' => elad_crm_visitors_clean_text($body['city'] ?? '', 120),
+                'region' => elad_crm_visitors_clean_text($body['region'] ?? '', 120),
+                'country' => elad_crm_visitors_clean_text($body['country'] ?? '', 120),
+            );
+        }
+    }
+
+    set_transient($cache_key, $geo, DAY_IN_SECONDS);
+    return $geo;
+}
+
 function elad_crm_visitors_store(WP_REST_Request $request) {
     global $wpdb;
 
@@ -122,6 +166,9 @@ function elad_crm_visitors_store(WP_REST_Request $request) {
     $now = current_time('mysql', true);
     $created_at = elad_crm_visitors_clean_datetime($body['created_at'] ?? '', $now);
     $updated_at = elad_crm_visitors_clean_datetime($body['updated_at'] ?? '', $created_at);
+    $ip_address = elad_crm_visitors_client_ip();
+    $geo = elad_crm_visitors_geo_lookup($ip_address);
+
     $data = array(
         'session_id' => $session_id,
         'landing_page' => esc_url_raw($body['landing_page'] ?? ''),
@@ -134,10 +181,10 @@ function elad_crm_visitors_store(WP_REST_Request $request) {
         'time_on_site' => max(0, (int) ($body['time_on_site'] ?? 0)),
         'pages_visited' => wp_json_encode($pages),
         'screen_width' => max(0, (int) ($body['screen_width'] ?? 0)),
-        'ip_address' => elad_crm_visitors_client_ip(),
-        'city' => '',
-        'region' => '',
-        'country' => '',
+        'ip_address' => $ip_address,
+        'city' => $geo['city'],
+        'region' => $geo['region'],
+        'country' => $geo['country'],
         'updated_at' => $updated_at,
     );
 
