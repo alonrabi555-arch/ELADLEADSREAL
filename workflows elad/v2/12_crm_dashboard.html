@@ -597,6 +597,7 @@ const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversat
 const MARK_NOT_RELEVANT_URL = 'https://alon09.app.n8n.cloud/webhook/mark-not-relevant';
 const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitors';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
+const LEADS_REST_URL   = 'https://vjjqnxbevdimgulqvain.supabase.co/rest/v1/leads';
 const LEADS_CACHE_KEY  = 'elad_crm_leads_cache_v1';
 const LEADS_CACHE_TTL  = 60 * 1000;
 const CHAT_MIRROR_STARTED_AT = new Date('2026-06-08T08:00:00.000Z').getTime();
@@ -1599,7 +1600,8 @@ function openDrawer(phone) {
     <div class="drw-sec">
       <div class="drw-sec-title">פעולות ידניות</div>
       <div class="act-grid">
-        <button class="act-btn green"  disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">סמן כמוכן לסגירה</button>
+        <button class="act-btn green"  onclick="markNeedsCall()">העבר לצריך שיחה</button>
+        <button class="act-btn"        onclick="markNoReply()">העבר ללא עונה</button>
         <button class="act-btn gold"   onclick="takeoverConversation()">השתלט על השיחה</button>
         <button class="act-btn"        onclick="releaseConversation()">החזר לבוט</button>
         <button class="act-btn"        disabled title="אין endpoint בטוח לפעולה הזו כרגע" style="opacity:.45;cursor:not-allowed">העבר ל-NURTURE</button>
@@ -1674,6 +1676,82 @@ async function markNotRelevant() {
     await fetchLeads({ force: true });
   } catch(e) {
     alert('שגיאה בסימון לא רלוונטי');
+  }
+}
+
+async function updateLeadManualState(patch, successMessage) {
+  if (!currentLeadPhone) return;
+  const phone = normalizePhone(currentLeadPhone);
+  const now = new Date().toISOString();
+  const body = {
+    ...patch,
+    updated_at: now
+  };
+
+  const response = await fetch(`${LEADS_REST_URL}?phone=eq.${encodeURIComponent(phone)}`, {
+    method: 'PATCH',
+    headers: {
+      ...LEADS_DATA_HEADERS,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lead update failed: ${response.status}`);
+  }
+
+  const updatedRows = await response.json().catch(() => []);
+  const updatedLead = Array.isArray(updatedRows) ? updatedRows[0] : null;
+  allLeads = allLeads.map(lead => {
+    if (normalizePhone(lead.phone) !== phone) return lead;
+    return {
+      ...lead,
+      ...body,
+      ...(updatedLead || {})
+    };
+  });
+  setCachedLeads(allLeads);
+  renderLeadState();
+  openDrawer(phone);
+  alert(successMessage);
+}
+
+async function markNeedsCall() {
+  if (!currentLeadPhone) return;
+  const lead = allLeads.find(l => normalizePhone(l.phone) === normalizePhone(currentLeadPhone));
+  const name = lead ? lead.name || currentLeadPhone : currentLeadPhone;
+  if (!confirm(`להעביר את ${name} לצריך שיחה?`)) return;
+
+  try {
+    await updateLeadManualState({
+      stage: 'READY',
+      status: 'in_progress',
+      human_agent: true
+    }, 'הליד עבר לצריך שיחה');
+  } catch (e) {
+    alert('שגיאה בהעברה לצריך שיחה');
+  }
+}
+
+async function markNoReply() {
+  if (!currentLeadPhone) return;
+  const lead = allLeads.find(l => normalizePhone(l.phone) === normalizePhone(currentLeadPhone));
+  const name = lead ? lead.name || currentLeadPhone : currentLeadPhone;
+  if (!confirm(`להעביר את ${name} ללא עונה?`)) return;
+
+  try {
+    await updateLeadManualState({
+      stage: 'ACTIVE',
+      status: 'in_progress',
+      human_agent: true,
+      last_message_direction: 'out',
+      last_message_at: new Date().toISOString(),
+      last_outbound_at: new Date().toISOString()
+    }, 'הליד עבר ללא עונה');
+  } catch (e) {
+    alert('שגיאה בהעברה ללא עונה');
   }
 }
 
