@@ -588,6 +588,8 @@ const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversat
 const MARK_NOT_RELEVANT_URL = 'https://alon09.app.n8n.cloud/webhook/mark-not-relevant';
 const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitors';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
+const LEADS_CACHE_KEY  = 'elad_crm_leads_cache_v1';
+const LEADS_CACHE_TTL  = 60 * 1000;
 const QUICK_ASSETS = {
   warmup: {
     label: 'דף סגירה',
@@ -965,23 +967,78 @@ function leadMatchesFilter(l, filter) {
 // ============================================================
 // Fetch + Render
 // ============================================================
-async function fetchLeads() {
+let leadsFetchPromise = null;
+
+function hasCrmDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  return params.has('phone') || params.has('lead') || params.has('wa');
+}
+
+function getCachedLeads() {
+  try {
+    const raw = localStorage.getItem(LEADS_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || !Array.isArray(cached.leads) || !cached.savedAt) return null;
+    if (Date.now() - cached.savedAt > LEADS_CACHE_TTL) return null;
+    return cached.leads;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setCachedLeads(leads) {
+  try {
+    localStorage.setItem(LEADS_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      leads
+    }));
+  } catch (e) {}
+}
+
+function renderLeadState() {
+  renderKPIs();
+  renderTabs();
+  renderCallList();
+  renderStaleFollowupTables();
+  renderTable();
+  renderSupportEndedTable();
+  handleCrmDeepLink();
+}
+
+async function fetchLeads(options = {}) {
+  const force = !!options.force || hasCrmDeepLink();
+  const cached = !force ? getCachedLeads() : null;
+  if (cached) {
+    allLeads = cached;
+    renderLeadState();
+    return;
+  }
+
+  if (leadsFetchPromise && !force) return leadsFetchPromise;
+
   const refBtn = document.getElementById('refBtn');
   refBtn.classList.add('spin');
-  try {
+
+  leadsFetchPromise = (async () => {
     const r = await fetch(LEADS_DATA_URL);
     const data = await r.json();
     allLeads = Array.isArray(data) ? data : (data.leads || []);
-    renderKPIs();
-    renderTabs();
-    renderCallList();
-    renderStaleFollowupTables();
-    renderTable();
-    renderSupportEndedTable();
-    handleCrmDeepLink();
+    setCachedLeads(allLeads);
+    renderLeadState();
+  })();
+
+  try {
+    await leadsFetchPromise;
   } catch (e) {
     console.error('fetch failed', e);
+    const fallback = getCachedLeads();
+    if (fallback) {
+      allLeads = fallback;
+      renderLeadState();
+    }
   } finally {
+    leadsFetchPromise = null;
     refBtn.classList.remove('spin');
   }
 }
@@ -1539,7 +1596,7 @@ async function deleteLead() {
       body: JSON.stringify({ phone: currentLeadPhone })
     });
     closeDrawer();
-    await fetchLeads();
+    await fetchLeads({ force: true });
   } catch(e) { alert('שגיאה במחיקה'); }
 }
 
@@ -1555,7 +1612,7 @@ async function markNotRelevant() {
       body: JSON.stringify({ phone: currentLeadPhone })
     });
     closeDrawer();
-    await fetchLeads();
+    await fetchLeads({ force: true });
   } catch(e) {
     alert('שגיאה בסימון לא רלוונטי');
   }
@@ -1707,7 +1764,7 @@ async function takeoverConversation() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone })
     });
-    await fetchLeads();
+    await fetchLeads({ force: true });
     setChatStatus('השיחה אצלך');
   } catch (e) {
     setChatStatus('הצ׳אט פתוח, אבל סימון השליטה נכשל', true);
@@ -1727,7 +1784,7 @@ async function releaseConversation() {
       body: JSON.stringify({ phone })
     });
     setChatStatus('הוחזר לבוט');
-    await fetchLeads();
+    await fetchLeads({ force: true });
   } catch (e) {
     alert('שגיאה בהחזרת השיחה לבוט');
   }
@@ -1828,7 +1885,7 @@ async function sendChatMessage(event) {
     input.value = '';
     resizeChatInput();
     setChatStatus('נשלח');
-    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads()]);
+    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads({ force: true })]);
   } catch (e) {
     alert('שגיאה בשליחה');
     setChatStatus('');
@@ -1867,7 +1924,7 @@ async function sendApprovedTemplate(type) {
     const now = new Date().toISOString();
     renderFullChat([...fullChatMessages, { direction: 'out', body: renderedPreview, sent_at: now }]);
     setChatStatus(`${template.label} נשלח`);
-    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads()]);
+    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads({ force: true })]);
   } catch (e) {
     alert('שגיאה בשליחת תבנית מאושרת');
     setChatStatus('');
@@ -1898,7 +1955,7 @@ async function sendQuickAsset(type) {
     const now = new Date().toISOString();
     renderFullChat([...fullChatMessages, { direction: 'out', body: asset.message, sent_at: now }]);
     setChatStatus(`${asset.label} נשלח`);
-    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads()]);
+    await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads({ force: true })]);
   } catch (e) {
     alert('שגיאה בשליחה');
     setChatStatus('');
@@ -1910,7 +1967,7 @@ async function sendQuickAsset(type) {
 }
 
 function refreshAll() {
-  fetchLeads();
+  fetchLeads({ force: true });
   fetchVisitors();
 }
 document.addEventListener('click', event => {
