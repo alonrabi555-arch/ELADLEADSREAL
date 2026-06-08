@@ -375,6 +375,29 @@ body.chat-open{overflow:hidden}
   <div class="call-section">
     <div class="section-header">
       <div class="section-title">
+        🕒 עברו 24 שעות - תבנית מאושרת
+        <span class="cnt-badge" id="template24-count">0</span>
+      </div>
+    </div>
+    <div class="call-tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ליד</th>
+            <th>טלפון</th>
+            <th>שלב</th>
+            <th>מאז הודעת הליד</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="template24-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="call-section">
+    <div class="section-header">
+      <div class="section-title">
         ⚠️ לא ענו 3 ימים
         <span class="cnt-badge" id="stale3-count">0</span>
       </div>
@@ -1058,6 +1081,30 @@ function daysSinceLeadActivity(l) {
   return Math.floor((Date.now() - time) / 86400000);
 }
 
+function leadLastInboundAt(l) {
+  if (l.last_inbound_at) return l.last_inbound_at;
+  return lastMessageDirection(l) === 'in' ? l.last_message_at : null;
+}
+
+function hoursSinceLeadInbound(l) {
+  const ts = leadLastInboundAt(l);
+  const time = ts ? new Date(ts).getTime() : 0;
+  if (!time || Number.isNaN(time)) return null;
+  return (Date.now() - time) / 3600000;
+}
+
+function isApprovedTemplateDueLead(l) {
+  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isNotRelevant(l)) return false;
+  const hours = hoursSinceLeadInbound(l);
+  return Number.isFinite(hours) && hours >= 24;
+}
+
+function formatTemplateWindowAge(hours) {
+  if (!Number.isFinite(hours)) return '-';
+  if (hours < 48) return `${Math.floor(hours)} שעות`;
+  return `${Math.floor(hours / 24)} ימים`;
+}
+
 function isStaleFollowupLead(l, minDays, maxDays = Infinity) {
   if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isNotRelevant(l)) return false;
   if (!isNoFirstReply(l)) return false;
@@ -1066,8 +1113,45 @@ function isStaleFollowupLead(l, minDays, maxDays = Infinity) {
 }
 
 function renderStaleFollowupTables() {
+  renderApprovedTemplateWindowTable();
   renderStaleFollowupTable('stale3', 3, 7, 'אין כרגע לידים שלא ענו 3 ימים');
   renderStaleFollowupTable('stale7', 7, Infinity, 'אין כרגע לידים שלא ענו שבוע');
+}
+
+function renderApprovedTemplateWindowTable() {
+  const tbody = document.getElementById('template24-tbody');
+  const cnt = document.getElementById('template24-count');
+  if (!tbody) return;
+
+  const list = allLeads
+    .filter(isApprovedTemplateDueLead)
+    .sort((a, b) => (hoursSinceLeadInbound(b) || 0) - (hoursSinceLeadInbound(a) || 0));
+
+  if (cnt) cnt.textContent = list.length;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="call-empty">אין כרגע לידים שעברו 24 שעות מההודעה האחרונה שלהם</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(l => {
+    const waLink = `https://wa.me/${l.phone}`;
+    const hours = hoursSinceLeadInbound(l);
+    return `<tr onclick="openDrawer('${l.phone}')">
+      <td>
+        <div class="name-cell">
+          <div>
+            <div class="name-txt">${escapeHtml(l.name || '(ללא שם)')}</div>
+            <div class="name-phone">${l.phone || '-'}</div>
+          </div>
+        </div>
+      </td>
+      <td class="name-phone">${l.phone || '-'}</td>
+      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td style="color:var(--sub);font-size:12px">${formatTemplateWindowAge(hours)}</td>
+      <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
+    </tr>`;
+  }).join('');
 }
 
 function renderStaleFollowupTable(prefix, minDays, maxDays, emptyText) {
