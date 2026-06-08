@@ -579,7 +579,13 @@ body.chat-open{overflow:hidden}
 // ============================================================
 // Configuration
 // ============================================================
-const LEADS_DATA_URL   = 'https://alon09.app.n8n.cloud/webhook/leads-data';
+const LEADS_DATA_URL   = 'https://vjjqnxbevdimgulqvain.supabase.co/rest/v1/rpc/crm_leads_data';
+const LEADS_DATA_FALLBACK_URL = 'https://alon09.app.n8n.cloud/webhook/leads-data';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqanFueGJldmRpbWd1bHF2YWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODAzMjQsImV4cCI6MjA4NzE1NjMyNH0.PQmB0alaLnG83FwLhwOalIxTN1bbY0llpmSBw88GTp0';
+const LEADS_DATA_HEADERS = {
+  apikey: SUPABASE_ANON_KEY,
+  Authorization: 'Bearer ' + SUPABASE_ANON_KEY
+};
 const WA_HISTORY_URL   = 'https://alon09.app.n8n.cloud/webhook/conversation-history';
 const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
 const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
@@ -1006,6 +1012,22 @@ function renderLeadState() {
   handleCrmDeepLink();
 }
 
+async function fetchLeadsDataFromServer() {
+  try {
+    const r = await fetch(LEADS_DATA_URL, { headers: LEADS_DATA_HEADERS });
+    if (!r.ok) throw new Error(`Supabase leads failed: ${r.status}`);
+    const data = await r.json();
+    if (!Array.isArray(data)) throw new Error('Supabase leads response is not an array');
+    return data;
+  } catch (primaryError) {
+    console.warn('Primary leads fetch failed, using n8n fallback', primaryError);
+    const fallback = await fetch(LEADS_DATA_FALLBACK_URL);
+    if (!fallback.ok) throw new Error(`n8n leads fallback failed: ${fallback.status}`);
+    const fallbackData = await fallback.json();
+    return Array.isArray(fallbackData) ? fallbackData : (fallbackData.leads || []);
+  }
+}
+
 async function fetchLeads(options = {}) {
   const force = !!options.force || hasCrmDeepLink();
   const cached = !force ? getCachedLeads() : null;
@@ -1021,9 +1043,7 @@ async function fetchLeads(options = {}) {
   refBtn.classList.add('spin');
 
   leadsFetchPromise = (async () => {
-    const r = await fetch(LEADS_DATA_URL);
-    const data = await r.json();
-    allLeads = Array.isArray(data) ? data : (data.leads || []);
+    allLeads = await fetchLeadsDataFromServer();
     setCachedLeads(allLeads);
     renderLeadState();
   })();
