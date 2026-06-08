@@ -1161,7 +1161,17 @@ function daysSinceLeadActivity(l) {
 
 function leadLastInboundAt(l) {
   if (l.last_inbound_at) return l.last_inbound_at;
-  return lastMessageDirection(l) === 'in' ? l.last_message_at : null;
+  if (lastMessageDirection(l) === 'in') return l.last_message_at;
+
+  const state = String(l.state || '').toUpperCase();
+  const stage = String(l.stage || '').toUpperCase();
+  const isLegacyWaitingForRep =
+    !l.last_message_direction &&
+    !l.last_outbound_at &&
+    boolVal(l.human_agent) &&
+    (state === 'WAIT_HUMAN_AFTER_VIDEO' || stage === 'ACTIVE');
+
+  return isLegacyWaitingForRep ? (l.updated_at || l.created_at || null) : null;
 }
 
 function hoursSinceLeadInbound(l) {
