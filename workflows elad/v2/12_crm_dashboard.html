@@ -563,6 +563,8 @@ body.chat-open{overflow:hidden}
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('contact')">טלפון מתניה</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('idoContact')">טלפון עידו</button>
       <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('equipmentKit')">קיט ציוד ספרות</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('matanyaPhoto')">תמונת מתניה</button>
+      <button class="chat-quick-btn" type="button" onclick="sendQuickAsset('idoPhoto')">תמונת עידו</button>
       <div class="approved-menu-wrap">
         <button class="chat-quick-btn" id="approvedTemplatesToggle" type="button" onclick="toggleApprovedTemplates()">הודעות מאושרות</button>
         <div class="approved-menu" id="approvedTemplatesMenu" aria-label="Approved WhatsApp templates"></div>
@@ -629,6 +631,20 @@ const QUICK_ASSETS = {
   equipmentKit: {
     label: 'קיט ציוד ספרות',
     message: '*הקיט לתלמידים:*\nמכונת תספורת מדרגת\nמכונת פיניש\nמספריי גזירה\nמספריי דילול\nמסרק צר לעבודת מספריים\nמסרק C7\nשפריצר מים\nמברשת פייד לנקות שיער\nספריי לחיטוי המכונות\nאפטר שייב לחיטוי הלקוח\nנייר צוואר\nקליפסים לתפיסת השיער - *ממתכת*\nתער עם ידית רב פעמית וסכינים לשימוש\nאבקת נפח וחימר לשיער'
+  },
+  matanyaPhoto: {
+    label: 'תמונת מתניה',
+    message: '',
+    mediaUrl: 'https://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/%D7%AA%D7%9E%D7%95%D7%A0%D7%AA%20%D7%9E%D7%AA%D7%A0%D7%99%D7%94.jpeg',
+    mediaContentType: 'image/jpeg',
+    filename: 'תמונת מתניה.jpeg'
+  },
+  idoPhoto: {
+    label: 'תמונת עידו',
+    message: '',
+    mediaUrl: 'https://cdn.jsdelivr.net/gh/alonrabi555-arch/ELADLEADSREAL@main/assets/%D7%AA%D7%9E%D7%95%D7%A0%D7%AA%20%D7%A2%D7%99%D7%93%D7%95.jpeg',
+    mediaContentType: 'image/jpeg',
+    filename: 'תמונת עידו.jpeg'
   }
 };
 
@@ -1997,14 +2013,26 @@ async function sendQuickAsset(type) {
   setChatStatus(`שולח ${asset.label}...`);
 
   try {
+    const payload = { phone: fullChatPhone, message: asset.message || '' };
+    if (asset.mediaUrl) {
+      payload.mediaUrl = asset.mediaUrl;
+      payload.mediaContentType = asset.mediaContentType || 'application/octet-stream';
+      payload.filename = asset.filename || asset.label;
+    }
+
     await fetch(WA_SEND_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: fullChatPhone, message: asset.message })
+      body: JSON.stringify(payload)
     });
 
     const now = new Date().toISOString();
-    renderFullChat([...fullChatMessages, { direction: 'out', body: asset.message, sent_at: now }]);
+    const media = asset.mediaUrl ? [{
+      url: asset.mediaUrl,
+      content_type: asset.mediaContentType || 'application/octet-stream',
+      filename: asset.filename || asset.label
+    }] : [];
+    renderFullChat([...fullChatMessages, { direction: 'out', body: asset.message || '', media, sent_at: now }]);
     setChatStatus(`${asset.label} נשלח`);
     await Promise.all([loadConversationHistory(true, { silent: true }), fetchLeads({ force: true })]);
   } catch (e) {
