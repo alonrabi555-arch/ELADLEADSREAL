@@ -587,6 +587,7 @@ const LEADS_DATA_HEADERS = {
   Authorization: 'Bearer ' + SUPABASE_ANON_KEY
 };
 const WA_HISTORY_URL   = 'https://alon09.app.n8n.cloud/webhook/conversation-history';
+const WA_HISTORY_DIRECT_URL = 'https://vjjqnxbevdimgulqvain.supabase.co/rest/v1/rpc/crm_conversation_history';
 const WA_SEND_URL      = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-message';
 const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-template';
 const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
@@ -1815,6 +1816,23 @@ async function manualMessage() {
   openFullChat(currentLeadPhone);
 }
 
+async function fetchConversationHistoryFromServer(phone) {
+  try {
+    const directUrl = `${WA_HISTORY_DIRECT_URL}?p_phone=${encodeURIComponent(phone)}`;
+    const direct = await fetch(directUrl, { headers: LEADS_DATA_HEADERS });
+    if (!direct.ok) throw new Error(`Supabase history failed: ${direct.status}`);
+    const messages = await direct.json();
+    if (Array.isArray(messages) && messages.length) return messages;
+  } catch (primaryError) {
+    console.warn('Primary conversation history failed, using n8n fallback', primaryError);
+  }
+
+  const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(phone)}`);
+  const data = await r.json();
+  const payload = Array.isArray(data) ? (data[0] || {}) : data;
+  return Array.isArray(payload.messages) ? payload.messages : [];
+}
+
 async function loadConversationHistory(full = false, options = {}) {
   const phone = full ? fullChatPhone : currentLeadPhone;
   if (!phone) return;
@@ -1824,10 +1842,7 @@ async function loadConversationHistory(full = false, options = {}) {
     box.innerHTML = full ? '<div class="chat-loading">טוען שיחה...</div>' : '<div>טוען שיחה...</div>';
   }
   try {
-    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(phone)}`);
-    const data = await r.json();
-    const payload = Array.isArray(data) ? (data[0] || {}) : data;
-    const messages = Array.isArray(payload.messages) ? payload.messages : [];
+    const messages = await fetchConversationHistoryFromServer(phone);
 
     if (full) {
       renderFullChat(messages);
