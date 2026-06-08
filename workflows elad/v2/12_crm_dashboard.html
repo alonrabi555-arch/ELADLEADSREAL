@@ -1160,8 +1160,14 @@ function daysSinceLeadActivity(l) {
 }
 
 function leadLastInboundAt(l) {
-  if (l.last_inbound_at) return l.last_inbound_at;
-  if (lastMessageDirection(l) === 'in') return l.last_message_at;
+  const dir = lastMessageDirection(l);
+  if (dir === 'in') return l.last_message_at || l.last_inbound_at;
+  if (dir === 'out') return null;
+
+  const inboundTime = l.last_inbound_at ? new Date(l.last_inbound_at).getTime() : 0;
+  const outboundTime = l.last_outbound_at ? new Date(l.last_outbound_at).getTime() : 0;
+  if (inboundTime && (!outboundTime || inboundTime >= outboundTime)) return l.last_inbound_at;
+  if (outboundTime && inboundTime && outboundTime > inboundTime) return null;
 
   const state = String(l.state || '').toUpperCase();
   const stage = String(l.stage || '').toUpperCase();
