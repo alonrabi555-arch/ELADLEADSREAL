@@ -595,9 +595,9 @@ const WA_TEMPLATE_URL  = 'https://alon09.app.n8n.cloud/webhook/send-whatsapp-tem
 const WA_TAKEOVER_URL  = 'https://alon09.app.n8n.cloud/webhook/takeover-conversation';
 const WA_RELEASE_URL   = 'https://alon09.app.n8n.cloud/webhook/release-conversation';
 const MARK_NOT_RELEVANT_URL = 'https://alon09.app.n8n.cloud/webhook/mark-not-relevant';
+const MANUAL_LEAD_STATE_URL = 'https://alon09.app.n8n.cloud/webhook/manual-lead-state';
 const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitors';
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
-const LEADS_REST_URL   = 'https://vjjqnxbevdimgulqvain.supabase.co/rest/v1/leads';
 const LEADS_CACHE_KEY  = 'elad_crm_leads_cache_v1';
 const LEADS_CACHE_TTL  = 60 * 1000;
 const CHAT_MIRROR_STARTED_AT = new Date('2026-06-08T08:00:00.000Z').getTime();
@@ -1684,7 +1684,7 @@ async function markNotRelevant() {
   }
 }
 
-async function updateLeadManualState(patch, successMessage) {
+async function updateLeadManualState(mode, patch, successMessage) {
   if (!currentLeadPhone) return;
   const phone = normalizePhone(currentLeadPhone);
   const now = new Date().toISOString();
@@ -1693,28 +1693,23 @@ async function updateLeadManualState(patch, successMessage) {
     updated_at: now
   };
 
-  const response = await fetch(`${LEADS_REST_URL}?phone=eq.${encodeURIComponent(phone)}`, {
-    method: 'PATCH',
+  const response = await fetch(MANUAL_LEAD_STATE_URL, {
+    method: 'POST',
     headers: {
-      ...LEADS_DATA_HEADERS,
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation'
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({ phone, mode })
   });
 
   if (!response.ok) {
     throw new Error(`Lead update failed: ${response.status}`);
   }
 
-  const updatedRows = await response.json().catch(() => []);
-  const updatedLead = Array.isArray(updatedRows) ? updatedRows[0] : null;
   allLeads = allLeads.map(lead => {
     if (normalizePhone(lead.phone) !== phone) return lead;
     return {
       ...lead,
-      ...body,
-      ...(updatedLead || {})
+      ...body
     };
   });
   setCachedLeads(allLeads);
@@ -1730,7 +1725,7 @@ async function markNeedsCall() {
   if (!confirm(`להעביר את ${name} לצריך שיחה?`)) return;
 
   try {
-    await updateLeadManualState({
+    await updateLeadManualState('ready', {
       stage: 'READY',
       status: 'in_progress',
       human_agent: true
@@ -1747,7 +1742,7 @@ async function markNoReply() {
   if (!confirm(`להעביר את ${name} ללא עונה?`)) return;
 
   try {
-    await updateLeadManualState({
+    await updateLeadManualState('no_reply', {
       stage: 'ACTIVE',
       status: 'in_progress',
       human_agent: true,
