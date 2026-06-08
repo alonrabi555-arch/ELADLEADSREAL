@@ -599,6 +599,7 @@ const VISITORS_URL     = 'https://www.eladrabi.co.il/wp-json/elad-crm/v1/visitor
 const DELETE_LEAD_URL  = 'https://alon09.app.n8n.cloud/webhook/delete-lead';
 const LEADS_CACHE_KEY  = 'elad_crm_leads_cache_v1';
 const LEADS_CACHE_TTL  = 60 * 1000;
+const CHAT_MIRROR_STARTED_AT = new Date('2026-06-08T08:00:00.000Z').getTime();
 const QUICK_ASSETS = {
   warmup: {
     label: 'דף סגירה',
@@ -1689,6 +1690,12 @@ function normalizePhone(phone) {
   return String(phone || '').replace(/\D/g, '');
 }
 
+function isLegacyChatLead(phone) {
+  const lead = getLeadByPhone(phone);
+  const createdAt = lead?.created_at ? new Date(lead.created_at).getTime() : 0;
+  return Boolean(createdAt && createdAt < CHAT_MIRROR_STARTED_AT);
+}
+
 function getCrmDeepLinkPhone() {
   const params = new URLSearchParams(window.location.search);
   return params.get('phone') || params.get('lead') || params.get('wa') || '';
@@ -1849,6 +1856,17 @@ async function manualMessage() {
 }
 
 async function fetchConversationHistoryFromServer(phone) {
+  const fetchLegacyHistory = async () => {
+    const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(phone)}`);
+    const data = await r.json();
+    const payload = Array.isArray(data) ? (data[0] || {}) : data;
+    return Array.isArray(payload.messages) ? payload.messages : [];
+  };
+
+  if (isLegacyChatLead(phone)) {
+    return fetchLegacyHistory();
+  }
+
   try {
     const directUrl = `${WA_HISTORY_DIRECT_URL}?p_phone=${encodeURIComponent(phone)}`;
     const direct = await fetch(directUrl, { headers: LEADS_DATA_HEADERS });
@@ -1859,10 +1877,7 @@ async function fetchConversationHistoryFromServer(phone) {
     console.warn('Primary conversation history failed, using n8n fallback', primaryError);
   }
 
-  const r = await fetch(`${WA_HISTORY_URL}?phone=${encodeURIComponent(phone)}`);
-  const data = await r.json();
-  const payload = Array.isArray(data) ? (data[0] || {}) : data;
-  return Array.isArray(payload.messages) ? payload.messages : [];
+  return fetchLegacyHistory();
 }
 
 async function loadConversationHistory(full = false, options = {}) {
