@@ -931,9 +931,10 @@ function leadAssets(l) {
 // "צריך שיחה" = הליד רוצה לדבר עם אלעד לפני שהוא סוגר (לחץ "אשמח שידברו איתי", מסר העדפת זמן, או נקבע יומן).
 // זה לא כל מי שהגיע לדף סגירה - הבוט סוגר לבד את רוב הלידים. רק מי שביקש שיחה אנושית.
 function isReadyForCall(l) {
+  // רק בקשת שיחה אמיתית: לחץ "אשמח שידברו איתי לפני" (call_requested), מסר העדפת זמן (preferred_call),
+  // או נקבע יומן. שדות meeting_type/availability מגיעים מהטופס הישן (לא בקשת שיחה) - לא נספרים.
   const pc = l.preferred_call;
   if (pc && (typeof pc === 'object' ? Object.keys(pc).length : String(pc).trim())) return true;
-  if (String(l.meeting_type || '').trim() || String(l.availability || '').trim()) return true;
   return leadAssets(l).some(a => /^(call_requested|calendar)/.test(String((a && a.asset) || '')));
 }
 // "קיבל סליקה" = הבוט שלח דף סליקה/סיכום והליד בדרך לסגור לבד. מי שגם ביקש שיחה -> "צריך שיחה" (קדימות).
