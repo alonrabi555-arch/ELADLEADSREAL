@@ -452,6 +452,7 @@ body.chat-open{overflow:hidden}
     <button class="tab fa"  data-filter="NO_FIRST_REPLY">לא ענו <span class="tcnt" id="cnt-NO_FIRST_REPLY">0</span></button>
     <button class="tab fo"  data-filter="HUMAN_AGENT">מחכה לנציג <span class="tcnt" id="cnt-HUMAN_AGENT">0</span></button>
     <button class="tab fr"  data-filter="READY_TO_CALL">צריך שיחה <span class="tcnt" id="cnt-READY_TO_CALL">0</span></button>
+    <button class="tab fw"  data-filter="RECEIVED_CHECKOUT">קיבל סליקה <span class="tcnt" id="cnt-RECEIVED_CHECKOUT">0</span></button>
     <button class="tab fp"  data-filter="MINORS">קטינים <span class="tcnt" id="cnt-MINORS">0</span></button>
     <button class="tab"     data-filter="NOT_RELEVANT">לא רלוונטי <span class="tcnt" id="cnt-NOT_RELEVANT">0</span></button>
     <button class="tab fv" id="tabVisitors" onclick="switchToVisitors()">👁️ מבקרים <span class="tcnt" id="cnt-visitors">–</span></button>
@@ -924,8 +925,21 @@ function boolVal(v) {
   return v === true || String(v || '').toLowerCase() === 'true';
 }
 
+function leadAssets(l) {
+  return Array.isArray(l.assets_sent) ? l.assets_sent : [];
+}
+// "צריך שיחה" = הליד רוצה לדבר עם אלעד לפני שהוא סוגר (לחץ "אשמח שידברו איתי", מסר העדפת זמן, או נקבע יומן).
+// זה לא כל מי שהגיע לדף סגירה - הבוט סוגר לבד את רוב הלידים. רק מי שביקש שיחה אנושית.
 function isReadyForCall(l) {
-  return boolVal(l.warmup_page_clicked) || l.stage === 'READY';
+  const pc = l.preferred_call;
+  if (pc && (typeof pc === 'object' ? Object.keys(pc).length : String(pc).trim())) return true;
+  if (String(l.meeting_type || '').trim() || String(l.availability || '').trim()) return true;
+  return leadAssets(l).some(a => /^(call_requested|calendar)/.test(String((a && a.asset) || '')));
+}
+// "קיבל סליקה" = הבוט שלח דף סליקה/סיכום והליד בדרך לסגור לבד. מי שגם ביקש שיחה -> "צריך שיחה" (קדימות).
+function isReceivedCheckout(l) {
+  if (isReadyForCall(l) || isClosedLead(l)) return false;
+  return leadAssets(l).some(a => /^(payment_link|checkout_link)/.test(String((a && a.asset) || '')));
 }
 
 function lastMessageDirection(l) {
@@ -937,7 +951,7 @@ function lastMessageDirection(l) {
 
 function isInitialNoReply(l) {
   const state = String(l.state || '').toUpperCase();
-  return (state === 'WAIT_CONFIRM' || state === 'ASK_MINOR_EXCEPTION') && !isReadyForCall(l) && !isClosedLead(l) && !isSupportEnded(l) && !isNotRelevant(l);
+  return (state === 'WAIT_CONFIRM' || state === 'ASK_MINOR_EXCEPTION') && !isReadyForCall(l) && !isReceivedCheckout(l) && !isClosedLead(l) && !isSupportEnded(l) && !isNotRelevant(l);
 }
 
 function isMinorTimeoutLead(l) {
@@ -948,7 +962,7 @@ function isMinorTimeoutLead(l) {
 }
 
 function isNoFirstReply(l) {
-  if (isReadyForCall(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
+  if (isReadyForCall(l) || isReceivedCheckout(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
   if (isMinorTimeoutLead(l)) return false;
   const dir = lastMessageDirection(l);
   if (dir === 'out') return true;
@@ -957,7 +971,7 @@ function isNoFirstReply(l) {
 }
 
 function isWithHumanAgent(l) {
-  if (isReadyForCall(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
+  if (isReadyForCall(l) || isReceivedCheckout(l) || isClosedLead(l) || isSupportEnded(l) || isNotRelevant(l)) return false;
   const dir = lastMessageDirection(l);
   if (dir === 'in') return true;
   if (dir === 'out') return false;
@@ -994,6 +1008,7 @@ function leadMatchesFilter(l, filter) {
   if (filter === 'NO_FIRST_REPLY') return isNoFirstReply(l);
   if (filter === 'HUMAN_AGENT') return isWithHumanAgent(l);
   if (filter === 'READY_TO_CALL') return isReadyForCall(l);
+  if (filter === 'RECEIVED_CHECKOUT') return isReceivedCheckout(l);
   if (filter === 'MINORS') return isMinorLead(l);
   if (filter === 'NOT_RELEVANT') return isNotRelevant(l);
   return l.stage === filter;
@@ -1122,6 +1137,7 @@ function renderTabs() {
   document.getElementById('cnt-NO_FIRST_REPLY').textContent = activeLeads.filter(isNoFirstReply).length;
   document.getElementById('cnt-HUMAN_AGENT').textContent = activeLeads.filter(isWithHumanAgent).length;
   document.getElementById('cnt-READY_TO_CALL').textContent = activeLeads.filter(isReadyForCall).length;
+  document.getElementById('cnt-RECEIVED_CHECKOUT').textContent = activeLeads.filter(isReceivedCheckout).length;
   document.getElementById('cnt-MINORS').textContent = activeLeads.filter(isMinorLead).length;
   document.getElementById('cnt-NOT_RELEVANT').textContent = notRelevantLeads.length;
 }
@@ -1144,7 +1160,7 @@ function renderCallList() {
   tbody.innerHTML = list.map(l => {
     const score = urgencyScore(l);
     const reason = isReadyForCall(l)
-      ? { text: 'לחץ אחרי דף סגירה', cls: 'urg-reason-hot' }
+      ? { text: 'רוצה שיחה עם אלעד', cls: 'urg-reason-hot' }
       : urgencyReason(l);
     const readColor = (l.readiness_score || 0) >= 8 ? 'var(--hot)' : (l.readiness_score || 0) >= 5 ? 'var(--gold)' : 'var(--cold)';
     const waLink = `https://wa.me/${l.phone}`;
@@ -1216,7 +1232,7 @@ function hoursSinceLeadInbound(l) {
 }
 
 function isApprovedTemplateDueLead(l) {
-  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isNotRelevant(l)) return false;
+  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isReceivedCheckout(l) || isNotRelevant(l)) return false;
   const hours = hoursSinceLeadInbound(l);
   return Number.isFinite(hours) && hours >= 24;
 }
@@ -1228,7 +1244,7 @@ function formatTemplateWindowAge(hours) {
 }
 
 function isStaleFollowupLead(l, minDays, maxDays = Infinity) {
-  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isNotRelevant(l)) return false;
+  if (isSupportEnded(l) || isClosedLead(l) || isMinorLead(l) || isReadyForCall(l) || isReceivedCheckout(l) || isNotRelevant(l)) return false;
   if (!isNoFirstReply(l)) return false;
   const days = daysSinceLeadActivity(l);
   return days >= minDays && days < maxDays;
