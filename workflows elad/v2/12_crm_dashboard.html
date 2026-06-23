@@ -1178,7 +1178,7 @@ function renderCallList() {
       <td style="color:var(--sub);font-family:var(--mono);font-size:12px">${l.age || '—'}</td>
       <td class="hide-mobile city-cell">${escapeHtml(l.city || l.state || '—')}</td>
       <td class="hide-mobile">${sourceBadge(l.source)}</td>
-      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td><span class="stage-badge ${stageBadgeClass(l)}">${stageLabel(l.stage, l)}</span></td>
       <td>
         <div class="rd-cell">
           <span class="rd-n">${l.readiness_score || 0}</span>
@@ -1286,7 +1286,7 @@ function renderApprovedTemplateWindowTable() {
         </div>
       </td>
       <td class="name-phone">${l.phone || '-'}</td>
-      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td><span class="stage-badge ${stageBadgeClass(l)}">${stageLabel(l.stage, l)}</span></td>
       <td style="color:var(--sub);font-size:12px">${formatTemplateWindowAge(hours)}</td>
       <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
     </tr>`;
@@ -1322,7 +1322,7 @@ function renderStaleFollowupTable(prefix, minDays, maxDays, emptyText) {
         </div>
       </td>
       <td class="name-phone">${l.phone || '-'}</td>
-      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td><span class="stage-badge ${stageBadgeClass(l)}">${stageLabel(l.stage, l)}</span></td>
       <td style="color:var(--sub);font-size:12px">${days} ימים</td>
       <td onclick="event.stopPropagation()"><a class="wa-btn" href="${waLink}" target="_blank">WhatsApp</a></td>
     </tr>`;
@@ -1387,7 +1387,7 @@ function renderTable() {
       <td style="color:var(--sub);font-family:var(--mono);font-size:12px">${l.age || '—'}</td>
       <td class="hide-mobile city-cell">${escapeHtml(l.city || l.state || '—')}</td>
       <td class="hide-mobile">${sourceBadge(l.source)}</td>
-      <td><span class="stage-badge stage-${l.stage || 'NEW'}">${stageLabel(l.stage)}</span></td>
+      <td><span class="stage-badge ${stageBadgeClass(l)}">${stageLabel(l.stage, l)}</span></td>
       <td>
         <div class="rd-cell">
           <span class="rd-n">${l.readiness_score || 0}</span>
@@ -1442,14 +1442,26 @@ function renderSupportEndedTable() {
   }).join('');
 }
 
-function stageLabel(s) {
-  return { NEW:'חדש', ACTIVE:'פעיל', OBJECTION:'צריך בדיקה', READY:'צריך שיחה', WON:'סגר', NURTURE:'קטינים', DEAD:'לא רלוונטי' }[s] || s || '?';
+function stageLabel(s, l) {
+  // READY כבר לא אומר אוטומטית "צריך שיחה". מציגים את הדלי האמיתי: ביקש שיחה / קיבל סליקה / סתם מוכן לסגירה.
+  if (s === 'READY' && l) {
+    if (isReadyForCall(l)) return 'צריך שיחה';
+    if (isReceivedCheckout(l)) return 'קיבל סליקה';
+    return 'מוכן לסגירה';
+  }
+  return { NEW:'חדש', ACTIVE:'פעיל', OBJECTION:'צריך בדיקה', READY:'מוכן לסגירה', WON:'סגר', NURTURE:'קטינים', DEAD:'לא רלוונטי' }[s] || s || '?';
+}
+function stageBadgeClass(l) {
+  if (l && l.stage === 'READY' && isReceivedCheckout(l)) return 'stage-WON'; // ירוק - תואם לטאב "קיבל סליקה"
+  return 'stage-' + ((l && l.stage) || 'NEW');
 }
 
 function formatNextAction(l) {
   if (!l.next_check_at) {
     if (l.stage === 'NURTURE' && l.re_engage_at) return { text: 'חזרה ב-' + formatDate(l.re_engage_at), cls: 'next-cell' };
-    if (l.stage === 'READY') return { text: 'אלעד צריך להתקשר', cls: 'next-cell due' };
+    if (l.stage === 'READY') return isReadyForCall(l)
+      ? { text: 'אלעד צריך להתקשר', cls: 'next-cell due' }
+      : { text: 'ממתין לסגירה', cls: 'next-cell' };
     if (l.stage === 'WON' || l.stage === 'DEAD') return { text: '—', cls: 'next-cell' };
     return { text: 'ממתין לתגובה', cls: 'next-cell' };
   }
@@ -1552,7 +1564,7 @@ function openDrawer(phone) {
       <button class="drw-close" onclick="closeDrawer()">✕</button>
     </div>
     <div class="drw-meta" style="margin-top:14px;flex-wrap:wrap;gap:8px">
-      <span class="stage-badge stage-${lead.stage || 'NEW'}">${stageLabel(lead.stage)}</span>
+      <span class="stage-badge ${stageBadgeClass(lead)}">${stageLabel(lead.stage, lead)}</span>
       <span class="stage-badge stage-NEW">בשלות ${lead.readiness_score || 0}/10</span>
       ${lead.age ? `<span class="stage-badge stage-NEW">גיל ${lead.age}</span>` : ''}
       ${srcLabel ? `<span class="stage-badge stage-NEW">${srcIcon} ${srcLabel}</span>` : ''}
