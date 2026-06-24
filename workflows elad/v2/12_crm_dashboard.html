@@ -1512,18 +1512,28 @@ function messageMediaItems(m) {
   return raw.map(item => typeof item === 'string' ? { url: item } : item).filter(item => item && (item.data_url || item.url || item.media_url));
 }
 
+// Twilio media URLs require Basic Auth -> loading them directly pops a browser sign-in dialog.
+// Route them through our n8n proxy, which adds the auth server-side and returns the bytes.
+function proxyMediaUrl(url) {
+  if (/^https?:\/\/api\.twilio\.com\//i.test(url || '')) {
+    return 'https://alon09.app.n8n.cloud/webhook/twilio-media?u=' + encodeURIComponent(url);
+  }
+  return url;
+}
+
 function renderChatMedia(m) {
   const items = messageMediaItems(m);
   if (!items.length) return '';
   const html = items.map((item, index) => {
-    const url = item.data_url || item.url || item.media_url;
+    const rawUrl = item.data_url || item.url || item.media_url;
+    const url = proxyMediaUrl(rawUrl);
     const safeUrl = escapeHtml(url);
     const contentType = String(item.content_type || item.contentType || '').toLowerCase();
     const label = escapeHtml(item.filename || item.sid || `קובץ ${index + 1}`);
-    if (contentType.startsWith('image/') || /^data:image\//i.test(url)) {
+    if (contentType.startsWith('image/') || /^data:image\//i.test(rawUrl)) {
       return `<a href="${safeUrl}" target="_blank" rel="noopener"><img class="chat-media-img" src="${safeUrl}" alt="${label}" loading="lazy"></a>`;
     }
-    if (contentType.startsWith('video/') || /^data:video\//i.test(url)) {
+    if (contentType.startsWith('video/') || /^data:video\//i.test(rawUrl)) {
       return `<video class="chat-media-video" controls src="${safeUrl}"></video>`;
     }
     return `<a class="chat-media-link" href="${safeUrl}" target="_blank" rel="noopener">📎 ${label}</a>`;
